@@ -30,4 +30,5 @@ Thumbs.db
 
 # ---- Local secrets / runtime ----
 .env.local
+application-local.yml
 *.log
