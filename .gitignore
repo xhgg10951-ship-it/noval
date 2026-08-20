@@ -1,0 +1,33 @@
+# ---- Python (AI Service) ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+.pytest_cache/
+.mypy_cache/
+
+# ---- Java / Maven (Backend) ----
+target/
+*.class
+*.jar
+*.war
+.mvn/wrapper/maven-wrapper.jar
+
+# ---- Node / Vue (Frontend) ----
+node_modules/
+dist/
+.vite/
+*.local
+
+# ---- IDE / OS ----
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# ---- Local secrets / runtime ----
+.env.local
+*.log
