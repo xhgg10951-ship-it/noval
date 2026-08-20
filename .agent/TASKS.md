@@ -235,7 +235,7 @@ v0.1 按照：
 
 ## TASK-001 — Initialize Repository Structure
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -264,7 +264,7 @@ None
 
 ## TASK-002 — Initialize Spring Boot Backend
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -302,7 +302,7 @@ TASK-001
 
 ## TASK-003 — Initialize MySQL Development Database
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -326,7 +326,7 @@ TASK-002
 
 ## TASK-004 — Initialize Python AI Service
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -356,7 +356,7 @@ TASK-001
 
 ## TASK-005 — Initialize Vue Frontend
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -387,7 +387,7 @@ TASK-001
 
 ## TASK-006 — Add Backend ↔ AI Service Connectivity Check
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
