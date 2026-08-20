@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.storyai.story.mapper.StoryMapper">
+
+    <insert id="insert" parameterType="com.example.storyai.story.model.Story"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO story (name, core_idea, initial_stage_direction, status)
+        VALUES (#{name}, #{coreIdea}, #{initialStageDirection},
+                COALESCE(#{status}, 'ACTIVE'))
+    </insert>
+
+    <select id="findById" parameterType="long"
+            resultType="com.example.storyai.story.model.Story">
+        SELECT id, name, core_idea, initial_stage_direction, status,
+               created_at, updated_at
+        FROM story
+        WHERE id = #{id}
+    </select>
+
+    <select id="findAll"
+            resultType="com.example.storyai.story.model.Story">
+        SELECT id, name, core_idea, initial_stage_direction, status,
+               created_at, updated_at
+        FROM story
+        ORDER BY created_at DESC
+    </select>
+</mapper>
