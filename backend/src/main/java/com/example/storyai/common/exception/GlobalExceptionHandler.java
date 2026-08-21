@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.ResourceAccessException;
 
 /**
  * Global error mapping so the frontend never gets an opaque 500 (ARCHITECTURE §54).
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * <pre>
  * Validation Error  -> 400 VALIDATION_ERROR   (+ fieldErrors)
  * Business (404)    -> 404 NOT_FOUND
+ * AI boundary       -> 502 AI_SERVICE_ERROR   (unreachable / contract violation)
  * Internal          -> 500 INTERNAL_ERROR     (details logged server-side)
  * </pre>
  */
@@ -29,6 +31,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse("NOT_FOUND", ex.getMessage()));
+    }
+
+    @ExceptionHandler(AiServiceException.class)
+    public ResponseEntity<ErrorResponse> handleAiService(AiServiceException ex) {
+        log.warn("AI service error: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                .body(new ErrorResponse("AI_SERVICE_ERROR", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ResourceAccessException.class)
+    public ResponseEntity<ErrorResponse> handleAiUnreachable(ResourceAccessException ex) {
+        log.warn("AI service unreachable: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                .body(new ErrorResponse("AI_SERVICE_ERROR", "AI 服务不可用，请确认 Python AI Service 已启动"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
