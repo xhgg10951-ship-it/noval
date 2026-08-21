@@ -412,7 +412,7 @@ TASK-004
 
 ## TASK-007 — Design Minimum Story Schema
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -435,7 +435,7 @@ TASK-003
 
 ## TASK-008 — Implement Story Persistence with MyBatis
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -461,7 +461,7 @@ TASK-007
 
 ## TASK-009 — Implement Story REST API
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -489,7 +489,7 @@ TASK-008
 
 ## TASK-010 — Implement Story Creation UI
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
