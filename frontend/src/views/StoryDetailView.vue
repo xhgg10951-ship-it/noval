@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { onMounted, watch } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useStoryStore } from '@/stores/story'
+import StagePlanning from '@/components/StagePlanning.vue'
 
 const route = useRoute()
 const router = useRouter()
 const storyStore = useStoryStore()
+
+const storyId = computed(() => storyStore.currentStory?.id ?? null)
 
 async function loadStory(id: number): Promise<void> {
   await storyStore.fetchStory(id)
@@ -73,6 +76,9 @@ function goBack(): void {
           </li>
         </ul>
       </section>
+
+      <!-- Stage planning vertical slice (M2) -->
+      <StagePlanning v-if="storyId" :story-id="storyId" class="story-detail__section" />
     </article>
 
     <div v-else class="story-list__empty">未找到故事。</div>

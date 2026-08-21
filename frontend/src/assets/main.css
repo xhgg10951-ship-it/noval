@@ -372,3 +372,153 @@ body {
 .constraint-item__content {
   flex: 1;
 }
+
+/* ---- stage planning ---- */
+.stage-planning {
+  border-top: 1px solid var(--border);
+  padding-top: 1.25rem;
+}
+
+.stage-planning h3 {
+  margin: 0 0 0.75rem 0;
+}
+
+.stage-form {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.stage-form .form__textarea {
+  flex: 1;
+}
+
+.stage-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 1rem 0 0.75rem 0;
+}
+
+.stage-tab {
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.stage-tab--active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: #f0f2ff;
+}
+
+.stage-detail {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+}
+
+.stage-detail__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.stage-detail__meta {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.stage-detail__direction {
+  margin: 0 0 1rem 0;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.plan-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.plan-item {
+  display: flex;
+  gap: 0.85rem;
+  padding: 0.7rem 0.85rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.plan-item__order {
+  flex-shrink: 0;
+  width: 1.6rem;
+  height: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.plan-item__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.plan-item__goal {
+  margin: 0 0 0.25rem 0;
+  line-height: 1.5;
+}
+
+.plan-item__progress {
+  margin: 0 0 0.35rem 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.plan-item__actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.btn--small {
+  padding: 0.3rem 0.7rem;
+  font-size: 0.8rem;
+}
+
+.stage-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  border-top: 1px dashed var(--border);
+  padding-top: 1rem;
+}
+
+.stage-controls__label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.form__input--count {
+  width: 80px;
+  padding: 0.35rem 0.5rem;
+}

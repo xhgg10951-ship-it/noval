@@ -544,7 +544,7 @@ Vue
 
 ## TASK-011 — Add Stage and ChapterPlan Minimum Schema
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -563,7 +563,7 @@ TASK-010
 
 ## TASK-012 — Implement Stage Persistence
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -584,7 +584,7 @@ TASK-011
 
 ## TASK-013 — Define Java ↔ Python Planner Contract
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -614,7 +614,7 @@ TASK-006
 
 ## TASK-014 — Implement Python Stage Planner
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -647,7 +647,7 @@ TASK-013
 
 ## TASK-015 — Implement Spring Boot Stage Planning Service
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -674,7 +674,7 @@ TASK-014
 
 ## TASK-016 — Implement Plan Adjustment / Replanning
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -697,7 +697,7 @@ TASK-015
 
 ## TASK-017 — Implement Planning UI
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
