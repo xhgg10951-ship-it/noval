@@ -1242,7 +1242,7 @@ TASK-034
 
 ## TASK-036 — Add GenerationJob Persistence
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1271,7 +1271,7 @@ TASK-032
 
 ## TASK-037 — Refactor Generate-One-Chapter as Reusable Unit
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1295,7 +1295,7 @@ TASK-036
 
 ## TASK-038 — Implement Step-by-Step Mode
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1317,7 +1317,7 @@ TASK-037
 
 ## TASK-039 — Implement Continuous Mode
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1344,7 +1344,7 @@ TASK-037
 
 ## TASK-040 — Implement Generation Failure / Retry
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1371,7 +1371,7 @@ TASK-039
 
 ## TASK-041 — Implement Generation Progress UI
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1770,20 +1770,20 @@ TASK-055
 
 Current Milestone:
 
-`M4 — Memory Vertical Slice` → **COMPLETE**
+`M5 — Multi-Chapter Generation` → **COMPLETE**
 
 Current Task:
 
-`TASK-035 — Implement Memory UI` → `DONE`
+`TASK-041 — Implement Generation Progress UI` → `DONE`
 
 Next Milestone:
 
-`M5 — Multi-Chapter Generation` → start at `TASK-036 — Add GenerationJob Persistence`
+`M6 — Author Assistance` → start at `TASK-042 — Planner Direction Suggestions`
 
 Task Status:
 
-`M0..M4 all DONE (TASK-001..035)`
+`M0..M5 all DONE (TASK-001..041)`
 
 Next Safe Action:
 
-> 进入 M5：建立 GenerationJob 持久化（stage/mode/currentPlanIndex/total/status/lastError），将单章生成重构为可复用单元（TASK-037），再实现 Step-by-Step（TASK-038）与 Continuous（TASK-039）两种模式，复用同一单章流程。
+> 进入 M6：Python 返回 ≥3 个明显不同的剧情候选（TASK-042），提供请求/选择/修改后作为新方向/全部拒绝的 API 与 UI（TASK-043），并实现 Story Query 上下文组装（TASK-044）、Python Story Query（TASK-045）与查询 UI（TASK-046）。复用现有 `/ai/*` 端点模式与 HTTP/1.1 AiServiceClient。

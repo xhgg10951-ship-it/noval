@@ -663,3 +663,52 @@ body {
 .badge--auto { background: #34d399; color: #064e3b; }
 .badge--review { background: #fbbf24; color: #78350f; }
 .badge--ignore { background: #9ca3af; color: #1f2937; }
+.badge--ok { background: #34d399; color: #064e3b; }
+.badge--error { background: #f87171; color: #7f1d1d; }
+.badge--warn { background: #fbbf24; color: #78350f; }
+.badge--run { background: #60a5fa; color: #1e3a8a; }
+
+/* ---- Generation Progress panel (M5 / TASK-041) ---- */
+.gen-panel {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+}
+.gen-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+.gen-panel__header h4 { margin: 0; font-size: 0.95rem; }
+.gen-panel__hint { font-size: 0.82rem; color: var(--muted); margin: 0 0 0.6rem; }
+.gen-panel__modes { display: flex; gap: 1.2rem; margin-bottom: 0.8rem; }
+.gen-panel__mode { font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem; }
+.gen-panel__note { font-size: 0.78rem; color: var(--muted); margin: 0.5rem 0 0; }
+.gen-panel__bar {
+  height: 10px;
+  border-radius: 6px;
+  background: #eef0f6;
+  overflow: hidden;
+  margin-bottom: 0.45rem;
+}
+.gen-panel__bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6ea8fe, #4f7cff);
+  transition: width 0.35s ease;
+}
+.gen-panel__meta { font-size: 0.82rem; color: var(--muted); margin-bottom: 0.5rem; }
+.gen-panel__actions { display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-start; }
+.gen-panel__errdetail {
+  font-size: 0.78rem;
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  white-space: pre-wrap;
+  margin: 0;
+}
+.gen-panel__done { font-size: 0.85rem; color: #065f46; margin: 0; }

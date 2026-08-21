@@ -13,6 +13,7 @@ import {
   type ChapterPlanResponse,
 } from '@/api/stages'
 import ChapterPanel from '@/components/ChapterPanel.vue'
+import GenerationPanel from '@/components/GenerationPanel.vue'
 
 const props = defineProps<{ storyId: number }>()
 
@@ -224,6 +225,14 @@ function statusLabel(status: string): string {
           {{ confirming ? '确认中…' : '确认计划' }}
         </button>
       </div>
+
+      <!-- multi-chapter generation + progress (M5, TASK-036..041) -->
+      <GenerationPanel
+        v-if="stage"
+        :stage-id="stage.id"
+        :plan-count="stage.plans?.length"
+        :stage-status="stage.status"
+      />
 
       <!-- single chapter generation + reading (M3, TASK-024) -->
       <ChapterPanel v-if="stage" :stage-id="stage.id" :plan-count="stage.plans?.length" />

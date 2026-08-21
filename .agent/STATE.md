@@ -1,11 +1,11 @@
 # STATE — AI Story Co-Author v0.1
 
-_Updated: 2026-08-21 (M4 complete — Memory Vertical Slice live-verified)_
+_Updated: 2026-08-21 (M5 complete — Multi-Chapter Generation live-verified)_
 
 ## Current Project State
-- **Current Milestone:** `M4 — Memory Vertical Slice` → **COMPLETE**
-- **Current Task:** M4 gate closed; all of TASK-001..TASK-035 → `DONE`
-- **Next Task:** `M5 — Multi-Chapter Generation` → start at `TASK-036 — Add GenerationJob Persistence`
+- **Current Milestone:** `M5 — Multi-Chapter Generation` → **COMPLETE**
+- **Current Task:** M5 gate closed; all of TASK-001..TASK-041 → `DONE`
+- **Next Task:** `M6 — Author Assistance` → start at `TASK-042 — Planner Direction Suggestions`
 
 ## M2 Verified Deliverables (all committed)
 - **TASK-011** Stage + ChapterPlan min schema: `stage` (status PLANNING/ACTIVE/COMPLETED/ABANDONED, suggested+target chapter counts) + `chapter_plan` (order, goal, expected_progress), idempotent V2 migration — `fb358df`
@@ -49,6 +49,15 @@ _Updated: 2026-08-21 (M4 complete — Memory Vertical Slice live-verified)_
 - **TASK-035** Memory UI: `frontend/src/api/memory.ts` + `MemoryPanel.vue` (current state / relationships / story memories / review queue with evidence + 采用/忽略 buttons), wired into `StoryDetailView`.
 - **M4 gate (AT-E01/E02/G01/G03/H01/H02/H03) live-verified via curl:** create Story → Stage(2 plans, ACTIVE) → generate chapter → 3 CURRENT_STATE AUTO candidates (location=禁书区最深处, inventory=生锈的铜钥匙, physical_condition=受伤) all APPLIED to current_state; 1 RELATIONSHIP REVIEW candidate stays PENDING (boundary respected); author override `POST /apply` moved REVIEW→APPLIED and wrote the relationship. Backend tests 19/19, ai-service pytest 7/7, frontend build clean (102 modules). Java→Python HTTP/1.1 extractor path re-exercised, no 422.
 
+## M5 Verified Deliverables (this commit)
+- **TASK-036** GenerationJob persistence: `generation_job` table (stage_id FK CASCADE, mode, current_plan_index, total, status, phase, last_error) + `GenerationJob` entity (Mode/Status/Phase enums) + `GenerationJobMapper` (insert/findById/findLatestByStage/update) + `GenerationJobService` (`@Transactional`); V5 migration applied to `story_ai`. Status: PENDING/RUNNING/PAUSED/COMPLETED/FAILED.
+- **TASK-037** Reusable single-chapter unit: both STEP and CONTINUOUS modes drive the SAME `ChapterGenerationService.generateNextChapter(stageId)` (the M3+M4 Chapter→Memory→Checkpoint flow). `GenerationOrchestrationService.generateOneStep` is the single shared step — no second generation implementation.
+- **TASK-038** Step-by-Step mode: `startJob(STEP)` generates one chapter then sets PAUSED; `continueJob` resumes — each continue produces one more chapter; when `currentPlanIndex >= total` the job becomes COMPLETED (no dangling PAUSED after the final chapter). Author must click Continue between chapters (AT-L01).
+- **TASK-039** Continuous mode: `startJob(CONTINUOUS)` loops `Chapter→Memory→Checkpoint→Next` until the stage has no pending plan (COMPLETED) or a failure. No per-chapter clicks (AT-L02).
+- **TASK-040** Failure / retry: any exception in `generateOneStep` marks the job FAILED + `lastError` (real I/O error text captured, truncated to 2000 chars); the failing chapter is NOT persisted (failure before save). `retryJob` restarts a FAILED job from its current index and re-runs the same pending plan. Covers Writer / Extractor / AI-unavailable / invalid-response (AT-M01/M02/M03).
+- **TASK-041** Generation Progress UI: `frontend/src/api/generation.ts` (typed client) + `GenerationPanel.vue` (mode selector, progress bar current/total, phase label, status badge PAUSED/FAILED/COMPLETED, Continue/Retry buttons) wired into `StagePlanning.vue`; CSS in `main.css`.
+- **M5 gate (AT-L01/L02/M01/M02/M03) live-verified via curl:** STEP job on 3-chapter stage → PAUSED@1 → PAUSED@2 → COMPLETED@3 (3 chapters); CONTINUOUS job on 3-chapter stage → COMPLETED in one call (3 chapters, global numbering ch#4-6 across stages); AI-down run → FAILED with `lastError="Connection refused"`, 0 chapters saved → restart AI + retry → COMPLETED (3 chapters). Backend tests 22/22 (incl. 3 new GenerationModesIntegrationTest), ai-service pytest 7/7, frontend build clean (105 modules).
+
 ## M2 Verified Deliverables (all committed)
 
 ## Environment (verified this session)
@@ -71,4 +80,4 @@ _Updated: 2026-08-21 (M4 complete — Memory Vertical Slice live-verified)_
 - Stage status is a free string column; transitions enforced by service methods (PLANNING→ACTIVE on confirm), no branch system yet (M2 scope).
 
 ## Next Safe Action
-Start M5: TASK-036 GenerationJob persistence (stage/mode/currentPlanIndex/total/status/lastError), TASK-037 refactor generate-one-chapter into a reusable unit, TASK-038 Step-by-Step mode (checkpoint→PAUSED→user Continue), TASK-039 Continuous mode (Chapter→Memory→Checkpoint→Next until stage complete/failure), TASK-040 failure/retry, TASK-041 progress UI. Reuse the exact same single-chapter flow proven in M3+M4 — no second generation implementation.
+Start M6: TASK-042 Planner Direction Suggestions (Python returns ≥3 distinct directions, does NOT auto-modify stage), TASK-043 Planner Suggestions API + UI (request / pick / edit-as-new-direction / reject-all), TASK-044 Story Query context assembly, TASK-045 Python Story Query (Current Location / Inventory / Relationship / Foreshadowing / Unknown), TASK-046 Story Query UI. Reuse existing Python `/ai/*` endpoint pattern and the HTTP/1.1 `AiServiceClient`.
