@@ -16,6 +16,9 @@ import com.example.storyai.ai.dto.GenerateChapterResponse;
 import com.example.storyai.chapter.model.Chapter;
 import com.example.storyai.common.exception.AiServiceException;
 import com.example.storyai.common.exception.NoPendingChapterException;
+import com.example.storyai.memory.model.MemoryCandidate;
+import com.example.storyai.memory.service.CandidateProcessingService;
+import com.example.storyai.memory.service.MemoryExtractionService;
 import com.example.storyai.story.model.Story;
 import com.example.storyai.story.model.StoryConstraint;
 import com.example.storyai.story.service.StoryService;
@@ -45,15 +48,21 @@ public class ChapterGenerationService {
     private final StageService stageService;
     private final ChapterService chapterService;
     private final AiServiceClient aiServiceClient;
+    private final MemoryExtractionService extractionService;
+    private final CandidateProcessingService processingService;
 
     public ChapterGenerationService(StoryService storyService,
                                     StageService stageService,
                                     ChapterService chapterService,
-                                    AiServiceClient aiServiceClient) {
+                                    AiServiceClient aiServiceClient,
+                                    MemoryExtractionService extractionService,
+                                    CandidateProcessingService processingService) {
         this.storyService = storyService;
         this.stageService = stageService;
         this.chapterService = chapterService;
         this.aiServiceClient = aiServiceClient;
+        this.extractionService = extractionService;
+        this.processingService = processingService;
     }
 
     /** Generates the next pending chapter for a stage (AT-C01). */
@@ -94,7 +103,16 @@ public class ChapterGenerationService {
         chapter.setSummary(ai.summary());
         chapter.setGenerationStatus("GENERATED");
 
-        return chapterService.saveChapter(chapter);
+        Chapter saved = chapterService.saveChapter(chapter);
+
+        // M4 (TASK-032): Save Chapter -> Extract Memory -> Save Candidates -> Apply AUTO -> Checkpoint.
+        // Extraction calls Python OUTSIDE the generation tx; candidate persistence + AUTO apply run
+        // in their own transactions inside the memory services.
+        List<MemoryCandidate> candidates = extractionService.extractForChapter(saved);
+        for (MemoryCandidate c : candidates) {
+            processingService.autoProcess(c); // AUTO -> apply, REVIEW -> pending, IGNORE -> ignored
+        }
+        return saved;
     }
 
     /**

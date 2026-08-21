@@ -86,6 +86,12 @@ class ChapterGenerationIntegrationTest {
                 });
     }
 
+    /** Stub the memory extractor so the M4 generate->extract wiring is a no-op in these chapter tests. */
+    private void stubExtractor() {
+        when(aiServiceClient.extractMemory(any())).thenReturn(
+                new com.example.storyai.ai.dto.ExtractMemoryResponse(java.util.List.of()));
+    }
+
     // ---- AT-C01: generate next chapter persists and advances the plan goal ----
 
     @Test
@@ -103,6 +109,7 @@ class ChapterGenerationIntegrationTest {
         long stageId = objectMapper.readTree(created.getResponse().getContentAsString())
                 .get("id").asLong();
 
+        stubExtractor();
         mockMvc.perform(post("/api/stages/{id}/chapters", stageId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.chapterNumber").value(1))
@@ -134,6 +141,7 @@ class ChapterGenerationIntegrationTest {
         when(aiServiceClient.planStage(any(PlanStageRequest.class)))
                 .thenReturn(planOf(3, "目标"));
         stubWriter();
+        stubExtractor();
 
         long stageId = objectMapper.readTree(mockMvc.perform(post("/api/stories/{id}/stages", storyId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -159,6 +167,7 @@ class ChapterGenerationIntegrationTest {
         when(aiServiceClient.planStage(any(PlanStageRequest.class)))
                 .thenReturn(planOf(2, "目标"));
         stubWriter();
+        stubExtractor();
 
         long stageId = objectMapper.readTree(mockMvc.perform(post("/api/stories/{id}/stages", storyId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -187,6 +196,7 @@ class ChapterGenerationIntegrationTest {
                 .thenReturn(planOf(3, "目标"));
         when(aiServiceClient.generateChapter(any(GenerateChapterRequest.class)))
                 .thenReturn(new GenerateChapterResponse("标题", "", "摘要")); // blank content
+        stubExtractor();
 
         long stageId = objectMapper.readTree(mockMvc.perform(post("/api/stories/{id}/stages", storyId)
                         .contentType(MediaType.APPLICATION_JSON)

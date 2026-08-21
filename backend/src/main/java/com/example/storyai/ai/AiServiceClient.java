@@ -8,6 +8,8 @@ import org.springframework.web.client.RestClient;
 
 import com.example.storyai.ai.dto.GenerateChapterRequest;
 import com.example.storyai.ai.dto.GenerateChapterResponse;
+import com.example.storyai.ai.dto.ExtractMemoryRequest;
+import com.example.storyai.ai.dto.ExtractMemoryResponse;
 import com.example.storyai.ai.dto.PlanStageRequest;
 import com.example.storyai.ai.dto.PlanStageResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -87,6 +89,17 @@ public class AiServiceClient {
                 .body(json)
                 .retrieve()
                 .body(GenerateChapterResponse.class);
+    }
+
+    /** Calls {@code POST /ai/extract-memory} — memory candidate extraction (TASK-027, AT-G / AT-E). */
+    public ExtractMemoryResponse extractMemory(ExtractMemoryRequest request) {
+        String json = serialize(request);
+        return restClient.post()
+                .uri("/ai/extract-memory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(json)
+                .retrieve()
+                .body(ExtractMemoryResponse.class);
     }
 
     private String serialize(Object payload) {

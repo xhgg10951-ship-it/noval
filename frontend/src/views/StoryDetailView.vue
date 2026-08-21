@@ -3,6 +3,7 @@ import { computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useStoryStore } from '@/stores/story'
 import StagePlanning from '@/components/StagePlanning.vue'
+import MemoryPanel from '@/components/MemoryPanel.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -79,6 +80,9 @@ function goBack(): void {
 
       <!-- Stage planning vertical slice (M2) -->
       <StagePlanning v-if="storyId" :story-id="storyId" class="story-detail__section" />
+
+      <!-- Memory vertical slice (M4) -->
+      <MemoryPanel v-if="storyId" :story-id="storyId" class="story-detail__section" />
     </article>
 
     <div v-else class="story-list__empty">未找到故事。</div>

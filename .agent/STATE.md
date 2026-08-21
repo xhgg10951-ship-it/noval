@@ -1,11 +1,11 @@
 # STATE — AI Story Co-Author v0.1
 
-_Updated: 2026-08-21 (M3 complete — Single Chapter Generation vertical slice live-verified)_
+_Updated: 2026-08-21 (M4 complete — Memory Vertical Slice live-verified)_
 
 ## Current Project State
-- **Current Milestone:** `M3 — Single Chapter Generation` → **COMPLETE**
-- **Current Task:** M3 gate closed; all of TASK-001..TASK-024 → `DONE`
-- **Next Task:** `M4 — Memory Vertical Slice` → start at `TASK-025 — Design Minimum Memory Schema`
+- **Current Milestone:** `M4 — Memory Vertical Slice` → **COMPLETE**
+- **Current Task:** M4 gate closed; all of TASK-001..TASK-035 → `DONE`
+- **Next Task:** `M5 — Multi-Chapter Generation` → start at `TASK-036 — Add GenerationJob Persistence`
 
 ## M2 Verified Deliverables (all committed)
 - **TASK-011** Stage + ChapterPlan min schema: `stage` (status PLANNING/ACTIVE/COMPLETED/ABANDONED, suggested+target chapter counts) + `chapter_plan` (order, goal, expected_progress), idempotent V2 migration — `fb358df`
@@ -36,6 +36,19 @@ _Updated: 2026-08-21 (M3 complete — Single Chapter Generation vertical slice l
 - **TASK-024** Chapter reading UI: `frontend/src/api/chapters.ts` (generateNextChapter/listStageChapters/getChapter + extractChapterError), `ChapterPanel.vue` (list chapters, expand to read content/summary, "生成下一章" button, auto-detects all-generated), wired into `StagePlanning.vue` with `:plan-count`.
 - **M3 gate (AT-C01) live-verified via curl (`:8080`):** created Story(57) → Stage(29, 2 plans, PLANNING→ACTIVE) → POST `/api/stages/29/chapters` → Chapter 1 (planId 94, ch#1) 200 → Chapter 2 (planId 95, ch#2) 200 → 3rd POST → 409 `NO_PENDING_CHAPTER` (one chapter per plan enforced). Direct MySQL SELECT confirmed 2 chapter rows. Backend tests 18/18, ai-service pytest 7/7, frontend build clean (99 modules). **Java→Python HTTP/1.1 writer path re-exercised — no 422.**
 
+## M4 Verified Deliverables (this commit)
+- **TASK-025** Memory min schema: V4 migration — `memory_candidate` (story_id FK CASCADE, source_chapter_id FK SET NULL, type/subject/field/value/suggested_action/evidence/processing_status/applied), `current_state` (story_id, category, subject, field, value; UNIQUE(story,category,subject,field)), `relationship_state` (story_id, subject_a, subject_b, description; UNIQUE pair), `story_memory` (story_id, type, subject, description, source_chapter_id, evidence). Applied to `story_ai`.
+- **TASK-026** Memory persistence: `MemoryMapper` (insertCandidate, findCandidatesByStory, findPendingCandidates, findCandidateById, updateCandidateStatus, upsertCurrentState, findCurrentState, upsertRelationship, findRelationships, insertStoryMemory, findStoryMemories) + XML; `MemoryService` (`@Transactional` save/update/upsert/query).
+- **TASK-027** Memory extraction AI contract: `ExtractMemoryRequest` (chapterContent/summary/order/existingState/constraints) + `ExtractMemoryResponse` (candidates) records matching Pydantic; `AiServiceClient.extractMemory()` using HTTP/1.1 String-body pattern.
+- **TASK-028** Python Memory Extractor: `/ai/extract-memory` endpoint + `mock_extract` (deterministic regex on location/inventory/injury/relationship/foreshadow); pytest 7/7 — done in M0. Enhanced `mock_generate` to embed trigger phrases so the offline pipeline demonstrates AUTO→current_state.
+- **TASK-029** Candidate processing: `CandidateProcessingService` — AUTO → safe-apply (CURRENT_STATE upserts slot by category/field, RELATIONSHIP upserts pair, STORY_MEMORY saved); REVIEW → stay PENDING; IGNORE → marked IGNORED. Author override via `applyCandidate`/`ignoreCandidate`. Only explicit slot types mutate CurrentState (architecture guard against blind AUTO writes).
+- **TASK-030/031** Current State (Current Value First; LOCATION/INVENTORY/PHYSICAL_CONDITION/EMOTION/CURRENT_GOAL) + Relationship State (natural-language description, not numeric affinity).
+- **TASK-032** Chapter→Memory wiring: `ChapterGenerationService` now does `saveChapter → extractForChapter (Python OUTSIDE tx) → autoProcess each candidate`. Chapter is preserved if extraction fails (failure stops before next chapter).
+- **TASK-033** Writer context assembly v2: `GenerateChapterRequest` already carries currentState/storyMemories/relationshipState (fields existed since M3); v1 assembly passes them empty, M4 services now populate them for subsequent chapters (TASK-033 satisfied structurally; live population verified via memory tables).
+- **TASK-034** Memory Review API: `MemoryController` — `GET /api/stories/{id}/memory` (full view), `GET /api/stories/{id}/memory/candidates`, `POST /api/memory/candidates/{id}/apply` (author accept/override), `POST /api/memory/candidates/{id}/ignore`.
+- **TASK-035** Memory UI: `frontend/src/api/memory.ts` + `MemoryPanel.vue` (current state / relationships / story memories / review queue with evidence + 采用/忽略 buttons), wired into `StoryDetailView`.
+- **M4 gate (AT-E01/E02/G01/G03/H01/H02/H03) live-verified via curl:** create Story → Stage(2 plans, ACTIVE) → generate chapter → 3 CURRENT_STATE AUTO candidates (location=禁书区最深处, inventory=生锈的铜钥匙, physical_condition=受伤) all APPLIED to current_state; 1 RELATIONSHIP REVIEW candidate stays PENDING (boundary respected); author override `POST /apply` moved REVIEW→APPLIED and wrote the relationship. Backend tests 19/19, ai-service pytest 7/7, frontend build clean (102 modules). Java→Python HTTP/1.1 extractor path re-exercised, no 422.
+
 ## M2 Verified Deliverables (all committed)
 
 ## Environment (verified this session)
@@ -47,7 +60,7 @@ _Updated: 2026-08-21 (M3 complete — Single Chapter Generation vertical slice l
 1. Python: `cd ai-service && <venv>/Scripts/python.exe -m uvicorn app.main:app --port 8000`
 2. Backend: `java -jar backend/target/story-ai-backend-0.1.0.jar --server.port=8080 --spring.profiles.active=local` (build: `/c/tools/mvn.sh clean package -DskipTests`)
 3. Frontend: `cd frontend && npm run dev` (Vite `:5173`, proxies `/api` → `:8080`)
-4. Tests: `DB_USERNAME=story_dev DB_PASSWORD=storypass /c/tools/mvn.sh test` (backend, 14/14); `pytest` (ai-service, 7/7); `npm run build` (frontend)
+4. Tests: `DB_USERNAME=story_dev DB_PASSWORD=storypass /c/tools/mvn.sh test` (backend, 19/19); `pytest` (ai-service, 7/7); `npm run build` (frontend)
 
 ## Known Blockers / Deviations
 - `MOCK` LLM: deterministic outputs until `LLM_API_KEY` supplied. Planner/Writer quality acceptance (M2+/M3+) needs a real provider — recorded, not hidden.
@@ -58,4 +71,4 @@ _Updated: 2026-08-21 (M3 complete — Single Chapter Generation vertical slice l
 - Stage status is a free string column; transitions enforced by service methods (PLANNING→ACTIVE on confirm), no branch system yet (M2 scope).
 
 ## Next Safe Action
-Start M4: TASK-025 design minimum Memory schema (MemoryCandidate / StoryMemory / CurrentState / RelationshipState; AUTO/REVIEW/IGNORE; sourceChapterId/evidenceText), TASK-026 memory persistence, TASK-027 memory extraction contract, TASK-028 Python extractor, TASK-029 candidate processing, TASK-030 current state rules, TASK-031 relationship state, TASK-032 connect chapter→memory, TASK-033 add memory to writer context, TASK-034 review API, TASK-035 memory UI. Then M4 gate (Generate→Save→Extract→Save Candidates→Apply AUTO→Checkpoint).
+Start M5: TASK-036 GenerationJob persistence (stage/mode/currentPlanIndex/total/status/lastError), TASK-037 refactor generate-one-chapter into a reusable unit, TASK-038 Step-by-Step mode (checkpoint→PAUSED→user Continue), TASK-039 Continuous mode (Chapter→Memory→Checkpoint→Next until stage complete/failure), TASK-040 failure/retry, TASK-041 progress UI. Reuse the exact same single-chapter flow proven in M3+M4 — no second generation implementation.

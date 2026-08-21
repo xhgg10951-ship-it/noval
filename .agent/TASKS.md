@@ -927,7 +927,7 @@ Story
 
 ## TASK-025 — Design Minimum Memory Schema
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -963,7 +963,7 @@ TASK-024
 
 ## TASK-026 — Implement Memory Persistence
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -984,7 +984,7 @@ TASK-025
 
 ## TASK-027 — Define Memory Extraction AI Contract
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1014,7 +1014,7 @@ TASK-020
 
 ## TASK-028 — Implement Python Memory Extractor
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1049,7 +1049,7 @@ TASK-027
 
 ## TASK-029 — Implement Memory Candidate Processing
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1081,7 +1081,7 @@ TASK-028
 
 ## TASK-030 — Implement Current State Update Rules v1
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1109,7 +1109,7 @@ TASK-029
 
 ## TASK-031 — Implement Relationship State v1
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1130,7 +1130,7 @@ TASK-029
 
 ## TASK-032 — Connect Chapter Generation → Memory Extraction
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1164,7 +1164,7 @@ TASK-031
 
 ## TASK-033 — Add Memory to Writer Context
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1188,7 +1188,7 @@ TASK-032
 
 ## TASK-034 — Implement Memory Review API
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1213,7 +1213,7 @@ TASK-029
 
 ## TASK-035 — Implement Memory UI
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1770,20 +1770,20 @@ TASK-055
 
 Current Milestone:
 
-`M3 — Single Chapter Generation` → **COMPLETE**
+`M4 — Memory Vertical Slice` → **COMPLETE**
 
 Current Task:
 
-`TASK-024 — Implement Chapter Reading UI` → `DONE`
+`TASK-035 — Implement Memory UI` → `DONE`
 
 Next Milestone:
 
-`M4 — Memory Vertical Slice` → start at `TASK-025 — Design Minimum Memory Schema`
+`M5 — Multi-Chapter Generation` → start at `TASK-036 — Add GenerationJob Persistence`
 
 Task Status:
 
-`M0..M3 all DONE (TASK-001..024)`
+`M0..M4 all DONE (TASK-001..035)`
 
 Next Safe Action:
 
-> 进入 M4：设计最小 Memory 数据结构（MemoryCandidate / StoryMemory / CurrentState / RelationshipState），支持 AUTO/REVIEW/IGNORE 与 sourceChapterId/evidenceText。不得提前扩大 MVP。
+> 进入 M5：建立 GenerationJob 持久化（stage/mode/currentPlanIndex/total/status/lastError），将单章生成重构为可复用单元（TASK-037），再实现 Step-by-Step（TASK-038）与 Continuous（TASK-039）两种模式，复用同一单章流程。
