@@ -1651,7 +1651,7 @@ TASK-051
 
 ## TASK-053 — Run Full Verification
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1673,7 +1673,7 @@ TASK-052
 
 ## TASK-054 — Verify Local Startup Documentation
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1694,7 +1694,7 @@ TASK-053
 
 ## TASK-055 — Prepare Resume / README Evidence
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1716,7 +1716,7 @@ TASK-054
 
 ## TASK-056 — Freeze v0.1
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1770,20 +1770,22 @@ TASK-055
 
 Current Milestone:
 
-`M7 — Acceptance & Memory Experiment` → **COMPLETE**
+`M8 — v0.1 Release Freeze` → **COMPLETE**
 
 Current Task:
 
-`TASK-052 — Record v0.1 Known Issues` → `DONE`
+`TASK-056 — Freeze v0.1` → `DONE`
 
 Next Milestone:
 
-`M8 — v0.1 Release Freeze` → start at `TASK-053 — Run Full Verification`
+`v0.2 planning` (future; not started)
 
 Task Status:
 
-`M0..M7 all DONE (TASK-001..052)`
+`M0..M8 all DONE (TASK-001..056)`
 
 Next Safe Action:
 
-> 进入 M8：运行完整验证（mvn test / pytest / npm build + 5 章 e2e），整理本地启动文档与 README 证据，冻结 v0.1（TASK-053..056）。
+> v0.1 frozen. No new features. Future work enters v0.2 planning.
+
+Acceptance Complete (per `ACCEPTANCE_TESTS.md` §34): core loop + 5-chapter e2e (PASS-01..12) + observable memory + Baseline/Memory experiment + recorded failures.

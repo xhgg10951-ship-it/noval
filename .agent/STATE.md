@@ -1,11 +1,11 @@
 # STATE — AI Story Co-Author v0.1
 
-_Updated: 2026-08-21 (M7 complete — Acceptance & Memory Experiment live-verified)_
+_Updated: 2026-08-21 (M8 complete — v0.1 RELEASE FROZEN)_
 
 ## Current Project State
-- **Current Milestone:** `M7 — Acceptance & Memory Experiment` → **COMPLETE**
-- **Current Task:** M7 committed; all of TASK-001..TASK-052 → `DONE`
-- **Next Task:** `M8 — v0.1 Release Freeze` → start at `TASK-053 — Run Full Verification`
+- **Milestone:** `M8 — v0.1 Release Freeze` → **COMPLETE** — **v0.1 ACCEPTED & FROZEN**
+- **Task:** all of TASK-001..TASK-056 → `DONE`
+- **Status:** Core loop + 5-chapter e2e (PASS-01..12) + observable memory + Baseline/Memory experiment + recorded failures. No new features until v0.2.
 
 ## M2 Verified Deliverables (all committed)
 - **TASK-011** Stage + ChapterPlan min schema: `stage` (status PLANNING/ACTIVE/COMPLETED/ABANDONED, suggested+target chapter counts) + `chapter_plan` (order, goal, expected_progress), idempotent V2 migration — `fb358df`
@@ -94,4 +94,4 @@ _Updated: 2026-08-21 (M7 complete — Acceptance & Memory Experiment live-verifi
 - Stage status is a free string column; transitions enforced by service methods (PLANNING→ACTIVE on confirm), no branch system yet (M2 scope).
 
 ## Next Safe Action
-Start M8: TASK-053 Run Full Verification (mvn test / pytest / npm build + 5-chapter e2e), TASK-054 Verify Local Startup Documentation, TASK-055 Prepare Resume/README Evidence, TASK-056 Freeze v0.1. Confirm Acceptance Complete (core loop + 5-chapter e2e + observable memory + baseline/memory experiment + recorded failures), then stop adding features.
+v0.1 is frozen. Do NOT add features. Future requests enter `v0.2 planning`. If resuming, read `AGENTS.md` → `.agent/STATE.md` → `.agent/TASKS.md` → `git log`.

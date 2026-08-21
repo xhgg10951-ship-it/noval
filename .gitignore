@@ -21,6 +21,7 @@ app-m6.jar
 # ---- Node / Vue (Frontend) ----
 node_modules/
 dist/
+dist2/
 .vite/
 *.local
 
