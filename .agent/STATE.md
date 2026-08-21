@@ -1,11 +1,11 @@
 # STATE — AI Story Co-Author v0.1
 
-_Updated: 2026-08-21 (M5 complete — Multi-Chapter Generation live-verified)_
+_Updated: 2026-08-21 (M6 complete — Author Assistance committed)_
 
 ## Current Project State
-- **Current Milestone:** `M5 — Multi-Chapter Generation` → **COMPLETE**
-- **Current Task:** M5 gate closed; all of TASK-001..TASK-041 → `DONE`
-- **Next Task:** `M6 — Author Assistance` → start at `TASK-042 — Planner Direction Suggestions`
+- **Current Milestone:** `M6 — Author Assistance` → **COMPLETE**
+- **Current Task:** M6 committed; all of TASK-001..TASK-046 → `DONE`
+- **Next Task:** `M7 — Acceptance & Memory Experiment` → start at `TASK-047 — Prepare Fixed Acceptance Story`
 
 ## M2 Verified Deliverables (all committed)
 - **TASK-011** Stage + ChapterPlan min schema: `stage` (status PLANNING/ACTIVE/COMPLETED/ABANDONED, suggested+target chapter counts) + `chapter_plan` (order, goal, expected_progress), idempotent V2 migration — `fb358df`
@@ -60,6 +60,14 @@ _Updated: 2026-08-21 (M5 complete — Multi-Chapter Generation live-verified)_
 
 ## M2 Verified Deliverables (all committed)
 
+## M6 Verified Deliverables (this commit)
+- **TASK-042** Python Planner Direction Suggestions: `/ai/suggest-directions` (reuses `PlanStageRequest` ConstraintItem/StateItem/MemoryItem + RelationshipItem); `mock_suggest` returns ≥3 distinct directions (冲突型/成长型/悬疑型); does NOT auto-modify stage. pytest 7/7.
+- **TASK-043** Planner Suggestions API + UI: `SuggestDirectionsRequest/Response` records (nested `DirectionItem`); `AssistanceController.POST /api/stories/{id}/suggest-directions`; `frontend/src/api/assistance.ts` + `AssistancePanel.vue` (获取建议 → pick direction → editable textarea as new Stage Direction → 全部拒绝), wired into `StoryDetailView`.
+- **TASK-044** Story Query context assembly: `StoryAssistanceService.queryStory(storyId, question)` assembles currentState→StateItem, relationships→RelationshipItem, storyMemories→MemoryItem, recentContext=latest chapter summary from `StoryService`+`MemoryService`+`ChapterService`; calls Python OUTSIDE tx.
+- **TASK-045** Python Story Query: `/ai/story-query` (request/response records); `mock_query` answers location/inventory/relationship/foreshadowing from currentState/memories/relationships, returns Unknown when no data (correct: REVIEW candidates stay pending, not applied, so relationship/foreshadowing return UNKNOWN unless AUTO-applied).
+- **TASK-046** Story Query UI: `AssistancePanel.vue` story-query input + answer display.
+- **M6 gate (AT-K01/K03, AT-J01..J05) verified:** assistance integration tests 3/3 (suggestDirectionsReturnsThreeDistinct, suggestDirectionsIsReadOnly, storyQueryAnswersFromStructuredMemory); backend full suite 25/25; frontend build 108 modules clean; ai-service pytest 7/7. Live gate (prior session): suggestions returned 3 distinct directions; location/inventory/unknown queries verified; relationship/foreshadowing UNKNOWN confirmed correct (REVIEW not auto-applied).
+
 ## Environment (verified this session)
 - Maven 3.9.16 via wrapper `/c/tools/mvn.sh`. Java 17 (Corretto 17.0.20). Node 22.22.2; Python 3.13.12 (venv at `C:\Users\Administrator\.workbuddy\binaries\python\envs\default`).
 - MySQL 8.4.9 running; DB `story_ai` (utf8mb4); app user `story_dev` (password in local env only — NOT committed).
@@ -80,4 +88,4 @@ _Updated: 2026-08-21 (M5 complete — Multi-Chapter Generation live-verified)_
 - Stage status is a free string column; transitions enforced by service methods (PLANNING→ACTIVE on confirm), no branch system yet (M2 scope).
 
 ## Next Safe Action
-Start M6: TASK-042 Planner Direction Suggestions (Python returns ≥3 distinct directions, does NOT auto-modify stage), TASK-043 Planner Suggestions API + UI (request / pick / edit-as-new-direction / reject-all), TASK-044 Story Query context assembly, TASK-045 Python Story Query (Current Location / Inventory / Relationship / Foreshadowing / Unknown), TASK-046 Story Query UI. Reuse existing Python `/ai/*` endpoint pattern and the HTTP/1.1 `AiServiceClient`.
+Start M7: TASK-047 Prepare Fixed Acceptance Story (Core Idea/Constraints/Seed Facts from ACCEPTANCE_TESTS.md), TASK-048 Five-Chapter End-to-End Test (Create→Plan→Generate→Memory→Continue→Query→Suggestions, ≥5 chapters, PASS-01..12), TASK-049 Baseline Run (disable memory), TASK-050 Memory-Enabled Run, TASK-051 Compare (State/Inventory/Relationship Errors, Constraint Violations, Detail Recall, Manual Corrections), TASK-052 Record v0.1 Known Issues. Reuse existing generate CONTINUOUS/STEP, suggest-directions, story-query, memory apply/ignore endpoints.

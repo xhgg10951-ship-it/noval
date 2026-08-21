@@ -12,6 +12,10 @@ import com.example.storyai.ai.dto.ExtractMemoryRequest;
 import com.example.storyai.ai.dto.ExtractMemoryResponse;
 import com.example.storyai.ai.dto.PlanStageRequest;
 import com.example.storyai.ai.dto.PlanStageResponse;
+import com.example.storyai.ai.dto.SuggestDirectionsRequest;
+import com.example.storyai.ai.dto.SuggestDirectionsResponse;
+import com.example.storyai.ai.dto.StoryQueryRequest;
+import com.example.storyai.ai.dto.StoryQueryResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -100,6 +104,28 @@ public class AiServiceClient {
                 .body(json)
                 .retrieve()
                 .body(ExtractMemoryResponse.class);
+    }
+
+    /** Calls {@code POST /ai/suggest-directions} — planner-suggested next directions (M6 / TASK-042, AT-K01..K03). */
+    public SuggestDirectionsResponse suggestDirections(SuggestDirectionsRequest request) {
+        String json = serialize(request);
+        return restClient.post()
+                .uri("/ai/suggest-directions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(json)
+                .retrieve()
+                .body(SuggestDirectionsResponse.class);
+    }
+
+    /** Calls {@code POST /ai/story-query} — natural-language query over story info (M6 / TASK-044, AT-J01..J05). */
+    public StoryQueryResponse storyQuery(StoryQueryRequest request) {
+        String json = serialize(request);
+        return restClient.post()
+                .uri("/ai/story-query")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(json)
+                .retrieve()
+                .body(StoryQueryResponse.class);
     }
 
     private String serialize(Object payload) {

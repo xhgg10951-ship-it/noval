@@ -1396,7 +1396,7 @@ TASK-040
 
 ## TASK-042 — Implement Planner Direction Suggestions
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1418,7 +1418,7 @@ TASK-033
 
 ## TASK-043 — Implement Planner Suggestions API + UI
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1437,7 +1437,7 @@ TASK-042
 
 ## TASK-044 — Implement Story Query Context Assembly
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1459,7 +1459,7 @@ TASK-033
 
 ## TASK-045 — Implement Python Story Query
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1491,7 +1491,7 @@ TASK-044
 
 ## TASK-046 — Implement Story Query UI
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1770,20 +1770,20 @@ TASK-055
 
 Current Milestone:
 
-`M5 — Multi-Chapter Generation` → **COMPLETE**
+`M6 — Author Assistance` → **COMPLETE**
 
 Current Task:
 
-`TASK-041 — Implement Generation Progress UI` → `DONE`
+`TASK-046 — Implement Story Query UI` → `DONE`
 
 Next Milestone:
 
-`M6 — Author Assistance` → start at `TASK-042 — Planner Direction Suggestions`
+`M7 — Acceptance & Memory Experiment` → start at `TASK-047 — Prepare Fixed Acceptance Story`
 
 Task Status:
 
-`M0..M5 all DONE (TASK-001..041)`
+`M0..M6 all DONE (TASK-001..046)`
 
 Next Safe Action:
 
-> 进入 M6：Python 返回 ≥3 个明显不同的剧情候选（TASK-042），提供请求/选择/修改后作为新方向/全部拒绝的 API 与 UI（TASK-043），并实现 Story Query 上下文组装（TASK-044）、Python Story Query（TASK-045）与查询 UI（TASK-046）。复用现有 `/ai/*` 端点模式与 HTTP/1.1 AiServiceClient。
+> 进入 M7：按 `ACCEPTANCE_TESTS.md` 固定验收故事（TASK-047），完成 5 章端到端测试（TASK-048, PASS-01~12），执行 Baseline vs Memory 实验（TASK-049..051），记录 v0.1 已知问题（TASK-052）。复用现有 generate/STEP/CONTINUOUS、suggest-directions、story-query、memory apply/ignore 端点。

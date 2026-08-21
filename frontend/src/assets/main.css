@@ -712,3 +712,46 @@ body {
   margin: 0;
 }
 .gen-panel__done { font-size: 0.85rem; color: #065f46; margin: 0; }
+
+/* ---- Author Assistance panel (M6 / TASK-042..046) ---- */
+.assist-panel { margin-top: 1.5rem; }
+.assist-panel__block {
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  margin-bottom: 1rem;
+}
+.assist-panel__block h4 { margin: 0 0 0.6rem; font-size: 0.95rem; }
+.assist-panel__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+.assist-dirs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.assist-dir__pick {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fafbff;
+  cursor: pointer;
+}
+.assist-dir__pick:hover { border-color: var(--accent); }
+.assist-dir--selected .assist-dir__pick { border-color: var(--accent); background: #eef2ff; }
+.assist-dir__desc { font-size: 0.82rem; color: var(--muted); }
+.assist-panel__edit { margin-top: 0.6rem; }
+.assist-panel__label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.3rem; }
+.assist-panel__actions { display: flex; gap: 0.5rem; margin: 0.5rem 0; }
+.assist-panel__hint { font-size: 0.76rem; color: var(--muted); margin: 0; }
+.assist-query { display: flex; gap: 0.5rem; }
+.assist-query .form__input { flex: 1; }
+.assist-query__answer {
+  margin: 0.6rem 0 0;
+  padding: 0.6rem 0.8rem;
+  background: #f6f8ff;
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  font-size: 0.88rem;
+  white-space: pre-wrap;
+}
