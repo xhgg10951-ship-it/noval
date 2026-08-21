@@ -1507,7 +1507,7 @@ TASK-045
 
 ## TASK-047 — Prepare Fixed Acceptance Story
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1527,7 +1527,7 @@ TASK-046
 
 ## TASK-048 — Execute Five-Chapter End-to-End Test
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1557,7 +1557,7 @@ TASK-047
 
 ## TASK-049 — Execute Baseline Run
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1583,7 +1583,7 @@ TASK-047
 
 ## TASK-050 — Execute Memory-Enabled Run
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1603,7 +1603,7 @@ TASK-049
 
 ## TASK-051 — Compare Baseline vs Memory
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1628,7 +1628,7 @@ TASK-050
 
 ## TASK-052 — Record v0.1 Known Issues
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1770,20 +1770,20 @@ TASK-055
 
 Current Milestone:
 
-`M6 — Author Assistance` → **COMPLETE**
+`M7 — Acceptance & Memory Experiment` → **COMPLETE**
 
 Current Task:
 
-`TASK-046 — Implement Story Query UI` → `DONE`
+`TASK-052 — Record v0.1 Known Issues` → `DONE`
 
 Next Milestone:
 
-`M7 — Acceptance & Memory Experiment` → start at `TASK-047 — Prepare Fixed Acceptance Story`
+`M8 — v0.1 Release Freeze` → start at `TASK-053 — Run Full Verification`
 
 Task Status:
 
-`M0..M6 all DONE (TASK-001..046)`
+`M0..M7 all DONE (TASK-001..052)`
 
 Next Safe Action:
 
-> 进入 M7：按 `ACCEPTANCE_TESTS.md` 固定验收故事（TASK-047），完成 5 章端到端测试（TASK-048, PASS-01~12），执行 Baseline vs Memory 实验（TASK-049..051），记录 v0.1 已知问题（TASK-052）。复用现有 generate/STEP/CONTINUOUS、suggest-directions、story-query、memory apply/ignore 端点。
+> 进入 M8：运行完整验证（mvn test / pytest / npm build + 5 章 e2e），整理本地启动文档与 README 证据，冻结 v0.1（TASK-053..056）。

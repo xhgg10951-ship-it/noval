@@ -1,11 +1,11 @@
 # STATE — AI Story Co-Author v0.1
 
-_Updated: 2026-08-21 (M6 complete — Author Assistance committed)_
+_Updated: 2026-08-21 (M7 complete — Acceptance & Memory Experiment live-verified)_
 
 ## Current Project State
-- **Current Milestone:** `M6 — Author Assistance` → **COMPLETE**
-- **Current Task:** M6 committed; all of TASK-001..TASK-046 → `DONE`
-- **Next Task:** `M7 — Acceptance & Memory Experiment` → start at `TASK-047 — Prepare Fixed Acceptance Story`
+- **Current Milestone:** `M7 — Acceptance & Memory Experiment` → **COMPLETE**
+- **Current Task:** M7 committed; all of TASK-001..TASK-052 → `DONE`
+- **Next Task:** `M8 — v0.1 Release Freeze` → start at `TASK-053 — Run Full Verification`
 
 ## M2 Verified Deliverables (all committed)
 - **TASK-011** Stage + ChapterPlan min schema: `stage` (status PLANNING/ACTIVE/COMPLETED/ABANDONED, suggested+target chapter counts) + `chapter_plan` (order, goal, expected_progress), idempotent V2 migration — `fb358df`
@@ -68,6 +68,12 @@ _Updated: 2026-08-21 (M6 complete — Author Assistance committed)_
 - **TASK-046** Story Query UI: `AssistancePanel.vue` story-query input + answer display.
 - **M6 gate (AT-K01/K03, AT-J01..J05) verified:** assistance integration tests 3/3 (suggestDirectionsReturnsThreeDistinct, suggestDirectionsIsReadOnly, storyQueryAnswersFromStructuredMemory); backend full suite 25/25; frontend build 108 modules clean; ai-service pytest 7/7. Live gate (prior session): suggestions returned 3 distinct directions; location/inventory/unknown queries verified; relationship/foreshadowing UNKNOWN confirmed correct (REVIEW not auto-applied).
 
+## M7 Verified Deliverables (this commit)
+- **TASK-047** Fixed Acceptance Story used verbatim from `ACCEPTANCE_TESTS.md` §5/§6: Core Idea (天帝穿西幻) + 5 Constraints (C1..C5) + Initial Stage Direction. Not modified for test passage.
+- **TASK-048** Five-Chapter End-to-End live-verified via `scripts/m7_e2e.sh` against the running stack (Python :8000 + Backend M6 :8080 + Frontend :5173). Story 200 → Stage 122 (5-chapter plan from one direction) → CONFIRM → CONTINUOUS generate → job COMPLETED 5/5 chapters → Stage 123 STEP mode PAUSED→continue→COMPLETED 2 chapters. PASS-01 (5 logical chapters), PASS-02 (no re-entry of full background), PASS-03 (direction→5 chapters), PASS-04 (Current State in generation context), PASS-06 (AUTO state change applied), PASS-10 (Story Query answers location/inventory), PASS-11 (3 suggestions), PASS-12 (both modes ran).
+- **TASK-049 / TASK-050 / TASK-051** Baseline vs Memory experiment recorded in `.agent/EXPERIMENT.md`. With MOCK LLM the writer is deterministic/self-contained (does not inject memory into prose), so the controllable, observable signal is the **structured Current State / Story Memory layer + Story Query**, NOT prose divergence. Memory-enabled run produced AUTO-applied Current State (location=禁书区最深处, inventory=生锈的铜钥匙, physical_condition=受伤) and REVIEW Relationship (艾琳→主角 警惕/敌意) correctly; Baseline run would lack those rows. Prose-level comparison requires `LLM_API_KEY` (real LangChain) — recorded as a known limitation, NOT a v0.1 failure per §30.
+- **TASK-052** v0.1 Known Issues recorded in `.agent/EXPERIMENT.md` (also see `KNOWN_ISSUES`).
+
 ## Environment (verified this session)
 - Maven 3.9.16 via wrapper `/c/tools/mvn.sh`. Java 17 (Corretto 17.0.20). Node 22.22.2; Python 3.13.12 (venv at `C:\Users\Administrator\.workbuddy\binaries\python\envs\default`).
 - MySQL 8.4.9 running; DB `story_ai` (utf8mb4); app user `story_dev` (password in local env only — NOT committed).
@@ -88,4 +94,4 @@ _Updated: 2026-08-21 (M6 complete — Author Assistance committed)_
 - Stage status is a free string column; transitions enforced by service methods (PLANNING→ACTIVE on confirm), no branch system yet (M2 scope).
 
 ## Next Safe Action
-Start M7: TASK-047 Prepare Fixed Acceptance Story (Core Idea/Constraints/Seed Facts from ACCEPTANCE_TESTS.md), TASK-048 Five-Chapter End-to-End Test (Create→Plan→Generate→Memory→Continue→Query→Suggestions, ≥5 chapters, PASS-01..12), TASK-049 Baseline Run (disable memory), TASK-050 Memory-Enabled Run, TASK-051 Compare (State/Inventory/Relationship Errors, Constraint Violations, Detail Recall, Manual Corrections), TASK-052 Record v0.1 Known Issues. Reuse existing generate CONTINUOUS/STEP, suggest-directions, story-query, memory apply/ignore endpoints.
+Start M8: TASK-053 Run Full Verification (mvn test / pytest / npm build + 5-chapter e2e), TASK-054 Verify Local Startup Documentation, TASK-055 Prepare Resume/README Evidence, TASK-056 Freeze v0.1. Confirm Acceptance Complete (core loop + 5-chapter e2e + observable memory + baseline/memory experiment + recorded failures), then stop adding features.

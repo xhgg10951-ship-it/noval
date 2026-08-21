@@ -1,0 +1,4 @@
+Main-Class: org.springframework.boot.loader.launch.JarLauncher
+Start-Class: com.example.storyai.StoryAiApplication
+Spring-Boot-Version: 3.5.0
+
