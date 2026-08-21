@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.ResourceAccessException;
 
+import com.example.storyai.common.exception.NoPendingChapterException;
+
 /**
  * Global error mapping so the frontend never gets an opaque 500 (ARCHITECTURE §54).
  *
@@ -45,6 +47,12 @@ public class GlobalExceptionHandler {
         log.warn("AI service unreachable: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
                 .body(new ErrorResponse("AI_SERVICE_ERROR", "AI 服务不可用，请确认 Python AI Service 已启动"));
+    }
+
+    @ExceptionHandler(NoPendingChapterException.class)
+    public ResponseEntity<ErrorResponse> handleNoPending(NoPendingChapterException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("NO_PENDING_CHAPTER", ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

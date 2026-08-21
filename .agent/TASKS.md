@@ -726,7 +726,7 @@ TASK-016
 
 ## TASK-018 — Add Chapter Minimum Schema
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -750,7 +750,7 @@ TASK-017
 
 ## TASK-019 — Implement Chapter Persistence
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -770,7 +770,7 @@ TASK-018
 
 ## TASK-020 — Define Writer AI Contract
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -801,7 +801,7 @@ TASK-013
 
 ## TASK-021 — Implement Python Writer
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -828,7 +828,7 @@ TASK-020
 
 ## TASK-022 — Implement Java Writer Context Assembly v1
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -856,7 +856,7 @@ TASK-021
 
 ## TASK-023 — Implement Generate-One-Chapter Service
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -883,7 +883,7 @@ TASK-022
 
 ## TASK-024 — Implement Chapter Reading UI
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1770,16 +1770,20 @@ TASK-055
 
 Current Milestone:
 
-`M0 — Repository Bootstrap`
+`M3 — Single Chapter Generation` → **COMPLETE**
 
 Current Task:
 
-`TASK-001 — Initialize Repository Structure`
+`TASK-024 — Implement Chapter Reading UI` → `DONE`
+
+Next Milestone:
+
+`M4 — Memory Vertical Slice` → start at `TASK-025 — Design Minimum Memory Schema`
 
 Task Status:
 
-`TODO`
+`M0..M3 all DONE (TASK-001..024)`
 
 Next Safe Action:
 
-> 创建仓库基础目录和核心工程骨架，不开始任何产品功能实现。
+> 进入 M4：设计最小 Memory 数据结构（MemoryCandidate / StoryMemory / CurrentState / RelationshipState），支持 AUTO/REVIEW/IGNORE 与 sourceChapterId/evidenceText。不得提前扩大 MVP。

@@ -522,3 +522,116 @@ body {
   width: 80px;
   padding: 0.35rem 0.5rem;
 }
+
+/* ---- chapter generation panel (M3, TASK-024) ---- */
+.chapter-panel {
+  border-top: 1px dashed var(--border);
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
+.chapter-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.chapter-panel__header h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.chapter-panel__done {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin: 0.6rem 0 0 0;
+}
+
+.chapter-panel__empty {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0.6rem 0 0 0;
+}
+
+.chapter-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.chapter-item {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.chapter-item__head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: var(--fg);
+}
+
+.chapter-item__head:hover {
+  background: #f0f2ff;
+}
+
+.chapter-item__num {
+  flex-shrink: 0;
+  width: 1.6rem;
+  height: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.chapter-item__title {
+  flex: 1;
+  font-weight: 600;
+  min-width: 0;
+}
+
+.chapter-item__toggle {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  color: var(--accent);
+}
+
+.chapter-item__body {
+  padding: 0 0.85rem 0.85rem 3.25rem;
+}
+
+.chapter-item__summary {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.chapter-item__content {
+  margin: 0;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  font-size: 0.9rem;
+}

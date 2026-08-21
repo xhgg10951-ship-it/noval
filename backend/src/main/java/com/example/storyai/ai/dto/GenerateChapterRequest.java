@@ -1,0 +1,42 @@
+package com.example.storyai.ai.dto;
+
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+/**
+ * Structured request for Python {@code POST /ai/generate-chapter} (TASK-020).
+ *
+ * <p>Field names and shapes MUST match the Pydantic {@code GenerateChapterRequest}
+ * in {@code ai-service/app/schemas/models.py}. Java never regex-parses natural
+ * language output — it validates these models.</p>
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record GenerateChapterRequest(
+        String coreIdea,
+        List<ConstraintItem> constraints,
+        String stageDirection,
+        String chapterGoal,
+        int chapterOrder,
+        List<StateItem> currentState,
+        List<MemoryItem> storyMemories,
+        List<RelationshipItem> relationshipState,
+        String recentContext
+) {
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record ConstraintItem(String type, String content) {
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record StateItem(String category, String subject, String field, String value) {
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record MemoryItem(String type, String subject, String description) {
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record RelationshipItem(String subjectA, String subjectB, String description) {
+    }
+}

@@ -1,11 +1,11 @@
 # STATE — AI Story Co-Author v0.1
 
-_Updated: 2026-08-21 (M2 complete — Stage Planning vertical slice live-verified)_
+_Updated: 2026-08-21 (M3 complete — Single Chapter Generation vertical slice live-verified)_
 
 ## Current Project State
-- **Current Milestone:** `M2 — Stage Planning Vertical Slice` → **COMPLETE**
-- **Current Task:** M2 gate closed; all of TASK-001..TASK-017 → `DONE`
-- **Next Task:** `M3 — Single Chapter Generation` → start at `TASK-018 — Add Chapter Minimum Schema`
+- **Current Milestone:** `M3 — Single Chapter Generation` → **COMPLETE**
+- **Current Task:** M3 gate closed; all of TASK-001..TASK-024 → `DONE`
+- **Next Task:** `M4 — Memory Vertical Slice` → start at `TASK-025 — Design Minimum Memory Schema`
 
 ## M2 Verified Deliverables (all committed)
 - **TASK-011** Stage + ChapterPlan min schema: `stage` (status PLANNING/ACTIVE/COMPLETED/ABANDONED, suggested+target chapter counts) + `chapter_plan` (order, goal, expected_progress), idempotent V2 migration — `fb358df`
@@ -25,6 +25,18 @@ _Updated: 2026-08-21 (M2 complete — Stage Planning vertical slice live-verifie
 
 ## M0 Verified Deliverables (all committed)
 - **TASK-001..006** repo structure, Spring Boot 3.5.0 backend, MySQL `story_ai` DB + `story_dev` user, Python AI Service (FastAPI, 6 `/ai/*` endpoints, Mock LLM), Vue 3+TS+Vite frontend, backend↔AI connectivity check — see git log `6ad302d`..`c8f37eb`
+
+## M3 Verified Deliverables (this commit)
+- **TASK-018** Chapter min schema: `chapter` (story_id FK CASCADE, stage_id FK CASCADE, plan_id FK SET NULL + UNIQUE, chapter_number UNIQUE per story, title, content MEDIUMTEXT, summary, generation_status default 'GENERATED', timestamps); idempotent V3 migration — applied to `story_ai`.
+- **TASK-019** Chapter persistence: `ChapterMapper` (insert w/ generated key, findById, findByPlanId, findByStageId, findByStoryId, maxChapterNumber) + XML; `ChapterService` (`@Transactional` saveChapter / getChapter 404 / listByStage / listByStory / nextChapterNumber). UNIQUE(plan_id) enforces one chapter per plan.
+- **TASK-020** Writer AI contract: `GenerateChapterRequest` record matching Pydantic (coreIdea, constraints, stageDirection, chapterGoal, chapterOrder, currentState, storyMemories, relationshipState, recentContext) + `GenerateChapterResponse` record (title, content, summary). `AiServiceClient.generateChapter()` added using the same HTTP/1.1 String-body pattern (TASK-017 fix).
+- **TASK-021** Python Writer: `generate_chapter` (mock-first `mock_generate`, real LangChain via env) + `/ai/generate-chapter` endpoint; pytest 7/7 — done in M0.
+- **TASK-022** Java context assembly v1: `ChapterGenerationService.buildRequest` assembles story constraints + stage direction + plan chapter goal + previous chapter summary as recentContext. CurrentState/Memory/Relationship empty (allowed by contract, filled in M4).
+- **TASK-023** Generate-one-chapter service: `ChapterGenerationService.generateNextChapter` = load context → call Python OUTSIDE tx → validate (title/content/summary non-blank) → persist. Picks next pending plan by lowest chapter order; `NoPendingChapterException` (→ 409) when none. AI call is OUTSIDE the DB transaction; persistence is `@Transactional` in `ChapterService`.
+- **TASK-024** Chapter reading UI: `frontend/src/api/chapters.ts` (generateNextChapter/listStageChapters/getChapter + extractChapterError), `ChapterPanel.vue` (list chapters, expand to read content/summary, "生成下一章" button, auto-detects all-generated), wired into `StagePlanning.vue` with `:plan-count`.
+- **M3 gate (AT-C01) live-verified via curl (`:8080`):** created Story(57) → Stage(29, 2 plans, PLANNING→ACTIVE) → POST `/api/stages/29/chapters` → Chapter 1 (planId 94, ch#1) 200 → Chapter 2 (planId 95, ch#2) 200 → 3rd POST → 409 `NO_PENDING_CHAPTER` (one chapter per plan enforced). Direct MySQL SELECT confirmed 2 chapter rows. Backend tests 18/18, ai-service pytest 7/7, frontend build clean (99 modules). **Java→Python HTTP/1.1 writer path re-exercised — no 422.**
+
+## M2 Verified Deliverables (all committed)
 
 ## Environment (verified this session)
 - Maven 3.9.16 via wrapper `/c/tools/mvn.sh`. Java 17 (Corretto 17.0.20). Node 22.22.2; Python 3.13.12 (venv at `C:\Users\Administrator\.workbuddy\binaries\python\envs\default`).
@@ -46,4 +58,4 @@ _Updated: 2026-08-21 (M2 complete — Stage Planning vertical slice live-verifie
 - Stage status is a free string column; transitions enforced by service methods (PLANNING→ACTIVE on confirm), no branch system yet (M2 scope).
 
 ## Next Safe Action
-Start M3: TASK-018 design minimum Chapter schema (story/chapter_plan/chapter_number/title/content/summary/status), then TASK-019 chapter persistence, TASK-020 writer AI contract, TASK-021 Python writer, TASK-022 Java context assembly, TASK-023 generate-one-chapter service, TASK-024 chapter reading UI. Then M3 gate (Story→Stage→Plan→Generate One Chapter→Save→Read in Vue).
+Start M4: TASK-025 design minimum Memory schema (MemoryCandidate / StoryMemory / CurrentState / RelationshipState; AUTO/REVIEW/IGNORE; sourceChapterId/evidenceText), TASK-026 memory persistence, TASK-027 memory extraction contract, TASK-028 Python extractor, TASK-029 candidate processing, TASK-030 current state rules, TASK-031 relationship state, TASK-032 connect chapter→memory, TASK-033 add memory to writer context, TASK-034 review API, TASK-035 memory UI. Then M4 gate (Generate→Save→Extract→Save Candidates→Apply AUTO→Checkpoint).

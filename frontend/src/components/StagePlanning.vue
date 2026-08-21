@@ -12,6 +12,7 @@ import {
   type StageSummary,
   type ChapterPlanResponse,
 } from '@/api/stages'
+import ChapterPanel from '@/components/ChapterPanel.vue'
 
 const props = defineProps<{ storyId: number }>()
 
@@ -223,6 +224,9 @@ function statusLabel(status: string): string {
           {{ confirming ? '确认中…' : '确认计划' }}
         </button>
       </div>
+
+      <!-- single chapter generation + reading (M3, TASK-024) -->
+      <ChapterPanel v-if="stage" :stage-id="stage.id" :plan-count="stage.plans?.length" />
     </article>
   </section>
 </template>

@@ -6,6 +6,8 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import com.example.storyai.ai.dto.GenerateChapterRequest;
+import com.example.storyai.ai.dto.GenerateChapterResponse;
 import com.example.storyai.ai.dto.PlanStageRequest;
 import com.example.storyai.ai.dto.PlanStageResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -74,6 +76,17 @@ public class AiServiceClient {
                 .body(json)
                 .retrieve()
                 .body(PlanStageResponse.class);
+    }
+
+    /** Calls {@code POST /ai/generate-chapter} — single chapter generation (TASK-023, AT-C01). */
+    public GenerateChapterResponse generateChapter(GenerateChapterRequest request) {
+        String json = serialize(request);
+        return restClient.post()
+                .uri("/ai/generate-chapter")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(json)
+                .retrieve()
+                .body(GenerateChapterResponse.class);
     }
 
     private String serialize(Object payload) {
