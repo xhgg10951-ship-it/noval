@@ -8,6 +8,7 @@ import os
 
 # Ensure mock mode regardless of ambient env.
 os.environ.pop("LLM_API_KEY", None)
+os.environ.pop("API_KEY", None)
 
 from fastapi.testclient import TestClient  # noqa: E402
 
