@@ -54,8 +54,11 @@ public class StoryController {
         List<StoryConstraint> constraints = toConstraints(request.getConstraints());
 
         Story created = storyService.createStory(story, constraints);
+        // Re-read so the response reflects DB-generated state (status default,
+        // created_at/updated_at timestamps) rather than in-memory nulls.
+        Story persisted = storyService.getStory(created.getId());
         List<StoryConstraint> saved = storyService.getConstraints(created.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(created, saved));
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(persisted, saved));
     }
 
     @GetMapping("/{id}")
