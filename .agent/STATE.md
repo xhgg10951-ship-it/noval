@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`Phase 2 — Chapter Control (engineering DONE; semantic acceptance pending real LLM)`
+`Phase 3 — Generation Reliability (engineering DONE; TASK-132 regression suite pending, mvn now available)`
 
 Current Task:
 
-`TASK-112 — Real-LLM Continuation Acceptance (AC-101) — UNBLOCKED, queued to run`
+`TASK-132 — Generation Reliability Regression Suite (Phase 3 Gate closure)`
 
 Task Status:
 
@@ -44,24 +44,17 @@ TASK-101/102 DONE — regression baseline at `.agent/EVIDENCE_v0.1_REGRESSION.md
 status corrections recorded in §2.1.
 TASK-103 DONE — DEBUG payload observability (commit `63781dd`).
 TASK-104 DONE — 5 root causes re-confirmed at file:line; Phase 0 Gate PASSED.
-TASK-105 DONE — `StoryContextReader` built + compiled.
-TASK-106 DONE — Planner wired to real context (currentState / storyMemories / recentContext).
-TASK-110 DONE — Writer wired to real context (currentState / storyMemories / relationshipState).
-TASK-111 DONE — Writer recent context upgraded to last 3 summaries + ending excerpt (commit `af66501`, javac PASSED).
-TASK-107 DONE — Planner continuation context v2 contract (commit `d03d936`).
-TASK-108 DONE — Continuation anchor assembly.
-TASK-109 DONE — Planner continuation prompt.
-TASK-113 DONE — Story writing settings migration (commit `5528dfd`).
-TASK-114 DONE — ChapterPlan → ChapterSpec schema (commit `bb345bc`).
-TASK-115/116 DONE — Planner v2 output + persist full ChapterSpec (commit `4bbd35b`).
-TASK-117/118 DONE — Writer Contract v2 + Goal Lock prompt (commit `1d6ccf9`).
-TASK-119/120 DONE — Chapter length measurement + light UI (commit `de576d2`).
-
-Engineering Verification:
-PASSED — Phase 2 engineering fully compiled + committed (5528dfd..de576d2)
-
-Real-LLM Semantic Verification:
-NOT_REQUIRED for TASK-107..120; REQUIRED for TASK-112/121/122 — now UNBLOCKED (see §11)
+TASK-105~111 DONE — Phase 1 context wiring + continuation (commits d03d936..af66501).
+TASK-112 DONE — AC-101 real-LLM PASS (continuation, no re-crossing).
+TASK-113~120 DONE — Phase 2 ChapterSpec chain (5528dfd..de576d2).
+TASK-121 DONE — AC-103 honest FAIL (qwen3-8b length ceiling); guard added.
+TASK-122 DONE — AC-104 real-LLM PASS (goal adherence).
+TASK-123~131 DONE — Phase 3 reliability (V9/V10; commits 454d167..966a97f):
+extraction status, resolver, safe retry, async bg execution, progress,
+pause, stop, stage completion.
+Phase 4 partial (uncommitted working tree recovered 2026-08-22, then committed):
+TASK-133/134/135 DONE + TASK-136 service layer (V11 plan versioning;
+active remaining generation queue; replanRemaining @Transactional).
 
 ---
 
@@ -829,67 +822,59 @@ Requirements:
 FROZEN
 
 Implementation:
-IN PROGRESS (Phase 2 — engineering complete; semantic acceptance running)
+IN PROGRESS (Phase 3 engineering DONE; TASK-132 regression suite pending;
+Phase 4 backend partially landed)
 
 Current Phase:
-Phase 2 — Chapter Control (engineering DONE; AC-103/104 running)
+Phase 3 → Gate closure via TASK-132 (mvn 3.9.16 + JDK17 now available in env)
 
 Current Task:
-TASK-112 — Real-LLM Continuation Acceptance (AC-101) — UNBLOCKED
+TASK-132 — Generation Reliability Regression Suite
 
 Current Task Status:
-IN_PROGRESS (real LLM credential now present; AC-101 ready to execute)
+IN_PROGRESS
 
 Phase 0 Gate:
 PASSED (2026-08-21, after commit 63781dd)
 
-Phase 1 progress (Context Wiring + Continuation):
-- TASK-105 DONE: StoryContextReader built + compiled
-- TASK-106 DONE: Planner wired to real context
-- TASK-107 DONE: Planner continuation context v2 contract (commit d03d936)
-- TASK-108 DONE: Continuation anchor assembly
-- TASK-109 DONE: Planner continuation prompt
-- TASK-110 DONE: Writer wired to real state/memory/relationship
-- TASK-111 DONE: Writer recent context = last 3 summaries + ending excerpt (commit af66501)
-- TASK-112 IN_PROGRESS: Real-LLM Continuation Acceptance (AC-101)
+Phase 1 Gate:
+Engineering PASSED; AC-101 real-LLM PASS (TASK-112)
 
-Phase 2 progress (Chapter Control):
-- TASK-113 DONE: Story writing settings migration (commit 5528dfd)
-- TASK-114 DONE: ChapterPlan → ChapterSpec schema (commit bb345bc)
-- TASK-115/116 DONE: Planner v2 output + persist ChapterSpec (commit 4bbd35b)
-- TASK-117/118 DONE: Writer Contract v2 + Goal Lock prompt (commit 1d6ccf9)
-- TASK-119/120 DONE: Chapter length measurement + light UI (commit de576d2)
-- TASK-121 DONE (eng): length contract + measurement + expand guard (39911e2/3e31460)
-  Real-LLM AC-103: FAIL — qwen3-8b 长度上限 ~1800-2000 字，无法稳定达到 2250 下限
-- TASK-122 DONE: Real-LLM AC-104 PASSED — mustAdvance 实现 / mustNotDo 无违规 / 未绕无关旧细节
+Phase 2 Gate:
+AC-103 honest FAIL (model length ceiling, remediation recorded);
+AC-104 PASS; engineering complete
+
+Phase 3 progress (Generation Reliability):
+- TASK-123~126 DONE: extraction status + explicit flow + Next Safe Action
+  Resolver + safe retry (V9; commits 454d167/a335bfb)
+- TASK-127~131 DONE: async bg execution + polling progress + pause + stop
+  + stage completion (V10; commit 966a97f)
+- TASK-132 IN_PROGRESS: regression suite (writer-fail / extract-fail / retry /
+  async / pause / stop / stage-complete / duplicate prevention)
+
+Phase 4 progress (Replan Remaining):
+- TASK-133 DONE: V11 plan_version/active/status additive migration +
+  ChapterPlan entity + insertPlans wiring
+- TASK-134 DONE: markCompleted on generation; supersedeRemaining keeps history
+- TASK-135 DONE: findActiveRemaining queue wired into ChapterGenerationService
+- TASK-136 IN_PROGRESS: replanRemaining service layer DONE (@Transactional);
+  HTTP entry + planner remaining call + old full-replan guard pending
 
 Real-LLM Credential:
-RESOLVED (2026-08-22) — API_URL Aliyun MaaS OpenAI-compatible, qwen3-8b,
-connectivity probe HTTP 200. using_mock_llm == False.
+RESOLVED (2026-08-22) — API_URL Aliyun MaaS OpenAI-compatible, qwen3-8b.
 
-Phase 2 Semantic Acceptance Summary (real LLM, 2026-08-22):
-- AC-101 (TASK-112): PASS — Planner 从既有状态续写，未重复穿越/初遇/找住处
-- AC-103 (TASK-121): FAIL — qwen3-8b 长度上限 ~1800-2000 字，5/5 均 < 2250
-  （工程层 expand guard 已加，但模型能力缺口无法靠指令闭环弥补；诚实记录，不伪造 PASS）
-- AC-104 (TASK-122): PASS — Writer 遵循 mustAdvance / mustNotDo，未绕无关旧细节
+Environment change note (2026-08-22):
+Maven 3.9.16 + JDK17 now available in this environment (previously absent,
+per old TASK-126 note). mvn compile verified against the recovered working
+tree. Integration tests (mvn test) are now executable — TASK-132 unblocked.
 
 Known Blocker:
-NONE — the prior real-LLM credential blocker (§11) is resolved. AC-103 is a
-model-fidelity limitation, not a code blocker; remediation options recorded in
-TASKS.md TASK-121 (larger model / lower target band / segmented generation).
+NONE.
 
 Next Safe Action:
-TASK-112 — Execute AC-101 against the real LLM: given known state
-(已穿越 / 已认识艾琳 / 已住进艾琳房间) and a new Stage (第二天去冒险者公会),
-the Planner must continue from the existing state — no repeated crossing /
-first meeting / re-acquiring housing. Credential now present; run AC-101, then
-proceed to TASK-121 (AC-103) and TASK-122 (AC-104).
-
-Engineering Verification:
-PASSED — Phase 2 engineering compiled + committed (5528dfd..de576d2)
-
-Real-LLM Semantic Verification:
-NOT_REQUIRED for TASK-107..120; REQUIRED + NOW RUNNABLE for TASK-112/121/122
+TASK-132 — implement + run the Phase 3 regression suite via Maven, then close
+the Phase 3 Gate; afterwards resume TASK-136 remainder (HTTP entry + old
+replan guard), TASK-137/138/139.
 ```
 
 Core principles:

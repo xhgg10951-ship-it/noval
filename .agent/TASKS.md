@@ -1553,7 +1553,7 @@ TASK-131
 
 ## TASK-133 — Add Minimal Plan Version Fields
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1573,7 +1573,18 @@ COMPLETED
 SUPERSEDED
 ```
 
-命名可小幅调整。
+命名可小幅调整.
+
+Implementation:
+
+- V11 additive migration (`db/V11__chapter_plan_version.sql`)：chapter_plan 增加
+  `plan_version INT NOT NULL DEFAULT 1` / `active TINYINT(1) NOT NULL DEFAULT 1`
+  / `status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE'`——旧行自动成为 v1+ACTIVE，兼容旧数据
+- `ChapterPlan` 实体 + getter/setter；`insertPlans` 写入 version/active/status
+
+Engineering Verification: PASSED — mvn compile 通过（2026-08-22 会话复核）
+
+Real-LLM Semantic Verification: NOT_REQUIRED
 
 Dependencies:
 
@@ -1583,7 +1594,7 @@ Phase 3 Gate
 
 ## TASK-134 — Preserve Completed Plan Relations
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1595,6 +1606,19 @@ Goal:
 deleteByStageId(stageId)
 ```
 
+Implementation:
+
+- `ChapterPlanMapper.markCompleted(id)`：生成完成后 plan → COMPLETED + inactive
+- `ChapterGenerationService.generateNextChapter` 在 save chapter 后调用
+  `stageService.markPlanCompleted(planId)`——已完成 Chapter 的 Plan 不再处于 active 队列
+- `supersedeRemaining(stageId)` 只 supersede `active=1 AND status='ACTIVE'` 行，历史保留
+- 注：旧入口 `POST /stages/{id}/replan`（replacePlans→deleteByStageId）仍存在，
+  其收口/保护在 TASK-136 HTTP 入口工作中处理（见 TASK-136 记录）
+
+Engineering Verification: PASSED — mvn compile 通过
+
+Real-LLM Semantic Verification: NOT_REQUIRED
+
 Dependencies:
 
 TASK-133
@@ -1603,7 +1627,7 @@ TASK-133
 
 ## TASK-135 — Implement Active Remaining Plan Query
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1616,6 +1640,17 @@ AND not completed
 
 的剩余 ChapterSpec。
 
+Implementation:
+
+- `ChapterPlanMapper.findActiveRemaining(stageId)`：`active=1 AND status='ACTIVE'` 按 chapter_order
+- `StageService.getActiveRemainingPlans`
+- `ChapterGenerationService.generateNextChapter` 从 `getPlans` 切换为
+  `getActiveRemainingPlans`——被 Replan 移除的计划（SUPERSEDED）永远不会重新生成
+
+Engineering Verification: PASSED — mvn compile 通过；行为回归由 TASK-132 套件覆盖
+
+Real-LLM Semantic Verification: NOT_REQUIRED
+
 Dependencies:
 
 TASK-134
@@ -1624,7 +1659,7 @@ TASK-134
 
 ## TASK-136 — Implement Replan Remaining Service
 
-Status: `TODO`
+Status: `IN_PROGRESS`
 
 Goal:
 
@@ -1641,6 +1676,20 @@ old remaining → superseded
 current Story State → Planner
 new version remaining plans created
 ```
+
+Implementation (partial — service layer DONE):
+
+- `StageService.replanRemaining(stageId, targetChapterCount, plan, newVersion)`
+  （@Transactional）：supersedeRemaining → updatePlanCounts → insertPlans(vN)，
+  已完成 Plan 不受影响
+- 待完成：HTTP 入口（ACTIVE/PAUSED stage 的 Replan Remaining endpoint）、
+  Planner "remaining" 调用路径（携带 currentChapterNumber / 已完成摘要，只请求剩余章）、
+  旧全量 replan 入口 `POST /stages/{id}/replan` 的安全收口（PLANNING-only 或迁移），
+  以及 newVersion 单调递增的来源
+
+Engineering Verification: PASSED (service layer) — mvn compile 通过
+
+Real-LLM Semantic Verification: NOT_REQUIRED（新计划续写语义属 TASK-139 / AC-106）
 
 Dependencies:
 

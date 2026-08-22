@@ -47,7 +47,7 @@ public class StageService {
         stage.setSuggestedChapterCount(plan.suggestedChapterCount());
         stage.setTargetChapterCount(targetChapterCount);
         stageMapper.insert(stage);
-        insertPlans(stage.getId(), plan);
+        insertPlans(stage.getId(), plan, 1);
         return stageMapper.findById(stage.getId());
     }
 
@@ -60,7 +60,7 @@ public class StageService {
         Stage stage = requireStage(stageId);
         chapterPlanMapper.deleteByStageId(stageId);
         stageMapper.updatePlanCounts(stageId, plan.suggestedChapterCount(), targetChapterCount);
-        insertPlans(stageId, plan);
+        insertPlans(stageId, plan, 1);
         return stageMapper.findById(stageId);
     }
 
@@ -119,6 +119,20 @@ public class StageService {
         return chapterPlanMapper.findByStageId(stageId);
     }
 
+    /**
+     * TASK-135 — the generation queue. Returns only plans that are still active and
+     * not completed, so superseded (replanned-away) plans are never regenerated.
+     */
+    public List<ChapterPlan> getActiveRemainingPlans(Long stageId) {
+        requireStage(stageId);
+        return chapterPlanMapper.findActiveRemaining(stageId);
+    }
+
+    /** TASK-134/135: a plan whose chapter has been generated is done. */
+    public void markPlanCompleted(Long planId) {
+        chapterPlanMapper.markCompleted(planId);
+    }
+
     public List<Stage> listStages(Long storyId) {
         return stageMapper.findByStoryId(storyId);
     }
@@ -133,7 +147,7 @@ public class StageService {
         return stage;
     }
 
-    private void insertPlans(Long stageId, PlanStageResponse plan) {
+    private void insertPlans(Long stageId, PlanStageResponse plan, int planVersion) {
         List<ChapterPlan> rows = plan.chapterPlans().stream().map(item -> {
             ChapterPlan p = new ChapterPlan();
             p.setStageId(stageId);
@@ -147,10 +161,43 @@ public class StageService {
             p.setMustNotDo(item.mustNotDo());
             p.setStoryBeats(item.storyBeats());
             p.setEndingIntent(item.endingIntent());
+            // TASK-133: every plan row carries its version + active/status.
+            p.setPlanVersion(planVersion);
+            p.setActive(true);
+            p.setStatus("ACTIVE");
             return p;
         }).toList();
         if (!rows.isEmpty()) {
             chapterPlanMapper.insertBatch(rows);
         }
+    }
+
+    /**
+     * TASK-136 — Replan Remaining (the safe mid-generation replan).
+     *
+     * <p>Completed plans (those with a generated chapter) are NEVER deleted; only
+     * the still-active, non-completed plans are superseded. New-version active
+     * plans are then created from the fresh Planner response. This preserves the
+     * author's history ("change the future, not the past") instead of the old
+     * {@code deleteByStageId} wholesale replace.</p>
+     *
+     * @param stageId            target stage
+     * @param targetChapterCount optional override
+     * @param plan               fresh Planner response for the REMAINING arc
+     * @param newVersion         monotonically increasing version for this stage
+     */
+    @Transactional
+    public Stage replanRemaining(Long stageId, Integer targetChapterCount,
+                                 PlanStageResponse plan, int newVersion) {
+        requireStage(stageId);
+        // TASK-134: supersede remaining (active, ACTIVE) plans — keep completed ones.
+        chapterPlanMapper.supersedeRemaining(stageId);
+        if (targetChapterCount != null) {
+            stageMapper.updatePlanCounts(stageId, plan.suggestedChapterCount(), targetChapterCount);
+        } else {
+            stageMapper.updatePlanCounts(stageId, plan.suggestedChapterCount(), null);
+        }
+        insertPlans(stageId, plan, newVersion);
+        return stageMapper.findById(stageId);
     }
 }

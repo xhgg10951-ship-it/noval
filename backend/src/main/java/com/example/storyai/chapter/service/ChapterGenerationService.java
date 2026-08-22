@@ -74,7 +74,10 @@ public class ChapterGenerationService {
         Stage stage = stageService.getStage(stageId);
         Story story = storyService.getStory(stage.getStoryId());
         List<StoryConstraint> constraints = storyService.getConstraints(stage.getStoryId());
-        List<ChapterPlan> plans = stageService.getPlans(stageId);
+        // TASK-135: generate only from active, non-completed plans. Superseded
+        // (replanned-away) plans are excluded, so replanning never regenerates
+        // chapters the author already has.
+        List<ChapterPlan> plans = stageService.getActiveRemainingPlans(stageId);
 
         Set<Long> generatedPlanIds = chapterService.listByStage(stageId).stream()
                 .map(Chapter::getPlanId)
@@ -116,6 +119,11 @@ public class ChapterGenerationService {
                 com.example.storyai.chapter.model.MemoryExtractionStatus.PENDING);
 
         Chapter saved = chapterService.saveChapter(chapter);
+
+        // TASK-134/135: the plan that produced this chapter is now done. Mark it
+        // COMPLETED + inactive so it is excluded from getActiveRemainingPlans and
+        // cannot be regenerated after a Replan Remaining.
+        stageService.markPlanCompleted(nextPlan.getId());
 
         // M4 (TASK-032): Save Chapter -> Extract Memory -> Save Candidates -> Apply AUTO -> Checkpoint.
         // Extraction calls Python OUTSIDE the generation tx; candidate persistence + AUTO apply run

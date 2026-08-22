@@ -18,6 +18,10 @@ public class ChapterPlan {
     private String mustNotDo;
     private String storyBeats;
     private String endingIntent;
+    // ---- TASK-133: plan versioning / active flag (Replan Remaining) ----
+    private Integer planVersion;   // increments each replan for this stage
+    private Boolean active;        // only active plans are eligible for generation
+    private String status;         // ACTIVE / COMPLETED / SUPERSEDED
     private java.time.LocalDateTime createdAt;
     private java.time.LocalDateTime updatedAt;
 
@@ -99,6 +103,30 @@ public class ChapterPlan {
 
     public void setEndingIntent(String endingIntent) {
         this.endingIntent = endingIntent;
+    }
+
+    public Integer getPlanVersion() {
+        return planVersion;
+    }
+
+    public void setPlanVersion(Integer planVersion) {
+        this.planVersion = planVersion;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public java.time.LocalDateTime getCreatedAt() {

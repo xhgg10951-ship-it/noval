@@ -3,33 +3,45 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.storyai.stage.mapper.ChapterPlanMapper">
 
+    <sql id="ChapterPlanColumns">
+        id, stage_id, chapter_order, goal, expected_progress,
+        target_characters, must_advance, must_not_do, story_beats, ending_intent,
+        plan_version, active, status, created_at, updated_at
+    </sql>
+
     <insert id="insertBatch" parameterType="java.util.List">
         INSERT INTO chapter_plan (stage_id, chapter_order, goal, expected_progress,
                                   target_characters, must_advance, must_not_do,
-                                  story_beats, ending_intent)
+                                  story_beats, ending_intent, plan_version, active, status)
         VALUES
         <foreach collection="list" item="p" separator=",">
             (#{p.stageId}, #{p.chapterOrder}, #{p.goal}, #{p.expectedProgress},
              #{p.targetCharacters}, #{p.mustAdvance}, #{p.mustNotDo},
-             #{p.storyBeats}, #{p.endingIntent})
+             #{p.storyBeats}, #{p.endingIntent}, #{p.planVersion}, #{p.active}, #{p.status})
         </foreach>
     </insert>
 
     <select id="findByStageId" parameterType="long"
             resultType="com.example.storyai.stage.model.ChapterPlan">
-        SELECT id, stage_id, chapter_order, goal, expected_progress,
-               target_characters, must_advance, must_not_do, story_beats, ending_intent,
-               created_at, updated_at
+        SELECT <include refid="ChapterPlanColumns"/>
         FROM chapter_plan
         WHERE stage_id = #{stageId}
         ORDER BY chapter_order ASC
     </select>
 
+    <select id="findActiveRemaining" parameterType="long"
+            resultType="com.example.storyai.stage.model.ChapterPlan">
+        SELECT <include refid="ChapterPlanColumns"/>
+        FROM chapter_plan
+        WHERE stage_id = #{stageId}
+          AND active = 1
+          AND status = 'ACTIVE'
+        ORDER BY chapter_order ASC
+    </select>
+
     <select id="findById" parameterType="long"
             resultType="com.example.storyai.stage.model.ChapterPlan">
-        SELECT id, stage_id, chapter_order, goal, expected_progress,
-               target_characters, must_advance, must_not_do, story_beats, ending_intent,
-               created_at, updated_at
+        SELECT <include refid="ChapterPlanColumns"/>
         FROM chapter_plan
         WHERE id = #{id}
     </select>
@@ -37,6 +49,13 @@
     <update id="updateGoal">
         UPDATE chapter_plan
         SET goal = #{goal}
+        WHERE id = #{id}
+    </update>
+
+    <update id="markCompleted">
+        UPDATE chapter_plan
+        SET status = 'COMPLETED',
+            active = 0
         WHERE id = #{id}
     </update>
 
@@ -48,6 +67,15 @@
             story_beats = #{storyBeats},
             ending_intent = #{endingIntent}
         WHERE id = #{id}
+    </update>
+
+    <update id="supersedeRemaining">
+        UPDATE chapter_plan
+        SET active = 0,
+            status = 'SUPERSEDED'
+        WHERE stage_id = #{stageId}
+          AND active = 1
+          AND status = 'ACTIVE'
     </update>
 
     <delete id="deleteByStageId" parameterType="long">

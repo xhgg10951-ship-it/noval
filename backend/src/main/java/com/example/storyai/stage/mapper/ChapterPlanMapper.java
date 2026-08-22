@@ -17,9 +17,18 @@ public interface ChapterPlanMapper {
 
     List<ChapterPlan> findByStageId(@Param("stageId") Long stageId);
 
+    /** TASK-135: only active, non-completed plans — the eligible generation queue. */
+    List<ChapterPlan> findActiveRemaining(@Param("stageId") Long stageId);
+
     ChapterPlan findById(@Param("id") Long id);
 
     int updateGoal(@Param("id") Long id, @Param("goal") String goal);
+
+    /** TASK-134/135: mark a single plan COMPLETED once its chapter is generated. */
+    int markCompleted(@Param("id") Long id);
+
+    /** TASK-134: mark all currently-active plans as superseded (preserves history). */
+    int supersedeRemaining(@Param("stageId") Long stageId);
 
     int deleteByStageId(@Param("stageId") Long stageId);
 }
