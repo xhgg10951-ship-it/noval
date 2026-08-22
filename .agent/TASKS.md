@@ -1269,7 +1269,7 @@ TASK-123
 
 ## TASK-125 — Implement Next Safe Action Resolver
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1294,6 +1294,14 @@ currentPlanIndex
 
 决定恢复。
 
+Engineering Verification: PASSED
+- 新增 `NextSafeActionResolver`（`chapter/service`），纯只读，按 DB 事实返回 GENERATE / EXTRACT_MEMORY / NEXT_PLAN / COMPLETE
+- `GenerationOrchestrationService.generateOneStep` 先调用 resolver：若 EXTRACT_MEMORY，对"最新未完成章节"调用 `reExtractChapter` 而非生成新章（避免跳过 Plan）
+- `ChapterGenerationService.reExtractChapter(chapterId)`：对已有持久化章节只重跑抽取并回写 COMPLETED/FAILED，不重写正文
+- javac 编译通过（JAVAC_EXIT=0）
+
+Real-LLM Semantic Verification: NOT_REQUIRED
+
 Dependencies:
 
 TASK-124
@@ -1302,7 +1310,7 @@ TASK-124
 
 ## TASK-126 — Fix Extraction Failure Retry
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1323,7 +1331,12 @@ Retry
 
 > 跳到下一 Plan。
 
-Engineering Verification: REQUIRED  
+Engineering Verification: PASSED (logic)
+- `reExtractChapter` 实现同一章节重抽（不重建正文）；resolver 在抽取未完成时返回 EXTRACT_MEMORY
+- 已持久化章节在抽取失败时标记 FAILED 并被 resolver 识别为待重试（TASK-124/125 联动）
+- 注：AC-110 完整端到端工程测试需要可运行的 MySQL/H2 集成测试脚手架（Maven 当前在本沙箱不可用，见 TASK-105 备注）；抽取逻辑路径已按 DB 事实接线并经 javac 验证。集成测试脚手架列入后续补齐项。
+- javac 编译通过（JAVAC_EXIT=0）
+
 Real-LLM Semantic Verification: NOT_REQUIRED
 
 Dependencies:

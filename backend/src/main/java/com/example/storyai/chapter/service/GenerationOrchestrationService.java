@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.example.storyai.chapter.model.GenerationJob;
+import com.example.storyai.chapter.mapper.ChapterMapper;
+import com.example.storyai.chapter.model.Chapter;
 import com.example.storyai.common.exception.NoPendingChapterException;
 import com.example.storyai.stage.service.StageService;
 
@@ -38,13 +40,19 @@ public class GenerationOrchestrationService {
     private final ChapterGenerationService generationService;
     private final StageService stageService;
     private final GenerationJobService jobService;
+    private final NextSafeActionResolver safeActionResolver;
+    private final ChapterMapper chapterMapper;
 
     public GenerationOrchestrationService(ChapterGenerationService generationService,
                                           StageService stageService,
-                                          GenerationJobService jobService) {
+                                          GenerationJobService jobService,
+                                          NextSafeActionResolver safeActionResolver,
+                                          ChapterMapper chapterMapper) {
         this.generationService = generationService;
         this.stageService = stageService;
         this.jobService = jobService;
+        this.safeActionResolver = safeActionResolver;
+        this.chapterMapper = chapterMapper;
     }
 
     /** Starts a generation job for a stage in the given mode (STEP or CONTINUOUS). */
@@ -138,11 +146,35 @@ public class GenerationOrchestrationService {
     private void generateOneStep(GenerationJob job) {
         job.setPhase(GenerationJob.Phase.WRITING.name());
         jobService.update(job);
+
+        // TASK-125: recovery is decided from DB facts, not currentPlanIndex alone.
+        // If the last persisted chapter's extraction is incomplete, retry EXTRACTION
+        // on the SAME chapter (safe), never skip to the next plan.
+        NextSafeActionResolver.SafeAction action = safeActionResolver.resolve(job.getStageId());
+        if (action == NextSafeActionResolver.SafeAction.EXTRACT_MEMORY) {
+            Chapter last = lastUnfinishedChapter(job.getStageId());
+            if (last != null) {
+                job.setPhase(GenerationJob.Phase.MEMORY.name());
+                jobService.update(job);
+                generationService.reExtractChapter(last.getId());
+                return; // same plan index; next step will resolve to NEXT_PLAN/COMPLETE
+            }
+        }
+
         // Reuses the exact M3+M4 single-chapter flow (Chapter -> Memory -> Checkpoint).
         generationService.generateNextChapter(job.getStageId());
         job.setCurrentPlanIndex(job.getCurrentPlanIndex() + 1);
         job.setPhase(GenerationJob.Phase.MEMORY.name());
         jobService.update(job);
+    }
+
+    /** Returns the most recent chapter whose extraction is not COMPLETED, if any. */
+    private Chapter lastUnfinishedChapter(Long stageId) {
+        return chapterMapper.findByStageId(stageId).stream()
+                .filter(c -> !com.example.storyai.chapter.model.MemoryExtractionStatus.COMPLETED
+                        .equals(c.getMemoryExtractionStatus()))
+                .max(java.util.Comparator.comparing(Chapter::getChapterNumber))
+                .orElse(null);
     }
 
     private void markRunning(GenerationJob job) {

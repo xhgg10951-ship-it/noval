@@ -195,6 +195,39 @@ public class ChapterGenerationService {
         }
     }
 
+    /**
+     * TASK-126 — safe retry of memory extraction for an ALREADY-PERSISTED chapter.
+     *
+     * <p>Unlike {@link #generateNextChapter(Long)} this does NOT regenerate the
+     * chapter content; it only re-runs the extraction step on the existing row and
+     * flips {@code memory_extraction_status} from FAILED/PENDING/STALE back to
+     * COMPLETED (or FAILED if it fails again). This is the recovery action the
+     * Next Safe Action Resolver (TASK-125) returns when the last chapter's
+     * extraction did not complete — so a failed extraction is retried on the SAME
+     * chapter instead of skipping to the next plan.</p>
+     */
+    public void reExtractChapter(Long chapterId) {
+        Chapter chapter = chapterService.getChapter(chapterId);
+        chapter.setMemoryExtractionStatus(
+                com.example.storyai.chapter.model.MemoryExtractionStatus.PENDING);
+        chapterService.saveChapter(chapter);
+        try {
+            List<MemoryCandidate> candidates = extractionService.extractForChapter(chapter);
+            for (MemoryCandidate c : candidates) {
+                processingService.autoProcess(c);
+            }
+            chapter.setMemoryExtractionStatus(
+                    com.example.storyai.chapter.model.MemoryExtractionStatus.COMPLETED);
+            chapterService.saveChapter(chapter);
+        } catch (Exception ex) {
+            log.warn("Re-extraction failed for chapter {}: {}", chapterId, ex.getMessage());
+            chapter.setMemoryExtractionStatus(
+                    com.example.storyai.chapter.model.MemoryExtractionStatus.FAILED);
+            chapterService.saveChapter(chapter);
+            throw ex;
+        }
+    }
+
     private boolean isBlank(String s) {
         return s == null || s.isBlank();
     }
