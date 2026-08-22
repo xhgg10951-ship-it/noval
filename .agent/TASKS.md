@@ -726,7 +726,7 @@ TASK-110
 
 ## TASK-112 — Real-LLM Continuation Acceptance
 
-Status: `BLOCKED`
+Status: `DONE`
 
 Goal:
 
@@ -754,23 +754,19 @@ FAIL:
 
 再次穿越 / 初遇 / 找住处。
 
-Engineering Verification: PASSED required before run  
-Real-LLM Semantic Verification: REQUIRED
+Engineering Verification: PASSED
+- 续写链路（build_plan_prompt + LangChainProvider）已接通 real LLM
+- 凭据：API_URL Aliyun MaaS OpenAI-compatible, qwen3-8b, using_mock_llm=False
 
-Blocker (frozen-requirement-defined):
-
-No usable real LLM credential is present. `ai-service/app/config.py` reads
-`LLM_API_KEY` / `API_KEY` from the environment; none is set and no `.env`
-exists, so `settings.using_mock_llm == True`. AC-101 explicitly requires
-Real-LLM Semantic Verification, therefore this task is BLOCKED until a real
-provider credential is supplied. Per AGENTS.md / STATE §11, Mock PASS is NOT
-accepted as Semantic PASS — the agent must not fabricate a real-LLM result.
-Engineering path (prompt + contract) is fully wired and Mock-testable.
-
-Action:
-
-Marked BLOCKED; continue with Phase 2 engineering tasks. Revisit when a real
-LLM credential is configured (set LLM_API_KEY + LLM_BASE_URL + LLM_MODEL).
+Real-LLM Semantic Verification: PASSED (2026-08-22)
+- Model: qwen3-8b (Aliyun MaaS compatible-mode)
+- Run: `.agent/ac101_run.py`; evidence: EVIDENCE_AC101_prompt_*.txt + EVIDENCE_AC101_raw_*.txt
+- Result: suggestedChapterCount=1, chapter order=4（续写而非重开）
+- goal="林夜和艾琳前往冒险者公会办理入会手续并接取第一个委托"
+- mustAdvance 全部为新阶段推进点（到达公会/办理入会/接取委托/了解任务）
+- mustNotDo 主动禁止：再次描写穿越或初次相遇 / 重复已有角色关系 / 重新获得已拥有身份或住所 / 回到艾琳家中
+- 肯定性计划内容中未发现任何 forbidden pattern（再次穿越/初遇/重新获得 等）
+- VERDICT: PASS — 从既有状态续写，未重复穿越/初遇/找住处/已完成阶段
 
 Dependencies:
 

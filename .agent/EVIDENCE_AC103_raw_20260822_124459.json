@@ -1,0 +1,32 @@
+[
+  {
+    "order": 4,
+    "chars": 1408,
+    "in_band": false,
+    "title": "初入冒险者之路"
+  },
+  {
+    "order": 5,
+    "chars": 876,
+    "in_band": false,
+    "title": "初入冒险者公会"
+  },
+  {
+    "order": 6,
+    "chars": 1286,
+    "in_band": false,
+    "title": "初试身手"
+  },
+  {
+    "order": 7,
+    "chars": 1422,
+    "in_band": false,
+    "title": "初入冒险之路"
+  },
+  {
+    "order": 8,
+    "chars": 1020,
+    "in_band": false,
+    "title": "初试冒险者的荣耀"
+  }
+]

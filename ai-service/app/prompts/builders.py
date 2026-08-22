@@ -223,16 +223,33 @@ def build_generate_prompt(req: GenerateChapterRequest) -> Tuple[str, str]:
 
 
 def _fmt_writer_spec(req: GenerateChapterRequest) -> str:
-    """TASK-117/118: render the full ChapterSpec the Writer must execute."""
+    """TASK-117/118: render the full ChapterSpec the Writer must execute.
+
+    TASK-121 length hardening: the target character count is a HARD contract.
+    qwen3-8b (and similar compact models) tend to write ~1000-char vignettes
+    unless explicitly pushed, so we state the floor/ceiling, forbid under-length
+    output, and give concrete structural guidance (expand each beat into a
+    paragraph-level scene with dialogue, action, and interiority).
+    """
     lines = ["本章执行规格（ChapterSpec）："]
     if req.targetCharacters is not None:
-        lines.append(f"- 目标字数：约 {req.targetCharacters} 字（请尽量接近，不要严重偏短）")
+        lo = max(1500, int(req.targetCharacters * 0.75))
+        hi = int(req.targetCharacters * 1.25)
+        lines.append(
+            f"- 目标字数：必须达到约 {req.targetCharacters} 字（硬性要求，可接受范围 "
+            f"{lo}–{hi} 字）。严禁明显偏短：若正文不足 {lo} 字，视为未完成本章，必须补充 "
+            f"场景细节、对话与描写直到达标。"
+        )
+        lines.append(
+            "  达成方法：把每个剧情节拍展开为完整段落——包含环境描写、人物对话、动作与"
+            "心理活动；不要只用一两句话带过任何一个节拍。"
+        )
     if req.mustAdvance:
         lines.append(f"- 必须推进：{req.mustAdvance}")
     if req.mustNotDo:
         lines.append(f"- 禁止事项：{req.mustNotDo}（绝不可违反）")
     if req.storyBeats:
-        lines.append(f"- 剧情节拍：{req.storyBeats}")
+        lines.append(f"- 剧情节拍（每个都要充分展开）：{req.storyBeats}")
     if req.endingIntent:
         lines.append(f"- 结尾意图：{req.endingIntent}")
     if len(lines) == 1:
