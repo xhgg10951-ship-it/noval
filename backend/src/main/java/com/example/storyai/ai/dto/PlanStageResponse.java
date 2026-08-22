@@ -26,9 +26,11 @@ public record PlanStageResponse(
             String expectedProgress,
             // ---- TASK-115: ChapterSpec output ----
             Integer targetCharacters,
-            String mustAdvance,
-            String mustNotDo,
-            String storyBeats,
+            // ---- v0.1.1 Phase 9 fix: real planners emit these as arrays (matches
+            // the Python contract exactly); stored as joined text in MySQL ----
+            List<String> mustAdvance,
+            List<String> mustNotDo,
+            List<String> storyBeats,
             String endingIntent
     ) {
     }

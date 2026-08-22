@@ -157,9 +157,10 @@ public class StageService {
             // TASK-116: persist the full ChapterSpec returned by the Planner so
             // no planner-provided field is silently dropped before MySQL.
             p.setTargetCharacters(item.targetCharacters());
-            p.setMustAdvance(item.mustAdvance());
-            p.setMustNotDo(item.mustNotDo());
-            p.setStoryBeats(item.storyBeats());
+            // Phase 9 fix: planner emits lists (Python contract); store joined text.
+            p.setMustAdvance(joinLines(item.mustAdvance()));
+            p.setMustNotDo(joinLines(item.mustNotDo()));
+            p.setStoryBeats(joinLines(item.storyBeats()));
             p.setEndingIntent(item.endingIntent());
             // TASK-133: every plan row carries its version + active/status.
             p.setPlanVersion(planVersion);
@@ -170,6 +171,13 @@ public class StageService {
         if (!rows.isEmpty()) {
             chapterPlanMapper.insertBatch(rows);
         }
+    }
+
+    private String joinLines(List<String> lines) {
+        if (lines == null || lines.isEmpty()) {
+            return null;
+        }
+        return String.join("\n", lines.stream().filter(l -> l != null && !l.isBlank()).toList());
     }
 
     /**
@@ -201,3 +209,4 @@ public class StageService {
         return stageMapper.findById(stageId);
     }
 }
+

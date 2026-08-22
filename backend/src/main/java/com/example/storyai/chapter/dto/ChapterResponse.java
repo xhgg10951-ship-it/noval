@@ -24,6 +24,9 @@ public class ChapterResponse {
     private String sourceType; // source of the current revision
     private String status; // DRAFT / APPROVED
     private String memoryExtractionStatus; // PENDING / COMPLETED / FAILED / STALE
+    // ---- TASK-119: chapter length measurement (needed by AC-103) ----
+    private Integer targetCharacters;
+    private Integer actualCharacterCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -43,6 +46,8 @@ public class ChapterResponse {
         this.currentRevisionId = c.getCurrentRevisionId();
         this.status = c.getStatus();
         this.memoryExtractionStatus = c.getMemoryExtractionStatus();
+        this.targetCharacters = c.getTargetCharacters();
+        this.actualCharacterCount = c.getActualCharacterCount();
         this.createdAt = c.getCreatedAt();
         this.updatedAt = c.getUpdatedAt();
     }
@@ -159,6 +164,22 @@ public class ChapterResponse {
         this.memoryExtractionStatus = memoryExtractionStatus;
     }
 
+    public Integer getTargetCharacters() {
+        return targetCharacters;
+    }
+
+    public void setTargetCharacters(Integer targetCharacters) {
+        this.targetCharacters = targetCharacters;
+    }
+
+    public Integer getActualCharacterCount() {
+        return actualCharacterCount;
+    }
+
+    public void setActualCharacterCount(Integer actualCharacterCount) {
+        this.actualCharacterCount = actualCharacterCount;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -175,3 +196,5 @@ public class ChapterResponse {
         this.updatedAt = updatedAt;
     }
 }
+
+

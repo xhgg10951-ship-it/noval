@@ -3036,22 +3036,17 @@ Phase 8 Gate Result: **PASSED** (2026-08-22, after TASK-171; full `mvn test` 59/
 
 ## TASK-172 — Prepare v0.1.1 Acceptance Fixture
 
-Status: `TODO`
+Status: `DONE`
 
-Goal:
+Implementation / Evidence:
 
-准备固定真实测试 Story。
+`.agent/evidence/ACCEPTANCE_FIXTURE.md`——冻结的 model（qwen3-8b）/prompt 版本
+（Phase 8 builders）/story settings（600 章目标/3000 字/风格）/Arc(1–60)/stage
+direction/chapter specs。执行期间未调整 fixture。
 
-保留：
+Engineering Verification: PASSED
 
-- model；
-- prompt version；
-- story settings；
-- arc；
-- stage；
-- chapter specs。
-
-不得为了结果通过临时修改 fixture。
+Real-LLM Semantic Verification: NOT_REQUIRED
 
 Dependencies:
 
@@ -3061,29 +3056,19 @@ Phase 8 Gate
 
 ## TASK-173 — Execute Full Engineering Verification
 
-Status: `TODO`
+Status: `DONE`
 
-Goal:
+Engineering Verification: PASSED (2026-08-22)
+- backend `mvn clean test`：59/59 PASSED
+- python `pytest ai-service/tests`：7/7 PASSED
+- frontend `npm run build`：SUCCESS
+- migrations V1..V14 已应用（V6..V11 曾为 MariaDB 语法从未生效，本版本内修正并
+  验证；V12/V13/V14 均为 additive 且已在本地库执行）
+- retry / async / pause / replan / revision / dedup 行为由
+  GenerationReliabilityRegressionTest + ReplanRemainingIntegrationTest +
+  ChapterRevisionIntegrationTest + MemoryV2IntegrationTest 覆盖并通过
 
-实际执行：
-
-```text
-backend tests
-python tests
-frontend build
-migration test
-```
-
-以及：
-
-- retry；
-- async；
-- pause；
-- replan；
-- revision；
-- dedup。
-
-Engineering Verification: REQUIRED
+Real-LLM Semantic Verification: NOT_REQUIRED
 
 Dependencies:
 
@@ -3093,27 +3078,24 @@ TASK-172
 
 ## TASK-174 — Execute Real-LLM Semantic Acceptance Suite
 
-Status: `TODO`
+Status: `DONE`
 
-Goal:
+Engineering Verification: PASSED — 全套在真实链路（backend + Python qwen3-8b +
+MySQL）执行，原始输出已存档：
 
-真实运行：
+| AC | 结果 | 证据 |
+|----|------|------|
+| AC-101 Continuation | PASS | Phase 1 EVIDENCE_AC101_*（续写无重开） |
+| AC-103 Length | **FAIL** | `ac103_rerun.json`（1013–1813 字，0/5 入带，复现确认） |
+| AC-104 Goal adherence | PASS | Phase 2 EVIDENCE_AC104_* |
+| AC-105 Bread-loop isolation | PASS | `ac105_extract.json`（面包 imp=1/IGNORE，不进 writer） |
+| AC-106 Replan Remaining | PASS | `ac106v2_after_replan.json` + DB 断言 |
+| AC-109 Polish preservation | PASS | `ac109_polish.json`（7/7 结构化检查） |
+| AC-114 600-chapter pace | PASS | `ac114_plan.json`（诱导终局被约束） |
 
-```text
-AC-101
-AC-103
-AC-104
-AC-105
-AC-106
-AC-109
-AC-114
-```
+不得只记录 PASS——所有证据文件随仓库保存。
 
-并保留原始输出。
-
-不得只记录“PASS”。
-
-必须保存证据。
+Real-LLM Semantic Verification: 见上表（6 PASS / 1 FAIL）
 
 Dependencies:
 
@@ -3123,30 +3105,17 @@ TASK-173
 
 ## TASK-175 — Record v0.1.1 Metrics
 
-Status: `TODO`
+Status: `DONE`
 
-Goal:
+Implementation / Evidence:
 
-至少记录：
+`.agent/evidence/ACCEPTANCE_METRICS.md`——Model/Prompt 版本、Story/Run ID、
+target vs actual characters、AC-103 长度通过率（0/5）、goal 完成率、续写失败数、
+低价值细节重复数（0）、dedup/edit/regenerate/polish 计数、抽取失败数、平均延迟。
 
-```text
-Model
-Prompt Version
-Story ID
-Run ID
-Target Characters
-Actual Characters
-Length Pass Rate
-Chapter Goal Completion Rate
-Continuation Failure Count
-Low-value Detail Repetition Count
-Duplicate Memory Count
-Manual Edit Count
-Regeneration Count
-Polish Count
-Memory Extraction Failure Count
-Average Generation Latency
-```
+Engineering Verification: PASSED
+
+Real-LLM Semantic Verification: NOT_REQUIRED
 
 Dependencies:
 
@@ -3156,17 +3125,24 @@ TASK-174
 
 ## TASK-176 — Fix Blocking Acceptance Failures Only
 
-Status: `TODO`
+Status: `DONE`
 
-Goal:
+Implementation / Evidence:
 
-如果 Acceptance Failure：
+唯一失败项 AC-103 的根因是 **qwen3-8b 模型输出长度上限**（~1800–2000 字），
+不是代码缺陷：契约（targetCharacters 全链路）、计数（TextLengthUtil）、
+长度指令、expand guard（Phase 2 已加，实测只能抬均值不能闭环上限）均已实现。
 
-只修：
+可选修复均超出 Agent 权限或冻结范围：
+- 更换更大模型 → 需项目所有者提供新凭据；
+- 分段拼接生成 → 冻结范围外，需 v0.1.2 评估；
+- 降低 2250 下限 → 属于"降低标准"，TASK-177 明确禁止。
 
-> 阻塞冻结 AC 的最小问题。
+结论：无代码侧最小修复可做。按 TASK-178/179 如实记录为剩余 blocker。
 
-不在最后阶段新增功能。
+Engineering Verification: NOT_APPLICABLE
+
+Real-LLM Semantic Verification: FAILED (AC-103, 复现确认)
 
 Dependencies:
 
@@ -3176,13 +3152,19 @@ TASK-174
 
 ## TASK-177 — Re-run Failed Acceptance Cases
 
-Status: `TODO`
+Status: `DONE`
 
-Goal:
+Implementation / Evidence:
 
-只对失败项重新执行完整条件。
+AC-103 按冻结完整条件重跑（`.agent/ac103_rerun.py` → `ac103_rerun.json`）：
+新 story（defaultTargetCharacters=3000）→ 5 章 plan → CONTINUOUS 全链路真实生成。
 
-不得降低标准。
+结果：1013 / 1798 / 1608 / 1628 / 1813 字——0/5 入 [2250,3750] 带。
+**FAIL 可复现**，与 Phase 2 三次独立运行的模型上限结论一致。标准未降低。
+
+Engineering Verification: PASSED（重跑流程与测量正确）
+
+Real-LLM Semantic Verification: FAILED (AC-103, 复现)
 
 Dependencies:
 
@@ -3192,18 +3174,17 @@ TASK-176
 
 ## TASK-178 — Update Truthful README / STATE / Experiment Record
 
-Status: `TODO`
+Status: `DONE`
 
-Goal:
+Implementation / Evidence:
 
-只有真实证据支持的能力才能写入 README。
+- STATE.md §20 更新为最终真实状态（含 NOT ACCEPTED 判定与唯一 blocker）
+- Engineering PASS / Real-LLM PASS / FAIL / Known Limitations 全部按本文件
+  各任务记录汇总；README 的能力声明以 STATE 为准（见 STATE §20 引用）
 
-必须明确：
+Engineering Verification: PASSED
 
-- 哪些 Engineering PASS；
-- 哪些 Real-LLM PASS；
-- Known Limitations；
-- Deferred Scope。
+Real-LLM Semantic Verification: NOT_REQUIRED
 
 Dependencies:
 
@@ -3214,31 +3195,46 @@ TASK-177
 
 ## TASK-179 — Freeze v0.1.1
 
-Status: `TODO`
+Status: `DONE`
 
-Goal:
+## 判定：`v0.1.1 NOT ACCEPTED`
 
-只有满足 `V0.1.1_IMPROVEMENT_PLAN.md` Definition of Done 时：
+按 `V0.1.1_IMPROVEMENT_PLAN.md` §26 Definition of Done 逐项核对：
 
-```text
-v0.1.1 ACCEPTED
-```
+Engineering（全部满足）：
+- [x] Backend tests pass — 59/59
+- [x] Python tests pass — 7/7
+- [x] Frontend build pass
+- [x] v0.1 → v0.1.1 migration 可运行 — V6..V14 已修正并应用（V6..V11 原为
+      MariaDB 语法从未生效，本版本内修复）
+- [x] Extraction Retry 通过 — TASK-125/126 + 回归套件
+- [x] Async / Pause / Replan 状态一致 — TASK-127..131 + TASK-137
 
-否则：
+Real LLM：
+- [x] Continuation PASS（AC-101）
+- [ ] **Length PASS —— FAIL**（AC-103：qwen3-8b 上限 ~1800–2000 字 < 2250 下限，
+      重跑复现）
+- [x] Chapter Goal PASS（AC-104）
+- [x] Replan Remaining PASS（AC-106）
+- [x] Manual Edit PASS（AC-107）
+- [x] Polish Fact Preservation PASS（AC-109，7/7 结构化检查）
+- [x] 600 Chapter Pace PASS（AC-114）
+- [x] Low-value Detail Isolation PASS（AC-105）
 
-```text
-v0.1.1 NOT ACCEPTED
-```
+Evidence：全部保存于 `.agent/evidence/` 与各任务条目。
 
-并记录剩余 blocker。
+## 剩余 Blocker（唯一）
 
-不得使用：
+**BLOCKER-1（模型能力）**：当前唯一可用模型 qwen3-8b 的叙事输出有效上限
+约 1800–2000 字，无法达到冻结验收的 2250 字下限。这不是代码缺陷——契约、
+计数、指令、扩写 guard 均已实现并被证明工作。
 
-```text
-mostly accepted
-should work
-basically done
-```
+解除路径（需项目所有者决策）：
+1. 提供更大/更擅长长文本的模型凭据后重跑 AC-103；
+2. 或由所有者显式修订冻结验收的目标带宽（如 1200–2200）。
+
+在 BLOCKER-1 解除前，v0.1.1 保持 **NOT ACCEPTED**。
+除 AC-103 外的全部 Engineering 与 Real-LLM 验收均已 PASS。
 
 Dependencies:
 
@@ -3344,5 +3340,6 @@ TASK-172 ~ TASK-179
 > **Prove wiring with tests. Prove AI behavior with a real model.**
 
 > **Never let TASKS.md become evidence by itself. Repository behavior is the evidence.**
+
 
 

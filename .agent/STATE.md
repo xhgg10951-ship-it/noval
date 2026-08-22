@@ -28,15 +28,15 @@ Current Implementation Plan:
 
 Current Phase:
 
-`Phase 7 — Memory v2 (Phase 6 Gate PASSED 2026-08-22)`
+`Phase 9 COMPLETE — v0.1.1 NOT ACCEPTED (single blocker: AC-103 model length ceiling)`
 
 Current Task:
 
-`TASK-157 — Memory v2 Migration (importance/scope/active + dedup support)`
+`NONE — awaiting project-owner decision on BLOCKER-1 (see TASK-179)`
 
 Task Status:
 
-`IN_PROGRESS`
+`FROZEN_PENDING_DECISION`
 
 Task Evidence:
 
@@ -828,13 +828,13 @@ IN PROGRESS (Phase 3 engineering DONE; TASK-132 regression suite pending;
 Phase 4 backend partially landed)
 
 Current Phase:
-Phase 7 — Memory v2 (Phase 6 Gate PASSED 2026-08-22)
+Phase 9 COMPLETE — v0.1.1 NOT ACCEPTED (single blocker: AC-103 model length ceiling)
 
 Current Task:
-TASK-157 — Memory v2 migration (importance/scope/active + dedup support)
+NONE — awaiting project-owner decision on BLOCKER-1 (TASK-179)
 
 Current Task Status:
-IN_PROGRESS
+FROZEN_PENDING_DECISION (all 79 tasks terminal)
 
 Phase 0 Gate:
 PASSED (2026-08-21, after commit 63781dd)
@@ -874,18 +874,36 @@ AC-114 real-LLM PASS: target=600/current=5/arc=1-60 with a DELIBERATELY
 endgame-seeking direction produced an arc-scoped plan, 0 endgame patterns
 (.agent/evidence/ac114_plan.json).
 
+Phase 7 Gate:
+PASSED (2026-08-22) — TASK-157..165, full mvn test 58/58.
+Memory v2 (V14 importance/scope/active), frozen type enum with normalize
+mapping, extractor five-question prompt, safe processing guards (unknown type
+REVIEW; item:* importance<4 REVIEW), dedup v1 (AC-115), inventory multi-item
+slots (AC-116), writer memory selection (excludes transient/importance<=2).
+AC-105 real-LLM PASS: bread detail classified imp=1/IGNORE — never reaches
+the writer context.
+
+Phase 8 Gate:
+PASSED (2026-08-22) — TASK-166..171, full mvn test 59/59.
+writingStyle wired to Writer contract+prompt; polish contract/prompt/workflow
+(POST /ai/polish-chapter; AI_POLISH revision → STALE → re-extract);
+polish UI. AC-109 real-LLM PASS: 7/7 structured fact-preservation checks.
+
 Environment change note (2026-08-22):
 Maven 3.9.16 + JDK17 now available in this environment (previously absent).
 mvn test fully operational against the local MySQL story_ai database.
 
 Known Blocker:
-NONE.
+BLOCKER-1 (sole blocker, model capability): qwen3-8b cannot produce narrative
+chapters beyond ~1800–2000 chars; frozen AC-103 lower bound is 2250. Re-run
+under frozen conditions reproduced the FAIL (ac103_rerun.json). Not a code
+defect. Unblock paths need owner decision: larger-model credential and rerun,
+or explicit revision of the frozen length band.
 
 Next Safe Action:
-TASK-157 — Memory v2 migration (V14 additive: story_memory/memory_candidate
-importance/scope/active columns with safe defaults), then type-contract enum
-freeze, extractor importance/scope output, dedup, apply-path updates, and
-AC acceptance per TASKS.md Phase 7.
+Project-owner decision on BLOCKER-1, then either rerun AC-103 only
+(TASK-177 path) or re-baseline the acceptance band. All other DoD items are
+green; engineering suite stands at backend 59/59, python 7/7, frontend build OK.
 ```
 
 Core principles:
