@@ -16,6 +16,9 @@ public class Story {
     private String coreIdea;
     private String initialStageDirection;
     private String status;
+    private Integer defaultTargetCharacters;
+    private String writingStyle;
+    private Integer targetChapterCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -57,6 +60,30 @@ public class Story {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Integer getDefaultTargetCharacters() {
+        return defaultTargetCharacters;
+    }
+
+    public void setDefaultTargetCharacters(Integer defaultTargetCharacters) {
+        this.defaultTargetCharacters = defaultTargetCharacters;
+    }
+
+    public String getWritingStyle() {
+        return writingStyle;
+    }
+
+    public void setWritingStyle(String writingStyle) {
+        this.writingStyle = writingStyle;
+    }
+
+    public Integer getTargetChapterCount() {
+        return targetChapterCount;
+    }
+
+    public void setTargetChapterCount(Integer targetChapterCount) {
+        this.targetChapterCount = targetChapterCount;
     }
 
     public LocalDateTime getCreatedAt() {
