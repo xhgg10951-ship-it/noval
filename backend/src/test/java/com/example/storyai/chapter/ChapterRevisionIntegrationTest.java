@@ -212,6 +212,38 @@ class ChapterRevisionIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
+    // ---- v0.1.1 Phase 8 (TASK-167/168/169): polish workflow ----
+
+    @Test
+    void polishCreatesAiPolishRevisionAndRefreshesMemory() throws Exception {
+        Long storyId = createStory();
+        long chapterId = createActiveStageWithOneChapter(storyId);
+        JsonNode before = getChapter(chapterId);
+
+        when(aiServiceClient.polishChapter(any(com.example.storyai.ai.dto.PolishChapterRequest.class)))
+                .thenReturn(new com.example.storyai.ai.dto.PolishChapterResponse(
+                        "润色后的事实保持版本。"));
+
+        mockMvc.perform(post("/api/chapters/{id}/polish", chapterId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"userInstruction\":\"对话更自然\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(before.get("id").asInt()))
+                .andExpect(jsonPath("$.currentRevisionVersion").value(2))
+                .andExpect(jsonPath("$.sourceType").value("AI_POLISH"))
+                .andExpect(jsonPath("$.content").value("润色后的事实保持版本。"))
+                .andExpect(jsonPath("$.memoryExtractionStatus").value("COMPLETED"));
+
+        // history: v1 AI_GENERATED preserved, v2 AI_POLISH current
+        String revBody = mockMvc.perform(get("/api/chapters/{id}/revisions", chapterId))
+                .andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        JsonNode revisions = objectMapper.readTree(revBody);
+        assertThat(revisions.size()).isEqualTo(2);
+        assertThat(revisions.get(0).get("sourceType").asText()).isEqualTo("AI_POLISH");
+        assertThat(revisions.get(1).get("sourceType").asText()).isEqualTo("AI_GENERATED");
+        assertThat(revisions.get(1).get("content").asText()).contains("AI 生成的原稿");
+    }
+
     // ---- TASK-144: regenerate same chapter -> same id, new AI_REWRITE revision ----
 
     @Test

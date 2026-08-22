@@ -77,6 +77,17 @@ export async function regenerateChapter(
   return data
 }
 
+/** v0.1.1 Phase 8: fact-preserving polish; creates an AI_POLISH revision. */
+export async function polishChapter(
+  chapterId: number,
+  userInstruction?: string,
+): Promise<ChapterResponse> {
+  const body: Record<string, unknown> = {}
+  if (userInstruction?.trim()) body.userInstruction = userInstruction.trim()
+  const { data } = await api.post<ChapterResponse>(`/chapters/${chapterId}/polish`, body)
+  return data
+}
+
 // ---- Error helper ----
 
 export function extractChapterError(err: unknown): string {

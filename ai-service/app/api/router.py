@@ -4,7 +4,7 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from app.llm.provider import get_provider, parse_json_response
-from app.prompts.builders import build_suggest_prompt
+from app.prompts.builders import build_polish_prompt, build_suggest_prompt
 from app.schemas.models import (
     ExtractMemoryRequest,
     ExtractMemoryResponse,
@@ -12,6 +12,8 @@ from app.schemas.models import (
     GenerateChapterResponse,
     PlanStageRequest,
     PlanStageResponse,
+    PolishChapterRequest,
+    PolishChapterResponse,
     StoryQueryRequest,
     StoryQueryResponse,
     SuggestDirectionsRequest,
@@ -36,6 +38,18 @@ def replan_stage(req: PlanStageRequest) -> PlanStageResponse:
 @router.post("/generate-chapter", response_model=GenerateChapterResponse)
 def generate_chapter(req: GenerateChapterRequest) -> GenerateChapterResponse:
     return writer.generate_chapter(req)
+
+
+@router.post("/polish-chapter", response_model=PolishChapterResponse)
+def polish_chapter(req: PolishChapterRequest) -> PolishChapterResponse:
+    """v0.1.1 Phase 8 (TASK-167/168): style polish with fact preservation."""
+    provider = get_provider()
+    if provider.is_mock:
+        return PolishChapterResponse(polishedContent=req.content)
+    system, user = build_polish_prompt(req)
+    raw = provider.complete(user, system=system)
+    polished = parse_json_response(PolishChapterResponse, raw)
+    return polished
 
 
 @router.post("/extract-memory", response_model=ExtractMemoryResponse)

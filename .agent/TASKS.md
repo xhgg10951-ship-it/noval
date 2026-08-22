@@ -2846,7 +2846,7 @@ Phase 7 Gate Result: **PASSED** (2026-08-22, after TASK-165; full `mvn test` 58/
 
 ## TASK-166 — Story Writing Style Profile
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2866,7 +2866,7 @@ Phase 7 Gate
 
 ## TASK-167 — Add Polish AI Contract
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2897,7 +2897,7 @@ TASK-166
 
 ## TASK-168 — Implement Polish Prompt Fact Preservation
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2924,7 +2924,7 @@ TASK-167
 
 ## TASK-169 — Backend Polish Revision Workflow
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2946,7 +2946,7 @@ TASK-147
 
 ## TASK-170 — Polish UI
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2965,7 +2965,7 @@ TASK-169
 
 ## TASK-171 — Real-LLM Polish Acceptance
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2978,7 +2978,23 @@ Goal:
 - inventory preserved；
 - ending intent preserved。
 
-Real-LLM Semantic Verification: REQUIRED
+Engineering Verification: PASSED — 集成测试 polishCreatesAiPolishRevision... ✓
+（AI_POLISH 新版本/v1 保留/memory COMPLETED）
+
+Real-LLM Semantic Verification: PASSED (2026-08-22, qwen3-8b, mock_llm=false)
+- 输入：含机械总结式结尾的粗糙正文 + 风格「冷峻克制」+ 指示「改掉机械结尾，
+  对话更自然」
+- 结构化检查 7/7 PASS：
+  - location_preserved ✓（幽影森林）
+  - inventory_preserved ✓（铁剑）
+  - character_preserved ✓（林夜/艾琳）
+  - clue_plot_preserved ✓（山洞/痕迹）
+  - mechanical_summary_removed ✓（"总的来说/难忘的经历"已消失）
+  - no_new_destination ✓（未新增地点或设定）
+  - ending_intent_preserved ✓（仍以发现线索收尾留接口）
+- 润色后文本质量：感官细节（雾、落叶、刃面反光）、对话口语化、以沉默对视收束
+  ——事实零漂移
+- 证据：`.agent/evidence/ac109_polish.json`；脚本 `.agent/ac109_run.py`
 
 Dependencies:
 
@@ -2989,11 +3005,24 @@ TASK-170
 ## Phase 8 Gate
 
 ```text
-[ ] writingStyle works
-[ ] Polish creates Revision
-[ ] Memory marked stale
-[ ] AC-109 PASS
+[x] writingStyle works — create/PATCH UI + Writer prompt 渲染（TASK-166）
+[x] Polish creates Revision — AI_POLISH 新版本，历史保留（集成测试 ✓）
+[x] Memory marked stale — createRevision 统一收口 → STALE → 重抽 COMPLETED
+[x] AC-109 PASS — 见 TASK-171（real-LLM）
 ```
+
+Phase 8 Gate Result: **PASSED** (2026-08-22, after TASK-171; full `mvn test` 59/59)
+
+实现说明：
+- TASK-166：GenerateChapterRequest 双端加 writingStyle；ChapterGenerationService
+  传递 story.writingStyle；writer prompt 渲染「写作风格（作者要求）」
+- TASK-167：Python `POST /ai/polish-chapter`（PolishChapterRequest/Response）+
+  Java `AiServiceClient.polishChapter` + DTO
+- TASK-168：polish prompt 允许句式/对话/场景/去重/去机械总结，禁止新设定/
+  改事件/改状态/改结局；事实基准（goal/state/constraints/endingIntent）随请求下发
+- TASK-169：`polishChapter(chapterId, instruction)` = AI_POLISH revision →
+  STALE → 失效+重抽闭环；`POST /api/chapters/{id}/polish`
+- TASK-170：ChapterPanel 润色按钮 + 可选指示 + 版本徽标
 
 ---
 
@@ -3315,4 +3344,5 @@ TASK-172 ~ TASK-179
 > **Prove wiring with tests. Prove AI behavior with a real model.**
 
 > **Never let TASKS.md become evidence by itself. Repository behavior is the evidence.**
+
 

@@ -117,12 +117,31 @@ class GenerateChapterRequest(BaseModel):
     mustNotDo: Optional[str] = None
     storyBeats: Optional[str] = None
     endingIntent: Optional[str] = None
+    # ---- v0.1.1 Phase 8 (TASK-166): author writing style ----
+    writingStyle: Optional[str] = None
 
 
 class GenerateChapterResponse(BaseModel):
     title: str
     content: str
     summary: str
+
+
+# --------------------------------------------------------------------------
+# Polish Chapter (v0.1.1 Phase 8 / TASK-167)
+# --------------------------------------------------------------------------
+class PolishChapterRequest(BaseModel):
+    content: str
+    chapterGoal: str
+    endingIntent: Optional[str] = None
+    constraints: List[ConstraintItem] = Field(default_factory=list)
+    currentState: List[StateItem] = Field(default_factory=list)
+    writingStyle: Optional[str] = None
+    userInstruction: Optional[str] = None
+
+
+class PolishChapterResponse(BaseModel):
+    polishedContent: str
 
 
 # --------------------------------------------------------------------------

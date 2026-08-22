@@ -218,6 +218,66 @@ public class ChapterGenerationService {
     }
 
     /**
+     * v0.1.1 Phase 8 (TASK-169) — Polish workflow:
+     * current Revision → Python polish (fact-preserving) → NEW AI_POLISH revision
+     * → memory STALE → re-extract. Chapter id/number unchanged; history intact.
+     */
+    public Chapter polishChapter(Long chapterId, String userInstruction) {
+        Chapter chapter = chapterService.getChapter(chapterId);
+        if (chapter.getPlanId() == null) {
+            throw new IllegalStateException("该章节没有关联的章节计划，无法润色");
+        }
+        Stage stage = stageService.getStage(chapter.getStageId());
+        Story story = storyService.getStory(stage.getStoryId());
+        List<StoryConstraint> constraints = storyService.getConstraints(stage.getStoryId());
+        ChapterPlan plan = stageService.getPlans(stage.getId()).stream()
+                .filter(p -> p.getId().equals(chapter.getPlanId()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("章节对应的计划不存在，无法润色"));
+
+        List<com.example.storyai.ai.dto.PolishChapterRequest.ConstraintItem> polishConstraints =
+                constraints.stream()
+                        .map(c -> new com.example.storyai.ai.dto.PolishChapterRequest.ConstraintItem(
+                                c.getType(), c.getContent()))
+                        .toList();
+        List<com.example.storyai.ai.dto.PolishChapterRequest.StateItem> stateItems =
+                contextReader.getWriterStateItems(story.getId()).stream()
+                        .map(s -> new com.example.storyai.ai.dto.PolishChapterRequest.StateItem(
+                                s.category(), s.subject(), s.field(), s.value()))
+                        .toList();
+
+        com.example.storyai.ai.dto.PolishChapterRequest request =
+                new com.example.storyai.ai.dto.PolishChapterRequest(
+                        chapter.getContent(),
+                        plan.getGoal(),
+                        plan.getEndingIntent(),
+                        polishConstraints,
+                        stateItems,
+                        story.getWritingStyle(),
+                        userInstruction
+                );
+        var ai = aiServiceClient.polishChapter(request); // OUTSIDE tx
+        String polished = ai == null || ai.polishedContent() == null
+                || ai.polishedContent().isBlank()
+                ? null : ai.polishedContent();
+        if (polished == null) {
+            throw new com.example.storyai.common.exception.AiServiceException("AI 润色服务返回空内容");
+        }
+
+        // NEW immutable AI_POLISH revision; createRevision marks memory STALE.
+        revisionService.createRevision(chapterId, polished,
+                com.example.storyai.chapter.model.ChapterRevision.SOURCE_AI_POLISH);
+
+        // TASK-148 loop: invalidate derived memories + re-extract from the polished text.
+        reExtractChapter(chapterId);
+
+        Chapter refreshed = chapterService.getChapter(chapterId);
+        refreshed.setActualCharacterCount(
+                com.example.storyai.common.util.TextLengthUtil.countCharacters(polished));
+        return chapterService.saveChapter(refreshed);
+    }
+
+    /**
      * v1 context assembly (TASK-022): story constraints + stage direction +
      * the plan's chapter goal + previous chapter summary as recent context.
      * CurrentState / StoryMemory / RelationshipState arrive in M4 and are left
@@ -255,7 +315,9 @@ public class ChapterGenerationService {
                 plan.getMustAdvance(),
                 plan.getMustNotDo(),
                 plan.getStoryBeats(),
-                plan.getEndingIntent()
+                plan.getEndingIntent(),
+                // TASK-166: the author's natural-language style hint reaches the Writer
+                story.getWritingStyle()
         );
     }
 

@@ -27,7 +27,9 @@ public record GenerateChapterRequest(
         String mustAdvance,
         String mustNotDo,
         String storyBeats,
-        String endingIntent
+        String endingIntent,
+        // ---- v0.1.1 Phase 8 (TASK-166): author writing style ----
+        String writingStyle
 ) {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

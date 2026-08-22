@@ -224,6 +224,62 @@ def _fmt_long_form_position(req: PlanStageRequest) -> str:
 GENERATE_OUTPUT_HINT = '{"title": str, "content": str, "summary": str}'
 
 
+# ---- v0.1.1 Phase 8 (TASK-167/168): polish prompt with fact preservation ----
+POLISH_OUTPUT_HINT = '{"polishedContent": str}'
+
+
+def build_polish_prompt(req) -> Tuple[str, str]:
+    """TASK-168 — polish the prose WITHOUT changing what happened.
+
+    Allowed: sentence flow, dialogue texture, scene detail, removing repetition
+    and mechanical summary tone. Forbidden: new plot elements, changed core
+    events, changed character/state facts, a different ending.
+    """
+    system = (
+        "你是一名小说文字润色 AI。你的任务是在【完全不改变事实】的前提下提升文笔。\n"
+        "\n"
+        "允许：\n"
+        "- 调整句式与节奏，让叙述更自然流畅；\n"
+        "- 优化对话的语气与个性化表达；\n"
+        "- 充实场景感官细节（在已有设定范围内）；\n"
+        "- 删除重复表述、机械总结式的段落收尾。\n"
+        "禁止：\n"
+        "- 增加任何新设定、新人物、新物品、新事件；\n"
+        "- 改变核心事件及其因果顺序；\n"
+        "- 改变人物的状态、持有物或关系事实；\n"
+        "- 改变章节结局的走向与意图。\n"
+        "必须只返回严格 JSON，格式为：\n" + POLISH_OUTPUT_HINT
+    )
+    style = req.writingStyle or "(未指定)"
+    instruction = req.userInstruction or "(无)"
+    state_block = _fmt_state(req.currentState)
+    constraint_block = _fmt_constraints(req.constraints)
+    ending = req.endingIntent or "(未指定)"
+    user = f"""写作风格要求：
+{style}
+
+润色指令（作者）：
+{instruction}
+
+本章目标（事实基准）：
+{req.chapterGoal}
+
+结尾意图（必须保持）：
+{ending}
+
+约束：
+{constraint_block}
+
+当前状态（事实基准——润色后这些事实必须原样成立）：
+{state_block}
+
+原文：
+{req.content}
+
+请只输出 JSON。"""
+    return system, user
+
+
 def build_generate_prompt(req: GenerateChapterRequest) -> Tuple[str, str]:
     system = (
         "你是一名小说章节写作 AI。根据阶段导演指令、本章目标与上下文，写出一章连贯的叙事正文，"
@@ -231,11 +287,15 @@ def build_generate_prompt(req: GenerateChapterRequest) -> Tuple[str, str]:
     )
     # TASK-118: Goal Lock — enforce priority order and Must-Not compliance.
     spec_block = _fmt_writer_spec(req)
+    style_block = getattr(req, "writingStyle", None) or "(未指定)"
     user = f"""核心创意：
 {req.coreIdea}
 
 阶段导演指令：
 {req.stageDirection}
+
+写作风格（作者要求）：
+{style_block}
 
 {spec_block}
 

@@ -7,6 +7,7 @@ import {
   editChapterContent,
   approveChapter,
   regenerateChapter,
+  polishChapter,
   extractChapterError,
   type ChapterResponse,
   type ChapterRevisionResponse,
@@ -28,6 +29,10 @@ const approvingId = ref<number | null>(null)
 const regeneratingId = ref<number | null>(null)
 const regenerateInstruction = ref('')
 const regenerateOpenId = ref<number | null>(null)
+// v0.1.1 Phase 8 (TASK-170): polish state
+const polishingId = ref<number | null>(null)
+const polishInstruction = ref('')
+const polishOpenId = ref<number | null>(null)
 const historyFor = ref<number | null>(null)
 const historyLoading = ref(false)
 const revisions = ref<ChapterRevisionResponse[]>([])
@@ -128,6 +133,22 @@ async function regenerate(c: ChapterResponse): Promise<void> {
   }
 }
 
+// v0.1.1 Phase 8 (TASK-170): fact-preserving polish
+async function polish(c: ChapterResponse): Promise<void> {
+  errorMsg.value = ''
+  polishingId.value = c.id
+  try {
+    const updated = await polishChapter(c.id, polishInstruction.value)
+    replaceLocal(updated)
+    polishOpenId.value = null
+    polishInstruction.value = ''
+  } catch (err) {
+    errorMsg.value = extractChapterError(err)
+  } finally {
+    polishingId.value = null
+  }
+}
+
 async function toggleHistory(c: ChapterResponse): Promise<void> {
   if (historyFor.value === c.id) {
     historyFor.value = null
@@ -217,6 +238,9 @@ watch(() => props.stageId, refresh)
             <button class="btn btn--ghost btn--small" @click="regenerateOpenId = regenerateOpenId === c.id ? null : c.id">
               重新生成
             </button>
+            <button class="btn btn--ghost btn--small" @click="polishOpenId = polishOpenId === c.id ? null : c.id">
+              AI 润色
+            </button>
             <button class="btn btn--ghost btn--small" @click="toggleHistory(c)">
               {{ historyFor === c.id ? '收起历史' : '修订历史' }}
             </button>
@@ -232,6 +256,19 @@ watch(() => props.stageId, refresh)
             ></textarea>
             <button class="btn btn--primary btn--small" :disabled="regeneratingId === c.id" @click="regenerate(c)">
               {{ regeneratingId === c.id ? '重写中…' : '确认重写（保留旧版本）' }}
+            </button>
+          </div>
+
+          <!-- v0.1.1 Phase 8 (TASK-170): polish with optional instruction -->
+          <div v-if="polishOpenId === c.id" class="chapter-regenerate">
+            <textarea
+              v-model="polishInstruction"
+              class="form__textarea"
+              rows="2"
+              placeholder="可选：润色指示，例：对话更口语化，删掉总结式结尾。（事实不会被改变）"
+            ></textarea>
+            <button class="btn btn--primary btn--small" :disabled="polishingId === c.id" @click="polish(c)">
+              {{ polishingId === c.id ? '润色中…' : '开始润色（保留旧版本）' }}
             </button>
           </div>
 

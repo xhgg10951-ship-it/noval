@@ -14,6 +14,8 @@ import com.example.storyai.ai.dto.ExtractMemoryRequest;
 import com.example.storyai.ai.dto.ExtractMemoryResponse;
 import com.example.storyai.ai.dto.PlanStageRequest;
 import com.example.storyai.ai.dto.PlanStageResponse;
+import com.example.storyai.ai.dto.PolishChapterRequest;
+import com.example.storyai.ai.dto.PolishChapterResponse;
 import com.example.storyai.ai.dto.SuggestDirectionsRequest;
 import com.example.storyai.ai.dto.SuggestDirectionsResponse;
 import com.example.storyai.ai.dto.StoryQueryRequest;
@@ -113,6 +115,17 @@ public class AiServiceClient {
                 .body(json)
                 .retrieve()
                 .body(ExtractMemoryResponse.class);
+    }
+
+    /** v0.1.1 Phase 8 (TASK-167): {@code POST /ai/polish-chapter} — fact-preserving style polish. */
+    public PolishChapterResponse polishChapter(PolishChapterRequest request) {
+        String json = serialize("polish-chapter", request);
+        return restClient.post()
+                .uri("/ai/polish-chapter")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(json)
+                .retrieve()
+                .body(PolishChapterResponse.class);
     }
 
     /** Calls {@code POST /ai/suggest-directions} — planner-suggested next directions (M6 / TASK-042, AT-K01..K03). */

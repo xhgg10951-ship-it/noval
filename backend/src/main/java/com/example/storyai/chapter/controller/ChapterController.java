@@ -102,6 +102,17 @@ public class ChapterController {
                 new ChapterResponse(generationService.regenerateChapter(chapterId, instruction)));
     }
 
+    /** v0.1.1 Phase 8 (TASK-169/170) — fact-preserving polish; new AI_POLISH revision. */
+    @PostMapping("/api/chapters/{chapterId}/polish")
+    public ChapterResponse polish(@PathVariable Long chapterId,
+                                  @org.springframework.web.bind.annotation.RequestBody(
+                                          required = false)
+                                  java.util.Map<String, String> body) {
+        String instruction = body == null ? null : body.get("userInstruction");
+        return withRevisionVersion(
+                new ChapterResponse(generationService.polishChapter(chapterId, instruction)));
+    }
+
     private ChapterResponse withRevisionVersion(ChapterResponse response) {
         if (response.getCurrentRevisionId() != null) {
             ChapterRevision current = revisionService.getRevision(response.getCurrentRevisionId());
