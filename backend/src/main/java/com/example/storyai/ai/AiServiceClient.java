@@ -1,5 +1,7 @@
 package com.example.storyai.ai;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -35,9 +37,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * not handle that upgrade on a cleartext connection and silently reads an empty
  * body -> 422. Forcing HTTP/1.1 via HttpURLConnection avoids the entire class of
  * problem.</p>
+ *
+ * <p>DEBUG logging: every outgoing AI request body is logged (redacted) so the
+ * assembled context (state / memory / relationship / recent context) is
+ * reviewable without a debugger (TASK-103). The AI request DTOs carry no API
+ * keys; the redaction guard is defensive only.</p>
  */
 @Component
 public class AiServiceClient {
+
+    private static final Logger log = LoggerFactory.getLogger(AiServiceClient.class);
 
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
@@ -64,7 +73,7 @@ public class AiServiceClient {
 
     /** Calls {@code POST /ai/plan-stage} — initial stage planning (TASK-015). */
     public PlanStageResponse planStage(PlanStageRequest request) {
-        String json = serialize(request);
+        String json = serialize("plan-stage", request);
         return restClient.post()
                 .uri("/ai/plan-stage")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -75,7 +84,7 @@ public class AiServiceClient {
 
     /** Calls {@code POST /ai/replan-stage} — full re-planning (TASK-016, AT-B02). */
     public PlanStageResponse replanStage(PlanStageRequest request) {
-        String json = serialize(request);
+        String json = serialize("replan-stage", request);
         return restClient.post()
                 .uri("/ai/replan-stage")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -86,7 +95,7 @@ public class AiServiceClient {
 
     /** Calls {@code POST /ai/generate-chapter} — single chapter generation (TASK-023, AT-C01). */
     public GenerateChapterResponse generateChapter(GenerateChapterRequest request) {
-        String json = serialize(request);
+        String json = serialize("generate-chapter", request);
         return restClient.post()
                 .uri("/ai/generate-chapter")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -97,7 +106,7 @@ public class AiServiceClient {
 
     /** Calls {@code POST /ai/extract-memory} — memory candidate extraction (TASK-027, AT-G / AT-E). */
     public ExtractMemoryResponse extractMemory(ExtractMemoryRequest request) {
-        String json = serialize(request);
+        String json = serialize("extract-memory", request);
         return restClient.post()
                 .uri("/ai/extract-memory")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -108,7 +117,7 @@ public class AiServiceClient {
 
     /** Calls {@code POST /ai/suggest-directions} — planner-suggested next directions (M6 / TASK-042, AT-K01..K03). */
     public SuggestDirectionsResponse suggestDirections(SuggestDirectionsRequest request) {
-        String json = serialize(request);
+        String json = serialize("suggest-directions", request);
         return restClient.post()
                 .uri("/ai/suggest-directions")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -119,7 +128,7 @@ public class AiServiceClient {
 
     /** Calls {@code POST /ai/story-query} — natural-language query over story info (M6 / TASK-044, AT-J01..J05). */
     public StoryQueryResponse storyQuery(StoryQueryRequest request) {
-        String json = serialize(request);
+        String json = serialize("story-query", request);
         return restClient.post()
                 .uri("/ai/story-query")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -128,11 +137,28 @@ public class AiServiceClient {
                 .body(StoryQueryResponse.class);
     }
 
-    private String serialize(Object payload) {
+    private String serialize(String op, Object payload) {
         try {
-            return objectMapper.writeValueAsString(payload);
+            String json = objectMapper.writeValueAsString(payload);
+            if (log.isDebugEnabled()) {
+                log.debug("AI request [{}] payload(redacted)=\n{}", op, redactSecrets(json));
+            }
+            return json;
         } catch (Exception e) {
             throw new IllegalStateException("Failed to serialize AI request: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Defensive redaction: blank the value of any key whose name suggests a
+     * secret. The AI request DTOs do not contain API keys, but this guard keeps
+     * DEBUG logs safe even if a future field is added.
+     */
+    private static String redactSecrets(String json) {
+        // Case-insensitive. Bare "key" is excluded to avoid false positives like
+        // "monkey"; only secret-shaped field names are matched.
+        return json.replaceAll(
+                "(?i)(\\\"[^\\\"]*(?:api[_-]?key|access[_-]?token|secret|password|authorization|token|client[_-]?secret|private[_-]?key)[^\\\"]*\\\"\\s*:\\s*\\\")([^\\\"]*)(\\\")",
+                "$1***$3");
     }
 }

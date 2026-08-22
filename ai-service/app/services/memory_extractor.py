@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 from app.llm.provider import get_provider, parse_json_response
-from app.prompts.builders import build_extract_prompt
+from app.prompts.builders import build_extract_prompt, log_request_shape
 from app.schemas.models import ExtractMemoryRequest, ExtractMemoryResponse
 from app.services.mock_builders import mock_extract
 
 
 def extract_memory(req: ExtractMemoryRequest) -> ExtractMemoryResponse:
+    log_request_shape("extract-memory", req)
     provider = get_provider()
     if provider.is_mock:
         return mock_extract(req)

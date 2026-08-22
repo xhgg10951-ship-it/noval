@@ -16,6 +16,41 @@ from app.schemas.models import (
     SuggestDirectionsRequest,
 )
 
+import logging
+
+_request_logger = logging.getLogger("ai.requests")
+
+
+def log_request_shape(name: str, req) -> None:
+    """DEBUG-only observability (TASK-103).
+
+    Logs which context fields are present vs empty so wiring gaps
+    (e.g. empty currentState / storyMemories) are visible without a
+    debugger. Request DTOs carry no API keys, so no secret is logged.
+    """
+    if not _request_logger.isEnabledFor(logging.DEBUG):
+        return
+
+    def _len(v):
+        if v is None:
+            return 0
+        if isinstance(v, (list, str)):
+            return len(v)
+        return 1
+
+    shape = {
+        "coreIdea": _len(getattr(req, "coreIdea", None)),
+        "constraints": _len(getattr(req, "constraints", None)),
+        "stageDirection": _len(getattr(req, "stageDirection", None)),
+        "chapterGoal": _len(getattr(req, "chapterGoal", None)),
+        "currentState": _len(getattr(req, "currentState", None)),
+        "storyMemories": _len(getattr(req, "storyMemories", None)),
+        "relationshipState": _len(getattr(req, "relationshipState", None)),
+        "recentContext": _len(getattr(req, "recentContext", None)),
+        "targetChapterCount": getattr(req, "targetChapterCount", None),
+    }
+    _request_logger.debug("[%s] received request shape: %s", name, shape)
+
 
 def _fmt_constraints(items) -> str:
     return "\n".join(f"- [{i.type}] {i.content}" for i in items) or "(无)"

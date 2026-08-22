@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from app.llm.provider import get_provider, parse_json_response
-from app.prompts.builders import build_plan_prompt
+from app.prompts.builders import build_plan_prompt, log_request_shape
 from app.schemas.models import PlanStageRequest, PlanStageResponse
 from app.services.mock_builders import mock_plan
 
@@ -17,10 +17,12 @@ def _plan(req: PlanStageRequest) -> PlanStageResponse:
 
 
 def plan_stage(req: PlanStageRequest) -> PlanStageResponse:
+    log_request_shape("plan-stage", req)
     return _plan(req)
 
 
 def replan_stage(req: PlanStageRequest) -> PlanStageResponse:
     # Re-planning uses the same structured contract; the caller supplies updated
     # constraints / state to steer a different outcome.
+    log_request_shape("replan-stage", req)
     return _plan(req)
