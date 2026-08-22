@@ -32,7 +32,7 @@ Current Phase:
 
 Current Task:
 
-`TASK-107 — Add Planner Continuation Context v2 Contract`
+`TASK-112 — Real-LLM Continuation Acceptance (AC-101)`
 
 Task Status:
 
@@ -48,12 +48,15 @@ TASK-105 DONE — `StoryContextReader` built + compiled.
 TASK-106 DONE — Planner wired to real context (currentState / storyMemories / recentContext).
 TASK-110 DONE — Writer wired to real context (currentState / storyMemories / relationshipState).
 TASK-111 DONE — Writer recent context upgraded to last 3 summaries + ending excerpt (commit `af66501`, javac PASSED).
+TASK-107 DONE — Planner continuation context v2 contract (commit `d03d936`).
+TASK-108 DONE — Continuation anchor assembly.
+TASK-109 DONE — Planner continuation prompt.
 
 Engineering Verification:
-PASSED — TASK-111 compiled clean; Phase 1 Planner continuation contract next
+PASSED — TASK-107/108/109 compiled + prompt round-trip; next is AC-101 real LLM
 
 Real-LLM Semantic Verification:
-NOT_REQUIRED
+NOT_REQUIRED (TASK-107/108/109); REQUIRED for TASK-112 (AC-101)
 
 ---
 
@@ -616,7 +619,7 @@ Current:
 
 ```text
 Phase 1
-TASK-107
+TASK-112
 ```
 
 Do not resume old v0.1 TASK-001 ~ TASK-056 as active work.
@@ -813,7 +816,7 @@ Current Phase:
 Phase 1 — Context Wiring + Continuation
 
 Current Task:
-TASK-107 — Add Planner Continuation Context v2 Contract
+TASK-112 — Real-LLM Continuation Acceptance (AC-101)
 
 Current Task Status:
 TODO
@@ -828,25 +831,28 @@ PASSED (2026-08-21, after commit 63781dd)
 Phase 1 progress (Context Wiring + Continuation):
 - TASK-105 DONE: StoryContextReader built + compiled
 - TASK-106 DONE: Planner wired to real context
+- TASK-107 DONE: Planner continuation context v2 contract (commit d03d936)
+- TASK-108 DONE: Continuation anchor assembly
+- TASK-109 DONE: Planner continuation prompt
 - TASK-110 DONE: Writer wired to real state/memory/relationship
 - TASK-111 DONE: Writer recent context = last 3 summaries + ending excerpt (commit af66501)
-- TASK-107/108/109 TODO: Planner Continuation Context v2 + Anchor + Prompt
 - TASK-112 TODO: Real-LLM Continuation Acceptance (AC-101, needs real LLM)
 
 Known Blocker:
-NONE
+NONE (real-LLM credential may BLOCK TASK-112 / Phase 1 Gate — see §11)
 
 Next Safe Action:
-TASK-107 — Add Planner Continuation Context v2 Contract
-(relationshipState, currentChapterNumber, completedStageSummaries,
-recentChapterSummaries, continuationAnchor) to PlanStageRequest + assembly.
-TASK-108 assembles the continuation anchor; TASK-109 updates the Planner prompt.
+TASK-112 — Execute AC-101 against the real LLM: given known state
+(已穿越 / 已认识艾琳 / 已住进艾琳房间) and a new Stage (第二天去冒险者公会),
+the Planner must continue from the existing state — no repeated crossing /
+first meeting / re-acquiring housing. If no usable real LLM credential exists,
+mark TASK-112 BLOCKED and continue with Phase 2 engineering tasks.
 
 Engineering Verification:
-PASSED — TASK-111 compiled clean
+PASSED — TASK-107/108/109 compiled + prompt round-trip verified
 
 Real-LLM Semantic Verification:
-NOT_REQUIRED
+NOT_REQUIRED (TASK-107/108/109); REQUIRED for TASK-112 (AC-101)
 ```
 
 Core principles:

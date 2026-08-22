@@ -514,7 +514,7 @@ TASK-105
 
 ## TASK-107 — Add Planner Continuation Context v2 Contract
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -532,6 +532,19 @@ continuationAnchor
 
 可以为未来字段保留 Optional，但不得提前实现 Phase 6 业务。
 
+Implementation:
+
+`PlanStageRequest`（Java record + Python Pydantic）新增 5 个字段：`relationshipState`(List<RelationshipItem>)、`currentChapterNumber`(Integer)、`completedStageSummaries`(List<String>)、`recentChapterSummaries`(List<String>)、`continuationAnchor`(ContinuationAnchor)。`StoryContextReader` 新增 `getPlannerRelationshipItems` / `getCurrentChapterNumber` / `getRecentChapterSummaries` / `getCompletedStageSummaries`；`StagePlanningService.buildRequest` 全部接线。未提前实现 Arc / Pace Logic。
+
+Verification:
+
+Engineering Verification: PASSED
+- Java javac 编译通过（PlanStageRequest + StoryContextReader + StagePlanningService）
+- Python import 通过；PlanStageRequest 序列化 keys 含全部 5 个新字段
+
+Real-LLM Semantic Verification:
+NOT_REQUIRED（语义质量属 TASK-112 / AC-101）
+
 Dependencies:
 
 TASK-106
@@ -540,7 +553,7 @@ TASK-106
 
 ## TASK-108 — Implement Continuation Anchor Assembly
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -559,6 +572,19 @@ lastChapterEnding
 
 只取末尾有限文本，不发送整本书。
 
+Implementation:
+
+`StoryContextReader.buildContinuationAnchor(storyId, endingExcerptChars)` 组装 ContinuationAnchor：`lastChapterNumber`/`lastChapterSummary`/`lastChapterEnding` 直接取最新章（结尾仅取末尾 800 字）；`currentLocation`/`currentImmediateGoal` 从 CurrentState 的 LOCATION/GOAL 类别派生；`activeCharacters` 从 StoryMemory.subject 去重派生。无信号时对应字段为 null/空（best-effort，非 LLM）。
+
+Verification:
+
+Engineering Verification: PASSED
+- Java javac 编译通过
+- anchor 结构在 Python 端 model_dump 正确生成
+
+Real-LLM Semantic Verification:
+NOT_REQUIRED
+
 Dependencies:
 
 TASK-107
@@ -567,7 +593,7 @@ TASK-107
 
 ## TASK-109 — Planner Continuation Prompt
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -586,9 +612,14 @@ Goal:
 
 Prompt 必须引用 Continuation Anchor。
 
-Engineering Verification:
+Implementation:
 
-Prompt builder test.
+`builders.py build_plan_prompt` 新增 `_fmt_continuation(req)`：无前情时标明"第一阶段自由开篇"；有前情时明确"正在连载、必须续写"，呈现 currentChapterNumber / 上一章摘要 / 上一章结尾 / 当前地点 / 当前活跃人物 / 当前直接目标，并硬性禁止重复穿越/初遇/已得身份/已完成阶段。同时把 relationshipState、completedStageSummaries、recentChapterSummaries 渲染进 user prompt；`log_request_shape` 增加续写字段观测。
+
+Verification:
+
+Engineering Verification: PASSED
+- Python 导入通过；round-trip 校验 user prompt 含"续写状态"/"上一章摘要"/"当前活跃人物"
 
 Real-LLM Semantic Verification:
 
