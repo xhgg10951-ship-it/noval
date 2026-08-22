@@ -54,7 +54,10 @@ public class NextSafeActionResolver {
      * their extraction status. Pure read-only; never mutates state.
      */
     public SafeAction resolve(Long stageId) {
-        List<ChapterPlan> plans = stageService.getPlans(stageId);
+        // TASK-137 fix: pending-ness is judged against the ACTIVE REMAINING queue
+        // only. Superseded (replanned-away) and completed rows are history — a
+        // superseded plan without a chapter must never look like "work left to do".
+        List<ChapterPlan> activePlans = stageService.getActiveRemainingPlans(stageId);
         List<Chapter> chapters = chapterMapper.findByStageId(stageId);
 
         // Generated plan ids (a plan with a chapter is "started").
@@ -72,8 +75,8 @@ public class NextSafeActionResolver {
             }
         }
 
-        // Plans not yet started at all -> generate the next one.
-        boolean hasPendingPlan = plans.stream()
+        // Active plans not yet started at all -> generate the next one.
+        boolean hasPendingPlan = activePlans.stream()
                 .anyMatch(p -> !startedPlanIds.contains(p.getId()));
         if (lastChapter == null) {
             return hasPendingPlan ? SafeAction.GENERATE : SafeAction.COMPLETE;

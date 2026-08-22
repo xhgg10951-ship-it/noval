@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`Phase 4 — Replan Remaining (backend DONE: TASK-133..137; remaining: TASK-138 UI, TASK-139 AC-106 real-LLM)`
+`Phase 5 — Chapter Revision (Phase 4 Gate PASSED 2026-08-22)`
 
 Current Task:
 
-`TASK-138 — Replan Remaining UI (Vue)`
+`TASK-140 — Add ChapterRevision Schema`
 
 Task Status:
 
@@ -854,6 +854,17 @@ control signals on create; pause/stop clobbered by stale-copy full-row UPDATE
 (rewritten to narrow disjoint updates); complete() ordering for AC-113;
 TextLengthUtil blank=0.
 
+Phase 4 Gate:
+PASSED (2026-08-22) — TASK-133..139, full mvn test 40/40.
+AC-106 real-LLM PASS after one honest FAIL→fix→re-verify cycle: first run's
+new plan repeated an already-written beat; root-caused (replan prompt lacked
+completed-beats list) and fixed by injecting the stage's finished chapters as
+"established facts, do not repeat" into the replan direction. Re-verified:
+v2 plans continue strictly after established facts; author instruction honored.
+Additional real defects fixed en route: stale-total STEP completion (now
+DB-facts via resolver), resolver counting superseded rows as pending,
+runStep NoPendingChapterException convergence with CONTINUOUS.
+
 Environment change note (2026-08-22):
 Maven 3.9.16 + JDK17 now available in this environment (previously absent).
 mvn test fully operational against the local MySQL story_ai database.
@@ -862,10 +873,11 @@ Known Blocker:
 NONE.
 
 Next Safe Action:
-TASK-136 remainder — expose POST /stages/{id}/replan-remaining (ACTIVE/PAUSED
-only), route it through StagePlanningService with continuation context, guard/
-retire the legacy full replan endpoint for non-PLANNING stages; then
-TASK-137 (job consistency), TASK-138 (UI), TASK-139 (AC-106 real-LLM).
+TASK-140 — ChapterRevision schema (chapter_revision table + chapter
+current_revision_id/status DRAFT|APPROVED, additive V12 migration), then
+TASK-141 legacy-content backfill, TASK-142/143 manual edit, TASK-144
+regenerate, TASK-145 revision history, TASK-146 approve, TASK-147/148 memory
+stale+refresh, TASK-149 acceptance.
 ```
 
 Core principles:

@@ -41,17 +41,21 @@ public class StagePlanningService {
     private final AiServiceClient aiServiceClient;
     // TASK-137: replan must respect in-flight generation jobs.
     private final GenerationJobService jobService;
+    // TASK-139: replan prompt lists the stage's already-written beats.
+    private final com.example.storyai.chapter.service.ChapterService chapterService;
 
     public StagePlanningService(StoryService storyService,
                                 StageService stageService,
                                 StoryContextReader contextReader,
                                 AiServiceClient aiServiceClient,
-                                GenerationJobService jobService) {
+                                GenerationJobService jobService,
+                                com.example.storyai.chapter.service.ChapterService chapterService) {
         this.storyService = storyService;
         this.stageService = stageService;
         this.contextReader = contextReader;
         this.aiServiceClient = aiServiceClient;
         this.jobService = jobService;
+        this.chapterService = chapterService;
     }
 
     /** Creates a new stage for the story and generates its initial plan (AT-B01). */
@@ -133,6 +137,28 @@ public class StagePlanningService {
 
         PlanStageRequest request = buildRequest(story, constraints, direction,
                 remainingChapterCount);
+        // TASK-139 fix: the Planner must know which BEATS of THIS stage are already
+        // written, otherwise it re-plans from the stage start and duplicates them
+        // (observed on AC-106: new plan #10 repeated the enrollment beat of ch1-2).
+        // Rides on direction text — no DTO contract change.
+        List<com.example.storyai.chapter.model.Chapter> doneChapters =
+                chapterService.listByStage(stageId).stream()
+                        .sorted(java.util.Comparator.comparing(
+                                com.example.storyai.chapter.model.Chapter::getChapterNumber))
+                        .toList();
+        if (!doneChapters.isEmpty()) {
+            java.util.Map<Long, String> goalByPlanId = stageService.getPlans(stageId).stream()
+                    .collect(java.util.stream.Collectors.toMap(
+                            ChapterPlan::getId, ChapterPlan::getGoal));
+            List<String> beats = doneChapters.stream()
+                    .map(c -> "- 第" + c.getChapterNumber() + "章（" + c.getTitle() + "）："
+                            + (c.getPlanId() == null ? "（无计划）"
+                                    : goalByPlanId.getOrDefault(c.getPlanId(), c.getTitle())))
+                    .toList();
+            direction = direction + "\n\n本阶段已完成章节的既成事实（新计划必须从这些事实之后继续，"
+                    + "严禁重复或重演以下任何节拍）：\n" + String.join("\n", beats);
+            request = buildRequest(story, constraints, direction, remainingChapterCount);
+        }
         PlanStageResponse plan = callPlanner(request, true);
 
         // Append the new remainder AFTER all existing orders and bump the version,

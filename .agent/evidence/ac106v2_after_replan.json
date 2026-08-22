@@ -1,0 +1,84 @@
+{
+  "id": 265,
+  "storyId": 364,
+  "direction": "第二天林夜和艾琳前往冒险者公会入会并接取第一个委托：调查幽影森林失踪案。",
+  "status": "ACTIVE",
+  "suggestedChapterCount": 2,
+  "targetChapterCount": 2,
+  "plans": [
+    {
+      "id": 877,
+      "stageId": 265,
+      "chapterOrder": 1,
+      "goal": "林夜和艾琳前往冒险者公会，完成入会手续并接受第一个委托。",
+      "expectedProgress": "两人正式成为冒险者，并获得调查幽影森林失踪案的任务。",
+      "planVersion": 1,
+      "active": false,
+      "status": "COMPLETED",
+      "createdAt": "2026-08-22T15:26:34.244",
+      "updatedAt": "2026-08-22T15:26:47.433"
+    },
+    {
+      "id": 878,
+      "stageId": 265,
+      "chapterOrder": 2,
+      "goal": "深入幽影森林，调查失踪案的线索，遭遇初步危险。",
+      "expectedProgress": "团队在森林中发现异常现象，遭遇怪物或神秘势力，展现世界观与挑战。",
+      "planVersion": 1,
+      "active": false,
+      "status": "SUPERSEDED",
+      "createdAt": "2026-08-22T15:26:34.244",
+      "updatedAt": "2026-08-22T15:27:37.126"
+    },
+    {
+      "id": 879,
+      "stageId": 265,
+      "chapterOrder": 3,
+      "goal": "揭示幽影森林失踪案背后的秘密，与敌对势力发生冲突。",
+      "expectedProgress": "揭开部分真相，团队面临重大威胁，展现人物成长与合作。",
+      "planVersion": 1,
+      "active": false,
+      "status": "SUPERSEDED",
+      "createdAt": "2026-08-22T15:26:34.244",
+      "updatedAt": "2026-08-22T15:27:37.126"
+    },
+    {
+      "id": 880,
+      "stageId": 265,
+      "chapterOrder": 4,
+      "goal": "完成委托任务，返回公会并获得初步评价，为后续冒险做准备。",
+      "expectedProgress": "任务成功结束，团队获得认可，埋下未来冒险的伏笔。",
+      "planVersion": 1,
+      "active": false,
+      "status": "SUPERSEDED",
+      "createdAt": "2026-08-22T15:26:34.244",
+      "updatedAt": "2026-08-22T15:27:37.126"
+    },
+    {
+      "id": 881,
+      "stageId": 265,
+      "chapterOrder": 5,
+      "goal": "进入幽影森林调查失踪案，遭遇夜间危险事件",
+      "expectedProgress": "林夜和艾琳深入幽影森林，遭遇未知敌人袭击，通过配合脱困，展现两人默契与成长",
+      "planVersion": 2,
+      "active": true,
+      "status": "ACTIVE",
+      "createdAt": "2026-08-22T15:27:37.127",
+      "updatedAt": "2026-08-22T15:27:37.127"
+    },
+    {
+      "id": 882,
+      "stageId": 265,
+      "chapterOrder": 6,
+      "goal": "完成委托任务并返回公会汇报结果",
+      "expectedProgress": "林夜和艾琳成功完成调查任务，返回冒险者公会提交报告，获得初步认可，为后续冒险奠定基础",
+      "planVersion": 2,
+      "active": true,
+      "status": "ACTIVE",
+      "createdAt": "2026-08-22T15:27:37.127",
+      "updatedAt": "2026-08-22T15:27:37.127"
+    }
+  ],
+  "createdAt": "2026-08-22T15:26:34.242",
+  "updatedAt": "2026-08-22T15:27:37.126"
+}

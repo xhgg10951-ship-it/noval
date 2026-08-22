@@ -1825,7 +1825,7 @@ TASK-137
 
 ## TASK-139 — Replan Remaining Acceptance
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1841,8 +1841,28 @@ PASS:
 
 最终 Chapter 1–6，无重复，1–3 不变。
 
-Engineering Verification: REQUIRED  
-Real-LLM Semantic Verification: REQUIRED（新计划必须从当前状态继续）
+Engineering Verification: PASSED (2026-08-22, real end-to-end via running stack)
+- 场景 A（AC-106 原型，stage 264 / job 124）：9 章计划 → STEP 生成 3 章 →
+  replan-remaining(3) → 续跑完毕：最终 6 章、编号 1..6 无重复、
+  Ch1..3 行 id 不变（378/379/380）、Stage COMPLETED。
+  计划行共存：3 COMPLETED(v1) + 6 SUPERSEDED(v1) + 3 ACTIVE(v2)，零删除。
+- 验收过程中发现并修复 3 个真实缺陷：
+  1. runStep 用过期 total 判完成 → 改 DB-facts（resolver COMPLETE）
+  2. resolver 把 SUPERSEDED 无章节历史行误判为"待处理" → 只统计 active queue
+  3. runStep 未捕获 NoPendingChapterException（与 CONTINUOUS 不一致）→ 补齐收敛
+
+Real-LLM Semantic Verification: PASSED (2026-08-22, after one honest FAIL→fix→re-verify cycle)
+- Model: qwen3-8b (Aliyun MaaS compatible-mode), mock_llm=false, 后端+Python 全真实链路
+- 首次运行语义 FAIL（诚实记录）：v2 新计划 #10 重演了已完成 ch1-2 的"入会"节拍——
+  Planner 不知道本 stage 已写节拍。根因：replan prompt 缺 completed-beats 清单。
+  修复：replanRemaining 将本 stage 已完成章（编号/标题/计划目标）以
+  "既成事实，严禁重演"清单注入 direction（零 DTO 变更）。
+- 复验（story 364 / stage 265）：4 章计划 → 写 1 章 → replan(2)+作者指示
+  "夜间遇险与两人配合脱困" → v2 = {#5 进入幽影森林调查失踪案，遭遇夜间危险事件;
+  #6 完成委托并返回公会汇报} —— 完全避开已写节拍、从事实后续写、指令融入 ✓
+- 最终正文连续性：Ch1 入会与委托 → Ch2 幽影森林的低语 → Ch3 幽影深处的回响，
+  Job/Stage 双 COMPLETED
+- 证据：`.agent/evidence/ac106_*.json|txt`
 
 Dependencies:
 
@@ -1853,11 +1873,13 @@ TASK-138
 ## Phase 4 Gate
 
 ```text
-[ ] Completed Plans 不删除
-[ ] Replan 只作用于未来
-[ ] Job 状态一致
-[ ] AC-106 PASS
+[x] Completed Plans 不删除 — replan 后 12 行共存（COMPLETED/SUPERSEDED/ACTIVE），零删除
+[x] Replan 只作用于未来 — 生成队列 = active remaining；SUPERSEDED 永不再生成
+[x] Job 状态一致 — total=active queue；RUNNING 拒绝 replan；完成判定 DB-facts 化
+[x] AC-106 PASS — engineering PASSED + real-LLM semantic PASSED（含一次 FAIL→fix→re-verify）
 ```
+
+Phase 4 Gate Result: **PASSED** (2026-08-22, after TASK-139; full `mvn test` 40/40)
 
 ---
 

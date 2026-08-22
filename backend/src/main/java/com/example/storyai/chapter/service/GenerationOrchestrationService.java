@@ -155,10 +155,17 @@ public class GenerationOrchestrationService {
 
     /** STEP: exactly one chapter, then PAUSED (or COMPLETED if that was the last plan). */
     private GenerationJob runStep(Long jobId, Long stageId) {
-        generateOneStep(jobId, stageId); // throws NoPendingChapterException only if already complete
-        int index = currentIndex(jobId);
-        int total = jobService.get(jobId).getTotal();
-        if (index >= total) {
+        try {
+            generateOneStep(jobId, stageId); // throws NoPendingChapterException when done
+        } catch (NoPendingChapterException ex) {
+            // same convergence as CONTINUOUS: an empty active queue means DONE
+            // (e.g. a Replan Remaining shrank the remainder mid-job — TASK-137).
+            return complete(jobId);
+        }
+        // TASK-137 fix: completion is decided from DB FACTS (no active plan left),
+        // never from a stale in-flight `total`. A Replan Remaining mid-job changes
+        // the queue size, so index-vs-total would either never finish or stop early.
+        if (safeActionResolver.resolve(stageId) == NextSafeActionResolver.SafeAction.COMPLETE) {
             return complete(jobId);
         }
         finalizeStatus(jobId, GenerationJob.Status.PAUSED.name(),
