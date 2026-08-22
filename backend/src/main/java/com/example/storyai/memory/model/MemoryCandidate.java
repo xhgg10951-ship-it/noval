@@ -18,10 +18,29 @@ public class MemoryCandidate {
     private String value;
     private String suggestedAction; // AUTO / REVIEW / IGNORE
     private String evidence;
-    private String processingStatus = "PENDING"; // PENDING / APPLIED / IGNORED
+    private String processingStatus = "PENDING"; // PENDING / APPLIED / IGNORED / SUPERSEDED
     private boolean applied = false;
+    // ---- v0.1.1 Phase 7 / TASK-157: Memory v2 ----
+    private int importance = 3;     // 1..5 (from extractor, validated)
+    private String scope = "STORY"; // CHAPTER / STAGE / ARC / STORY
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public int getImportance() {
+        return importance;
+    }
+
+    public void setImportance(int importance) {
+        this.importance = importance;
+    }
+
+    public String getScope() {
+        return scope;
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

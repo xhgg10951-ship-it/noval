@@ -56,6 +56,11 @@ public interface MemoryMapper {
 
     List<StoryMemory> findStoryMemories(@Param("storyId") Long storyId);
 
+    /** TASK-162: active rows with the same type+subject — the dedup candidate set. */
+    List<StoryMemory> findActiveByTypeSubject(@Param("storyId") Long storyId,
+                                              @Param("type") String type,
+                                              @Param("subject") String subject);
+
     // ---- TASK-148: invalidate a chapter's derived memories on revision change ----
 
     /** Deletes the STORY_MEMORY rows derived from one chapter (source-tracked). */

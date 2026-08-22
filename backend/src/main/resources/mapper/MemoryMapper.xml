@@ -16,6 +16,8 @@
         <result column="evidence" property="evidence"/>
         <result column="processing_status" property="processingStatus"/>
         <result column="applied" property="applied"/>
+        <result column="importance" property="importance"/>
+        <result column="scope" property="scope"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
     </resultMap>
@@ -23,30 +25,33 @@
     <insert id="insertCandidate" parameterType="com.example.storyai.memory.model.MemoryCandidate"
             useGeneratedKeys="true" keyProperty="id">
         INSERT INTO memory_candidate
-            (story_id, source_chapter_id, type, subject, field, value, suggested_action, evidence, processing_status, applied)
+            (story_id, source_chapter_id, type, subject, field, value, suggested_action, evidence, processing_status, applied, importance, scope)
         VALUES
-            (#{storyId}, #{sourceChapterId}, #{type}, #{subject}, #{field}, #{value}, #{suggestedAction}, #{evidence}, #{processingStatus}, #{applied})
+            (#{storyId}, #{sourceChapterId}, #{type}, #{subject}, #{field}, #{value}, #{suggestedAction}, #{evidence}, #{processingStatus}, #{applied}, #{importance}, #{scope})
     </insert>
 
+    <sql id="CandidateColumns">
+        id, story_id, source_chapter_id, type, subject, field, value,
+        suggested_action, evidence, processing_status, applied,
+        importance, scope, created_at, updated_at
+    </sql>
+
     <select id="findCandidatesByStory" resultMap="CandidateResult">
-        SELECT id, story_id, source_chapter_id, type, subject, field, value,
-               suggested_action, evidence, processing_status, applied, created_at, updated_at
+        SELECT <include refid="CandidateColumns"/>
         FROM memory_candidate
         WHERE story_id = #{storyId}
         ORDER BY id ASC
     </select>
 
     <select id="findPendingCandidates" resultMap="CandidateResult">
-        SELECT id, story_id, source_chapter_id, type, subject, field, value,
-               suggested_action, evidence, processing_status, applied, created_at, updated_at
+        SELECT <include refid="CandidateColumns"/>
         FROM memory_candidate
         WHERE story_id = #{storyId} AND processing_status = 'PENDING'
         ORDER BY id ASC
     </select>
 
     <select id="findCandidateById" resultMap="CandidateResult">
-        SELECT id, story_id, source_chapter_id, type, subject, field, value,
-               suggested_action, evidence, processing_status, applied, created_at, updated_at
+        SELECT <include refid="CandidateColumns"/>
         FROM memory_candidate
         WHERE id = #{id}
     </select>
@@ -61,7 +66,8 @@
          exactly which live-memory slots this chapter created. -->
     <select id="findAppliedCandidatesBySource" resultMap="CandidateResult">
         SELECT id, story_id, source_chapter_id, type, subject, field,
-               suggested_action, evidence, processing_status, applied, created_at, updated_at
+               suggested_action, evidence, processing_status, applied,
+               importance, scope, created_at, updated_at
         FROM memory_candidate
         WHERE source_chapter_id = #{chapterId} AND processing_status = 'APPLIED'
         ORDER BY id ASC
@@ -142,6 +148,9 @@
         <result column="description" property="description"/>
         <result column="source_chapter_id" property="sourceChapterId"/>
         <result column="evidence" property="evidence"/>
+        <result column="importance" property="importance"/>
+        <result column="scope" property="scope"/>
+        <result column="active" property="active"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
     </resultMap>
@@ -149,15 +158,28 @@
     <insert id="insertStoryMemory" parameterType="com.example.storyai.memory.model.StoryMemory"
             useGeneratedKeys="true" keyProperty="id">
         INSERT INTO story_memory
-            (story_id, type, subject, description, source_chapter_id, evidence)
+            (story_id, type, subject, description, source_chapter_id, evidence, importance, scope, active)
         VALUES
-            (#{storyId}, #{type}, #{subject}, #{description}, #{sourceChapterId}, #{evidence})
+            (#{storyId}, #{type}, #{subject}, #{description}, #{sourceChapterId}, #{evidence}, #{importance}, #{scope}, #{active})
     </insert>
 
     <select id="findStoryMemories" resultMap="StoryMemoryResult">
-        SELECT id, story_id, type, subject, description, source_chapter_id, evidence, created_at, updated_at
+        SELECT id, story_id, type, subject, description, source_chapter_id, evidence,
+               importance, scope, active, created_at, updated_at
         FROM story_memory
         WHERE story_id = #{storyId}
+        ORDER BY id ASC
+    </select>
+
+    <!-- TASK-162: dedup candidate set (same story + type + subject, still active) -->
+    <select id="findActiveByTypeSubject" resultMap="StoryMemoryResult">
+        SELECT id, story_id, type, subject, description, source_chapter_id, evidence,
+               importance, scope, active, created_at, updated_at
+        FROM story_memory
+        WHERE story_id = #{storyId}
+          AND type = #{type}
+          AND subject = #{subject}
+          AND active = 1
         ORDER BY id ASC
     </select>
 

@@ -103,14 +103,37 @@ public class StoryContextReader {
     /**
      * Story memories mapped to the Writer request shape (see
      * {@link #getWriterStateItems} for why a separate mapper is needed).
+     *
+     * <p>v0.1.1 Phase 7 (TASK-164) — SELECTIVE memory, never the full dump:</p>
+     * <ul>
+     *   <li>always excluded: inactive rows, TRANSIENT_DETAIL, importance &lt;= 2
+     *       (the "bread loop" class — transient details must not become anchors);</li>
+     *   <li>always kept: PLOT_THREAD / FORESHADOWING (active threads and setups)
+     *       and importance == 5 core facts;</li>
+     *   <li>everything else kept up to a bounded cap, highest importance first,
+     *       so long books cannot blow up the writer context.</li>
+     * </ul>
+     * No RAG / embeddings: structured selection only.
      */
     public List<GenerateChapterRequest.MemoryItem> getWriterMemoryItems(Long storyId) {
         List<StoryMemory> memories = memoryService.getStoryMemories(storyId);
         if (memories == null) return List.of();
-        return memories.stream()
+
+        List<StoryMemory> selected = memories.stream()
+                .filter(m -> m != null && m.isActive())
+                .filter(m -> !com.example.storyai.memory.model.MemoryTypes.TRANSIENT_DETAIL
+                        .equals(m.getType()))
+                .filter(m -> m.getImportance() > 2)
+                .sorted(Comparator.comparingInt(StoryMemory::getImportance).reversed())
+                .limit(WRITER_MEMORY_CAP)
+                .toList();
+        return selected.stream()
                 .map(m -> new GenerateChapterRequest.MemoryItem(m.getType(), m.getSubject(), m.getDescription()))
                 .toList();
     }
+
+    /** TASK-164: hard bound on how many memories reach the Writer. */
+    private static final int WRITER_MEMORY_CAP = 20;
 
     // ---- relationships ----
 

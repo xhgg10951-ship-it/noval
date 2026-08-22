@@ -10,13 +10,41 @@ public class StoryMemory {
 
     private Long id;
     private Long storyId;
-    private String type;     // EVENT / DETAIL / FORESHADOW / SECRET / PROMISE / ANOMALY
+    private String type;     // v0.1.1 Phase 7 enum (TASK-158): see MemoryTypes
     private String subject;
     private String description;
     private Long sourceChapterId;
     private String evidence;
+    // ---- v0.1.1 Phase 7 / TASK-157: Memory v2 ----
+    private int importance = 3;   // 1..5
+    private String scope = "STORY"; // CHAPTER / STAGE / ARC / STORY
+    private boolean active = true;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public int getImportance() {
+        return importance;
+    }
+
+    public void setImportance(int importance) {
+        this.importance = importance;
+    }
+
+    public String getScope() {
+        return scope;
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

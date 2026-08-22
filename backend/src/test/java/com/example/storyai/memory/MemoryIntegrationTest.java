@@ -89,11 +89,11 @@ class MemoryIntegrationTest {
                             "本章主角进入禁书区并获得钥匙。");
                 });
         when(aiServiceClient.extractMemory(any())).thenReturn(new ExtractMemoryResponse(java.util.List.of(
-                new ExtractMemoryResponse.MemoryCandidate("CURRENT_STATE", "主角", "location", "禁书区", "AUTO", "正文提及来到禁书区。"),
-                new ExtractMemoryResponse.MemoryCandidate("CURRENT_STATE", "主角", "inventory", "钥匙", "AUTO", "正文提及获得钥匙。"),
-                new ExtractMemoryResponse.MemoryCandidate("RELATIONSHIP", "艾琳->主角", null, "艾琳对主角保持警惕", "REVIEW", "正文包含艾琳互动。"),
-                new ExtractMemoryResponse.MemoryCandidate("STORY_MEMORY", "禁书区", null, "禁书区藏有禁忌知识", "REVIEW", "正文设定。"),
-                new ExtractMemoryResponse.MemoryCandidate("STORY_MEMORY", "噪音", null, "无关噪音", "IGNORE", "无明确价值。")
+                new ExtractMemoryResponse.MemoryCandidate("CURRENT_STATE", "主角", "location", "禁书区", "AUTO", "正文提及来到禁书区。", 4, "STAGE"),
+                new ExtractMemoryResponse.MemoryCandidate("CURRENT_STATE", "主角", "item:钥匙", "钥匙", "AUTO", "正文提及获得钥匙。", 4, "ARC"),
+                new ExtractMemoryResponse.MemoryCandidate("RELATIONSHIP", "艾琳->主角", null, "艾琳对主角保持警惕", "REVIEW", "正文包含艾琳互动。", 3, "STORY"),
+                new ExtractMemoryResponse.MemoryCandidate("FORESHADOWING", "禁书区", null, "禁书区藏有禁忌知识", "REVIEW", "正文设定。", 4, "STORY"),
+                new ExtractMemoryResponse.MemoryCandidate("TRANSIENT_DETAIL", "噪音", null, "无关噪音", "IGNORE", "无明确价值。", 1, "CHAPTER")
         )));
     }
 
@@ -118,9 +118,10 @@ class MemoryIntegrationTest {
         // AUTO candidates applied to current_state
         mockMvc.perform(get("/api/stories/{id}/memory", storyId))
                 .andExpect(status().isOk())
+                .andDo(r -> System.out.println("[DIAG] memory=" + r.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8)))
                 .andExpect(jsonPath("$.currentState").isArray())
                 .andExpect(jsonPath("$.currentState[?(@.field=='location' && @.value=='禁书区')]").exists())
-                .andExpect(jsonPath("$.currentState[?(@.field=='inventory' && @.value=='钥匙')]").exists())
+                .andExpect(jsonPath("$.currentState[?(@.field=='item:钥匙' && @.value=='钥匙')]").exists())
                 // REVIEW relationship not auto-applied -> relationships empty
                 .andExpect(jsonPath("$.relationships.length()").value(0))
                 // REVIEW story memory not auto-applied -> empty

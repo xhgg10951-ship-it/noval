@@ -143,6 +143,9 @@ class MemoryCandidate(BaseModel):
     value: str
     suggestedAction: SuggestedAction
     evidence: str
+    # ---- v0.1.1 Phase 7 (TASK-159): Memory v2 contract ----
+    importance: int = 3
+    scope: str = "STORY"
 
 
 class ExtractMemoryResponse(BaseModel):

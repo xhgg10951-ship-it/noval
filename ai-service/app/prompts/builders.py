@@ -306,16 +306,40 @@ def _fmt_writer_spec(req: GenerateChapterRequest) -> str:
 
 EXTRACT_OUTPUT_HINT = (
     '{"candidates": [{"type": str, "subject": str, "field": str|null, '
-    '"value": str, "suggestedAction": "AUTO"|"REVIEW"|"IGNORE", "evidence": str}]}'
+    '"value": str, "suggestedAction": "AUTO"|"REVIEW"|"IGNORE", "evidence": str, '
+    '"importance": int, "scope": str}]}'
 )
 
 
 def build_extract_prompt(req: ExtractMemoryRequest) -> Tuple[str, str]:
+    """TASK-160 — Memory v2 extractor prompt.
+
+    Core discipline: EXTRACT, DON'T INVENT. Every candidate must be grounded in
+    the chapter text; the five questions decide type/importance/scope/action.
+    """
     system = (
-        "你是一名故事记忆抽取 AI。从章节正文与摘要中，抽取应当被长期记住的事实："
-        "当前状态(CURRENT_STATE)、人物关系(RELATIONSHIP)、故事记忆(STORY_MEMORY，含伏笔)。"
-        "每个候选给出 subject、可选 field、value、suggestedAction(AUTO 自动采纳 / REVIEW 需作者确认 / IGNORE 忽略)、"
-        "以及 evidence 证据原文。必须只返回严格 JSON，格式为：\n" + EXTRACT_OUTPUT_HINT
+        "你是一名故事记忆抽取 AI。你的纪律是：只抽取，不发明（Extract, don't invent）——"
+        "每个候选都必须能在章节正文中找到证据原文，禁止推测、脑补或总结出正文没有的事实。\n"
+        "\n"
+        "对每个候选依次回答五个问题：\n"
+        "1. 这是当前状态吗？（位置/伤势/情绪/当前目标 → CURRENT_STATE；"
+        "两人关系变化 → RELATIONSHIP。有长期剧情意义的持有物 → CURRENT_STATE 且 field 写为 "
+        "item:物品名。注意：一次性食物/消耗品/纯过场物件不属于状态，除非它对后续剧情有明确持续影响）\n"
+        "2. 五章之后作者还需要它吗？不需要 → TRANSIENT_DETAIL（如一次性道具、"
+        "过场对话细节），建议 IGNORE 或低重要度\n"
+        "3. 它是剧情资产还是瞬时细节？推动主线/埋设伏笔/世界规则 → "
+        "PLOT_FACT / PLOT_THREAD / FORESHADOWING / WORLD_RULE\n"
+        "4. 重要度 importance 1–5：5=必须始终让写作者知道的核心事实；"
+        "1=可有可无的细节\n"
+        "5. 范围 scope：CHAPTER=仅本章有意义 / STAGE=本阶段内有效 / "
+        "ARC=本卷内有效 / STORY=全书长期有效\n"
+        "\n"
+        "type 只允许：CURRENT_STATE, RELATIONSHIP, PLOT_FACT, PLOT_THREAD, "
+        "FORESHADOWING, WORLD_RULE, TRANSIENT_DETAIL。"
+        "suggestedAction 建议：核心事实与状态→AUTO；伏笔与世界规则→REVIEW；"
+        "低价值细节→IGNORE。\n"
+        "每个候选给出 subject、可选 field、value、evidence 证据原文。"
+        "必须只返回严格 JSON，格式为：\n" + EXTRACT_OUTPUT_HINT
     )
     user = f"""章节摘要：
 {req.chapterSummary}
@@ -328,6 +352,8 @@ def build_extract_prompt(req: ExtractMemoryRequest) -> Tuple[str, str]:
 
 约束：
 {_fmt_constraints(req.constraints)}
+
+注意：每个 candidate 都必须包含 importance（1–5 整数）和 scope（CHAPTER/STAGE/ARC/STORY 之一）字段，缺一不可。
 
 请只输出 JSON。"""
     return system, user

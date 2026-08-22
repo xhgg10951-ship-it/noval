@@ -83,7 +83,11 @@ public class MemoryExtractionService {
         MemoryCandidate m = new MemoryCandidate();
         m.setStoryId(storyId);
         m.setSourceChapterId(chapterId);
-        m.setType(c.type());
+        // TASK-158/161: normalize onto the frozen type enum. Unknown types are
+        // NOT silently stored as story facts — they keep their raw value here
+        // and the processing service routes them to REVIEW (never AUTO).
+        String normalized = com.example.storyai.memory.model.MemoryTypes.normalize(c.type());
+        m.setType(normalized != null ? normalized : c.type());
         m.setSubject(c.subject());
         m.setField(c.field());
         m.setValue(c.value());
@@ -91,6 +95,9 @@ public class MemoryExtractionService {
         m.setEvidence(c.evidence());
         m.setProcessingStatus("PENDING"); // decision deferred to processing service
         m.setApplied(false);
+        // TASK-159: importance clamped to 1..5, scope validated against the enum.
+        m.setImportance(com.example.storyai.memory.model.MemoryTypes.clampImportance(c.importance()));
+        m.setScope(com.example.storyai.memory.model.MemoryTypes.normalizeScope(c.scope()));
         return m;
     }
 

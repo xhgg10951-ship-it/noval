@@ -1,0 +1,64 @@
+{
+  "candidates": [
+    {
+      "type": "CURRENT_STATE",
+      "subject": "林夜",
+      "field": "location",
+      "value": "冒险者公会",
+      "suggestedAction": "AUTO",
+      "evidence": "清晨的阳光洒进小屋。林夜起床后去街角的面包店买了一个普通的面包当早餐，边走边吃。回到公会大厅时，艾琳已经在等他了。",
+      "importance": 5,
+      "scope": "CHAPTER"
+    },
+    {
+      "type": "CURRENT_STATE",
+      "subject": "林夜",
+      "field": "item",
+      "value": "普通面包",
+      "suggestedAction": "IGNORE",
+      "evidence": "林夜起床后去街角的面包店买了一个普通的面包当早餐，边走边吃。",
+      "importance": 1,
+      "scope": "CHAPTER"
+    },
+    {
+      "type": "CURRENT_STATE",
+      "subject": "艾琳",
+      "field": "location",
+      "value": "冒险者公会",
+      "suggestedAction": "AUTO",
+      "evidence": "回到公会大厅时，艾琳已经在等他了。",
+      "importance": 5,
+      "scope": "CHAPTER"
+    },
+    {
+      "type": "CURRENT_STATE",
+      "subject": "林夜",
+      "field": "location",
+      "value": "幽影森林",
+      "suggestedAction": "AUTO",
+      "evidence": "出了城门，林夜注意到森林上空的云层泛着不寻常的紫色微光。",
+      "importance": 5,
+      "scope": "STAGE"
+    },
+    {
+      "type": "PLOT_FACT",
+      "subject": "委托",
+      "field": "内容",
+      "value": "调查幽影森林失踪案",
+      "suggestedAction": "AUTO",
+      "evidence": "艾琳把一张委托单拍在桌上：幽影森林又有人失踪了，这次是铁匠的小儿子。两人决定立刻出发。",
+      "importance": 5,
+      "scope": "STORY"
+    },
+    {
+      "type": "FORESHADOWING",
+      "subject": "幽影森林",
+      "field": "异常现象",
+      "value": "紫色微光",
+      "suggestedAction": "REVIEW",
+      "evidence": "出了城门，林夜注意到森林上空的云层泛着不寻常的紫色微光。",
+      "importance": 4,
+      "scope": "STORY"
+    }
+  ]
+}

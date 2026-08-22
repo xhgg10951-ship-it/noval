@@ -43,6 +43,26 @@ public class CandidateProcessingService {
 
     /** Applies a candidate exactly according to its suggestedAction (used after extraction). */
     public void autoProcess(MemoryCandidate candidate) {
+        // TASK-161: only the frozen type enum may be auto-applied. An unknown
+        // type is a contract violation from the extractor — it must never be
+        // silently stored as a long-term story fact; route it to REVIEW.
+        if (!com.example.storyai.memory.model.MemoryTypes.ALL.contains(candidate.getType())) {
+            log.warn("Unknown memory type '{}' from candidate {} -> REVIEW",
+                    candidate.getType(), candidate.getId());
+            memoryService.updateCandidateStatus(candidate.getId(), "PENDING", false);
+            return;
+        }
+        // TASK-165 (AC-105 bread-loop guard): inventory slots are CUMULATIVE —
+        // an AUTO-applied trifle would sit in Current State forever and leak
+        // into every later writer context. Structural rule, not a word list:
+        // an item:* slot needs importance >= 4 to be applied without the author.
+        if (candidate.getField() != null && candidate.getField().startsWith("item:")
+                && candidate.getImportance() < 4) {
+            log.info("Inventory candidate {} importance {} < 4 -> REVIEW (field={}, type={})",
+                    candidate.getId(), candidate.getImportance(), candidate.getField(), candidate.getType());
+            memoryService.updateCandidateStatus(candidate.getId(), "PENDING", false);
+            return;
+        }
         String action = candidate.getSuggestedAction();
         if ("AUTO".equals(action)) {
             applyCandidate(candidate);
@@ -80,14 +100,38 @@ public class CandidateProcessingService {
             applyStoryMemory(c);
             return;
         }
+        // TASK-163: inventory slots are per-item so multiple possessions coexist.
+        // field="inventory"/"item"/... + value="铁剑" becomes field="item:铁剑";
+        // losing the sword later deletes only that slot, never the whole inventory.
+        String effectiveField = normalizeInventoryField(field, c.getValue());
         CurrentState s = new CurrentState();
         s.setStoryId(c.getStoryId());
         s.setCategory(categoryFor(field));
         s.setSubject(c.getSubject());
-        s.setField(field);
+        s.setField(effectiveField);
         s.setValue(c.getValue());
         memoryService.upsertCurrentState(s);
-        log.info("Applied CURRENT_STATE candidate {} -> {}:{}", c.getId(), field, c.getValue());
+        log.info("Applied CURRENT_STATE candidate {} -> {}:{}", c.getId(), effectiveField, c.getValue());
+    }
+
+    /** TASK-163 — one slot per item: item:<normalized item name>. */
+    private String normalizeInventoryField(String field, String value) {
+        String f = field.toLowerCase();
+        boolean inventoryLike = f.equals("inventory") || f.equals("item")
+                || f.equals("weapon") || f.equals("equipment");
+        if (!inventoryLike) {
+            return field;
+        }
+        String item = value == null ? "" : value.trim();
+        if (item.isEmpty()) {
+            return field;
+        }
+        // keep a normalized, bounded key: collapse whitespace, cap length
+        item = item.replaceAll("\\s+", "");
+        if (item.length() > 48) {
+            item = item.substring(0, 48);
+        }
+        return "item:" + item;
     }
 
     private void applyRelationship(MemoryCandidate c) {
@@ -109,15 +153,54 @@ public class CandidateProcessingService {
     }
 
     private void applyStoryMemory(MemoryCandidate c) {
+        // TASK-162 — Dedup v1: normalized exact match against active rows with
+        // the same (story, type, subject). A duplicate refreshes nothing and
+        // inserts nothing; the existing fact already covers it. No embeddings.
+        String type = c.getType();
+        List<StoryMemory> sameSubject = memoryService.findActiveByTypeSubject(
+                c.getStoryId(), type, c.getSubject());
+        if (isDuplicate(sameSubject, c.getValue())) {
+            memoryService.updateCandidateStatus(c.getId(), "APPLIED", false);
+            log.info("Dedup: candidate {} matches an existing {} memory for '{}' — not inserted",
+                    c.getId(), type, c.getSubject());
+            return;
+        }
+
         StoryMemory m = new StoryMemory();
         m.setStoryId(c.getStoryId());
-        m.setType(c.getType());
+        m.setType(type);
         m.setSubject(c.getSubject());
         m.setDescription(c.getValue());
         m.setSourceChapterId(c.getSourceChapterId());
         m.setEvidence(c.getEvidence());
+        // TASK-159: clamp/normalize at the storage boundary — every path into
+        // story_memory goes through here, so invalid values can never persist.
+        m.setImportance(com.example.storyai.memory.model.MemoryTypes.clampImportance(c.getImportance()));
+        m.setScope(com.example.storyai.memory.model.MemoryTypes.normalizeScope(c.getScope()));
+        m.setActive(true);
         memoryService.saveStoryMemory(m);
-        log.info("Applied STORY_MEMORY candidate {} -> type {}", c.getId(), c.getType());
+        log.info("Applied STORY_MEMORY candidate {} -> type {}", c.getId(), type);
+    }
+
+    /** TASK-162 — normalized exact description match (whitespace-collapsed). */
+    private boolean isDuplicate(List<StoryMemory> candidates, String newValue) {
+        if (newValue == null || newValue.isBlank()) {
+            return false;
+        }
+        String normalizedNew = normalizeForDedup(newValue);
+        for (StoryMemory existing : candidates) {
+            if (existing.getDescription() == null) {
+                continue;
+            }
+            if (normalizeForDedup(existing.getDescription()).equals(normalizedNew)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String normalizeForDedup(String text) {
+        return text.replaceAll("\\s+", "").trim();
     }
 
     /** Maps a state field to a coarse category for CurrentState grouping. */

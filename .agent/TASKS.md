@@ -2576,7 +2576,7 @@ Phase 6 Gate Result: **PASSED** (2026-08-22, after TASK-156; full `mvn test` 53/
 
 ## TASK-157 — Memory v2 Migration
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2600,7 +2600,7 @@ Phase 6 Gate
 
 ## TASK-158 — Freeze Memory Type Contract as Enum
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2628,7 +2628,7 @@ TASK-157
 
 ## TASK-159 — Add Importance + Scope to AI Contract
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2649,7 +2649,7 @@ TASK-158
 
 ## TASK-160 — Redesign Memory Extractor Prompt
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2675,7 +2675,7 @@ TASK-159
 
 ## TASK-161 — Safe Candidate Processing v2
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2696,7 +2696,7 @@ TASK-159
 
 ## TASK-162 — StoryMemory Dedup v1
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2716,7 +2716,7 @@ TASK-161
 
 ## TASK-163 — Fix Inventory Multi-item State
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2745,7 +2745,7 @@ TASK-161
 
 ## TASK-164 — Implement Writer Memory Selection
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2781,7 +2781,7 @@ TASK-163
 
 ## TASK-165 — Bread-loop Regression Acceptance
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2811,15 +2811,28 @@ TASK-164
 ## Phase 7 Gate
 
 ```text
-[ ] Type enum safe
-[ ] importance/scope works
-[ ] dedup works
-[ ] inventory multi-item works
-[ ] Memory Selection works
-[ ] AC-105 PASS
-[ ] AC-115 PASS
-[ ] AC-116 PASS
+[x] Type enum safe — 7 类型冻结 + normalize 映射；未知类型 REVIEW 永不入库（TASK-158/161）
+[x] importance/scope works — 契约双端 + clamp/normalize 在存储边界收口（TASK-159）
+[x] dedup works — normalized exact 匹配，AC-115 断言通过（TASK-162）
+[x] inventory multi-item works — item:<name> 独立 slot 共存/独立删除，AC-116 通过（TASK-163）
+[x] Memory Selection works — 排除 inactive/TRANSIENT/importance≤2 + cap 20（TASK-164）
+[x] AC-105 PASS — real-LLM：面包被分类 imp=1/scope=CHAPTER/IGNORE，永不进入 writer 上下文
+[x] AC-115 PASS — duplicateFactIsNotStoredTwice
+[x] AC-116 PASS — inventorySlotsPerItemCoexistAndDeleteIndependently
 ```
+
+Phase 7 Gate Result: **PASSED** (2026-08-22, after TASK-165; full `mvn test` 58/58)
+
+实现说明：
+- V14 additive 迁移（importance TINYINT DEFAULT 3 / scope DEFAULT STORY / active
+  DEFAULT 1——旧数据语义兼容）；候选查询统一补齐新列（曾因 SELECT 缺列导致重读
+  行 importance 丢失，已修）
+- TASK-160 prompt：五问纪律（Extract, don't invent）+ 枚举白名单 + importance/
+  scope 定义 + user 尾部强制字段提醒（首轮真实运行模型省略 v2 字段后加的强化）
+- TASK-161：autoProcess 三道防线——未知类型 REVIEW、item:* 且 importance<4 降级
+  REVIEW（AC-105 结构性守卫，非词表）、其余按 action 路由
+- TASK-165 real-LLM 证据：`.agent/evidence/ac105_extract.json`、脚本
+  `.agent/ac105_run.py`（判定逻辑镜像 Java 流水线的 writer 可见性）
 
 ---
 
@@ -3302,3 +3315,4 @@ TASK-172 ~ TASK-179
 > **Prove wiring with tests. Prove AI behavior with a real model.**
 
 > **Never let TASKS.md become evidence by itself. Repository behavior is the evidence.**
+

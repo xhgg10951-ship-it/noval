@@ -23,7 +23,10 @@ public record ExtractMemoryResponse(
             String field,
             String value,
             String suggestedAction,
-            String evidence
+            String evidence,
+            // ---- v0.1.1 Phase 7 (TASK-159): Memory v2 contract ----
+            Integer importance, // 1..5, validated/clamped in Java
+            String scope        // CHAPTER/STAGE/ARC/STORY, validated in Java
     ) {
     }
 }

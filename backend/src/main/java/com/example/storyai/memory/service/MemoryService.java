@@ -98,4 +98,9 @@ public class MemoryService {
     public List<StoryMemory> getStoryMemories(Long storyId) {
         return memoryMapper.findStoryMemories(storyId);
     }
+
+    /** TASK-162: dedup candidate set (same story+type+subject, still active). */
+    public List<StoryMemory> findActiveByTypeSubject(Long storyId, String type, String subject) {
+        return memoryMapper.findActiveByTypeSubject(storyId, type, subject);
+    }
 }
