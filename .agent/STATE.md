@@ -28,15 +28,15 @@ Current Implementation Plan:
 
 Current Phase:
 
-`Phase 9 COMPLETE — v0.1.1 NOT ACCEPTED (single blocker: AC-103 model length ceiling)`
+`v0.1.1 ACCEPTED — Phase 9 COMPLETE (BLOCKER-1 resolved via model upgrade qwen3.7-plus)`
 
 Current Task:
 
-`NONE — awaiting project-owner decision on BLOCKER-1 (see TASK-179)`
+`NONE — v0.1.1 frozen as ACCEPTED`
 
 Task Status:
 
-`FROZEN_PENDING_DECISION`
+`ACCEPTED (all 79 tasks terminal; DoD fully green)`
 
 Task Evidence:
 
@@ -104,7 +104,10 @@ The repository also contains working concepts for:
 
 However:
 
-> real-LLM semantic quality and long-form authoring behavior are not accepted yet.
+> ~~real-LLM semantic quality and long-form authoring behavior are not accepted yet.~~
+> **SUPERSEDED 2026-08-22**: v0.1.1 completed the Real-LLM acceptance suite
+> (6/7 first-pass + AC-103 PASS after model upgrade) — see §20 Final Current State.
+> This section is retained as historical v0.1 baseline context.
 
 ### 2.1 Status Corrections Applied (TASK-102)
 
@@ -828,13 +831,13 @@ IN PROGRESS (Phase 3 engineering DONE; TASK-132 regression suite pending;
 Phase 4 backend partially landed)
 
 Current Phase:
-Phase 9 COMPLETE — v0.1.1 NOT ACCEPTED (single blocker: AC-103 model length ceiling)
+v0.1.1 ACCEPTED — Phase 9 COMPLETE (BLOCKER-1 resolved via model upgrade qwen3.7-plus)
 
 Current Task:
-NONE — awaiting project-owner decision on BLOCKER-1 (TASK-179)
+NONE — v0.1.1 frozen as ACCEPTED
 
 Current Task Status:
-FROZEN_PENDING_DECISION (all 79 tasks terminal)
+ACCEPTED (all 79 tasks terminal; DoD fully green)
 
 Phase 0 Gate:
 PASSED (2026-08-21, after commit 63781dd)
@@ -894,16 +897,15 @@ Maven 3.9.16 + JDK17 now available in this environment (previously absent).
 mvn test fully operational against the local MySQL story_ai database.
 
 Known Blocker:
-BLOCKER-1 (sole blocker, model capability): qwen3-8b cannot produce narrative
-chapters beyond ~1800–2000 chars; frozen AC-103 lower bound is 2250. Re-run
-under frozen conditions reproduced the FAIL (ac103_rerun.json). Not a code
-defect. Unblock paths need owner decision: larger-model credential and rerun,
-or explicit revision of the frozen length band.
+NONE — BLOCKER-1 resolved on 2026-08-22: owner switched the model to
+qwen3.7-plus; AC-103 re-run under frozen conditions produced
+3197/2788/2818/3795/3227 chars = 4/5 in band → PASS (ac103_rerun.json);
+manual inspection confirmed rich sensory prose, no padding. Original
+qwen3-8b FAIL records retained as capability-difference evidence.
 
 Next Safe Action:
-Project-owner decision on BLOCKER-1, then either rerun AC-103 only
-(TASK-177 path) or re-baseline the acceptance band. All other DoD items are
-green; engineering suite stands at backend 59/59, python 7/7, frontend build OK.
+None required for v0.1.1 — it is ACCEPTED. Future work belongs to a new
+frozen version (candidates already recorded in the Deferred Backlog).
 ```
 
 Core principles:
@@ -915,3 +917,5 @@ Core principles:
 > **Generated text is a draft until the author accepts it.**
 
 > **Mock proves plumbing. Real LLM proves AI behavior.**
+
+

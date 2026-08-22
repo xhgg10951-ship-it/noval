@@ -1102,7 +1102,15 @@ Engineering Verification: PASSED
 - 新增 Writer length-expand guard (`app/services/writer.py`)：首稿低于 2250 时最多 3 次
   "保留事实、丰满重写"回填，且扩写后更长才采纳；无新基础设施（commits 39911e2 / 3e31460）
 
-Real-LLM Semantic Verification: FAIL (2026-08-22, honest, reproducible)
+Real-LLM Semantic Verification: **PASS after model upgrade** (见下方复验记录)
+
+> [!UPDATE 2026-08-22 晚]
+> 项目所有者决策切换模型为 qwen3.7-plus 后，按冻结条件完整重跑
+> （`.agent/ac103_rerun.py` → `ac103_rerun.json`）：5 章
+> 3197/2788/2818/3795/3227 字——**4/5 入 [2250,3750] 带 → PASS**
+> （ch4 超上限仅 45 字；PASS 条件即 ≥4/5）。人工抽查正文：感官细节充实、
+> 章节间剧情递进、结尾均为钩子式收束，无重复灌水。原 qwen3-8b FAIL 记录保留如下，
+> 作为模型能力差异的证据存档。
 - Model: qwen3-8b (Aliyun MaaS compatible-mode), using_mock_llm=False
 - 证据（三次独立真实运行，target=3000，5 章）：
   - 弱/无 guard 第一轮：1171 / 962 / 992 / 1276 / 1107  → 0/5 入带
@@ -1165,7 +1173,7 @@ TASK-118
 [x] ChapterSpec 全链路不丢字段        (TASK-114/115/116 DONE, engineering)
 [x] Writer 使用 expectedProgress      (TASK-117 DONE, engineering)
 [x] Writer 使用 targetCharacters      (TASK-117/119 DONE, engineering)
-[ ] AC-103 PASS                        (TASK-121 — FAIL: qwen3-8b 长度上限 ~1800-2000 字, 见上)
+[x] AC-103 PASS                        (TASK-121 — 模型升级 qwen3.7-plus 后重跑 4/5 入带 PASS; 原 qwen3-8b FAIL 记录保留为证据)
 [x] AC-104 PASS                        (TASK-122 — PASSED, real LLM goal-adherence verified)
 ```
 
@@ -3340,6 +3348,10 @@ TASK-172 ~ TASK-179
 > **Prove wiring with tests. Prove AI behavior with a real model.**
 
 > **Never let TASKS.md become evidence by itself. Repository behavior is the evidence.**
+
+
+
+
 
 
 

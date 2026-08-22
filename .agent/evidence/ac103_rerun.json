@@ -1,28 +1,28 @@
 {
-  "storyId": 1022,
-  "stageId": 643,
+  "storyId": 1023,
+  "stageId": 644,
   "lengths": [
     [
       1,
-      1013
+      3197
     ],
     [
       2,
-      1798
+      2788
     ],
     [
       3,
-      1608
+      2818
     ],
     [
       4,
-      1628
+      3795
     ],
     [
       5,
-      1813
+      3227
     ]
   ],
-  "inBand": 0,
-  "verdict": "FAIL"
+  "inBand": 4,
+  "verdict": "PASS"
 }
