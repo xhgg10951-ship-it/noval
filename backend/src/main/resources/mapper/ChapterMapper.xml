@@ -13,6 +13,8 @@
         <result column="content" property="content"/>
         <result column="summary" property="summary"/>
         <result column="generation_status" property="generationStatus"/>
+        <result column="target_characters" property="targetCharacters"/>
+        <result column="actual_character_count" property="actualCharacterCount"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
     </resultMap>
@@ -20,28 +22,33 @@
     <insert id="insert" parameterType="com.example.storyai.chapter.model.Chapter"
             useGeneratedKeys="true" keyProperty="id">
         INSERT INTO chapter
-            (story_id, stage_id, plan_id, chapter_number, title, content, summary, generation_status)
+            (story_id, stage_id, plan_id, chapter_number, title, content, summary, generation_status,
+             target_characters, actual_character_count)
         VALUES
-            (#{storyId}, #{stageId}, #{planId}, #{chapterNumber}, #{title}, #{content}, #{summary}, #{generationStatus})
+            (#{storyId}, #{stageId}, #{planId}, #{chapterNumber}, #{title}, #{content}, #{summary}, #{generationStatus},
+             #{targetCharacters}, #{actualCharacterCount})
     </insert>
 
     <select id="findById" resultMap="ChapterResult">
         SELECT id, story_id, stage_id, plan_id, chapter_number, title, content,
-               summary, generation_status, created_at, updated_at
+               summary, generation_status, target_characters, actual_character_count,
+               created_at, updated_at
         FROM chapter
         WHERE id = #{id}
     </select>
 
     <select id="findByPlanId" resultMap="ChapterResult">
         SELECT id, story_id, stage_id, plan_id, chapter_number, title, content,
-               summary, generation_status, created_at, updated_at
+               summary, generation_status, target_characters, actual_character_count,
+               created_at, updated_at
         FROM chapter
         WHERE plan_id = #{planId}
     </select>
 
     <select id="findByStageId" resultMap="ChapterResult">
         SELECT id, story_id, stage_id, plan_id, chapter_number, title, content,
-               summary, generation_status, created_at, updated_at
+               summary, generation_status, target_characters, actual_character_count,
+               created_at, updated_at
         FROM chapter
         WHERE stage_id = #{stageId}
         ORDER BY chapter_number ASC, id ASC
@@ -49,7 +56,8 @@
 
     <select id="findByStoryId" resultMap="ChapterResult">
         SELECT id, story_id, stage_id, plan_id, chapter_number, title, content,
-               summary, generation_status, created_at, updated_at
+               summary, generation_status, target_characters, actual_character_count,
+               created_at, updated_at
         FROM chapter
         WHERE story_id = #{storyId}
         ORDER BY chapter_number ASC, id ASC

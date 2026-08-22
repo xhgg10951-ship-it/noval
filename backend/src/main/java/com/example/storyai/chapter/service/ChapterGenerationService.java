@@ -104,6 +104,10 @@ public class ChapterGenerationService {
         chapter.setContent(ai.content());
         chapter.setSummary(ai.summary());
         chapter.setGenerationStatus("GENERATED");
+        // TASK-119: record target (from ChapterSpec) + actual length (CJK count).
+        chapter.setTargetCharacters(nextPlan.getTargetCharacters());
+        chapter.setActualCharacterCount(
+                com.example.storyai.common.util.TextLengthUtil.countCharacters(ai.content()));
 
         Chapter saved = chapterService.saveChapter(chapter);
 

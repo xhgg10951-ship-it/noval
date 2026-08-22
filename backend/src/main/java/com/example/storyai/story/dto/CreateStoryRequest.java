@@ -19,6 +19,9 @@ public class CreateStoryRequest {
 
     private String initialStageDirection;
 
+    // TASK-120: story default target chapter length (nullable; DB default 3000).
+    private Integer defaultTargetCharacters;
+
     @Valid
     private List<ConstraintInput> constraints;
 
@@ -44,6 +47,14 @@ public class CreateStoryRequest {
 
     public void setInitialStageDirection(String initialStageDirection) {
         this.initialStageDirection = initialStageDirection;
+    }
+
+    public Integer getDefaultTargetCharacters() {
+        return defaultTargetCharacters;
+    }
+
+    public void setDefaultTargetCharacters(Integer defaultTargetCharacters) {
+        this.defaultTargetCharacters = defaultTargetCharacters;
     }
 
     public List<ConstraintInput> getConstraints() {

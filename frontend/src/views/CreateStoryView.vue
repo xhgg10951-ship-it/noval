@@ -17,6 +17,7 @@ const form = reactive({
   name: '',
   coreIdea: '',
   initialStageDirection: '',
+  defaultTargetCharacters: 3000 as number | null,
 })
 
 const constraints = reactive<ConstraintRow[]>([
@@ -65,6 +66,7 @@ async function handleSubmit(): Promise<void> {
       name: form.name.trim(),
       coreIdea: form.coreIdea.trim(),
       initialStageDirection: form.initialStageDirection.trim() || undefined,
+      defaultTargetCharacters: form.defaultTargetCharacters ?? undefined,
       constraints: filledConstraints.length > 0 ? filledConstraints : undefined,
     })
     successMsg.value = `故事创建成功！(ID: ${created.id})`
@@ -72,6 +74,7 @@ async function handleSubmit(): Promise<void> {
     form.name = ''
     form.coreIdea = ''
     form.initialStageDirection = ''
+    form.defaultTargetCharacters = 3000
     constraints.splice(0, constraints.length, { id: Date.now(), type: '', content: '' })
     // Navigate to story list after a brief delay so the user sees success.
     setTimeout(() => router.push('/stories'), 800)
@@ -121,6 +124,21 @@ async function handleSubmit(): Promise<void> {
           placeholder="例：主角在一艘废弃空间站中醒来，不知道自己是谁"
           rows="2"
         ></textarea>
+      </div>
+
+      <div class="form__field">
+        <label class="form__label" for="target-chars">单章默认目标字数（可选）</label>
+        <input
+          id="target-chars"
+          v-model.number="form.defaultTargetCharacters"
+          class="form__input"
+          type="number"
+          min="300"
+          max="20000"
+          step="100"
+          placeholder="默认 3000"
+        />
+        <p class="form__sub">生成章节时以此为目标长度；留空则使用默认值 3000。</p>
       </div>
 
       <div class="form__field">

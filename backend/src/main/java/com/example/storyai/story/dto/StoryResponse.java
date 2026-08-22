@@ -11,6 +11,7 @@ public class StoryResponse {
     private String name;
     private String coreIdea;
     private String initialStageDirection;
+    private Integer defaultTargetCharacters;
     private String status;
     private List<ConstraintResponse> constraints;
     private java.time.LocalDateTime createdAt;
@@ -46,6 +47,14 @@ public class StoryResponse {
 
     public void setInitialStageDirection(String initialStageDirection) {
         this.initialStageDirection = initialStageDirection;
+    }
+
+    public Integer getDefaultTargetCharacters() {
+        return defaultTargetCharacters;
+    }
+
+    public void setDefaultTargetCharacters(Integer defaultTargetCharacters) {
+        this.defaultTargetCharacters = defaultTargetCharacters;
     }
 
     public String getStatus() {

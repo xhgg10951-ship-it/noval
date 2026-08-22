@@ -51,6 +51,7 @@ public class StoryController {
         story.setName(request.getName());
         story.setCoreIdea(request.getCoreIdea());
         story.setInitialStageDirection(request.getInitialStageDirection());
+        story.setDefaultTargetCharacters(request.getDefaultTargetCharacters());
         List<StoryConstraint> constraints = toConstraints(request.getConstraints());
 
         Story created = storyService.createStory(story, constraints);
@@ -96,6 +97,7 @@ public class StoryController {
         response.setName(story.getName());
         response.setCoreIdea(story.getCoreIdea());
         response.setInitialStageDirection(story.getInitialStageDirection());
+        response.setDefaultTargetCharacters(story.getDefaultTargetCharacters());
         response.setStatus(story.getStatus());
         response.setConstraints(constraints.stream()
                 .map(ConstraintResponse::new)

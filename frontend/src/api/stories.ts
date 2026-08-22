@@ -12,6 +12,7 @@ export interface CreateStoryRequest {
   name: string
   coreIdea: string
   initialStageDirection?: string
+  defaultTargetCharacters?: number
   constraints?: ConstraintInput[]
 }
 
@@ -27,6 +28,7 @@ export interface StoryResponse {
   name: string
   coreIdea: string
   initialStageDirection: string | null
+  defaultTargetCharacters: number | null
   status: string
   constraints: ConstraintResponse[]
   createdAt: string
