@@ -32,7 +32,7 @@ Current Phase:
 
 Current Task:
 
-`TASK-112 — Real-LLM Continuation Acceptance (AC-101)`
+`TASK-113 — Add Story Writing Settings Migration`
 
 Task Status:
 
@@ -551,12 +551,28 @@ Never discard unknown changes automatically.
 
 # 11. Current Known Blockers
 
-`NONE KNOWN`
+`REAL-LLM CREDENTIAL (BLOCKS TASK-112 / PHASE 1 GATE AC-101)`
+
+TASK-112 (Real-LLM Continuation Acceptance, AC-101) is **BLOCKED**: the frozen
+plan requires Real-LLM Semantic Verification, but no usable real LLM credential
+is present. `ai-service/app/config.py` reads `LLM_API_KEY`/`API_KEY` from the
+environment; none is set and no `.env` exists, so `settings.using_mock_llm`
+is True. Mock PASS is explicitly NOT accepted as Semantic PASS (STATE §5 / §18),
+so the agent must not fabricate a real-LLM result.
+
+This is a frozen-requirement-defined Blocker, not an engineering gap — the
+Planner continuation engineering (TASK-107/108/109) is fully implemented and
+Mock-testable. Per the Recovery Protocol, work continues on downstream
+engineering tasks (Phase 2+) while AC-101 waits on the credential.
+
+To unblock: set `LLM_API_KEY` (+ optional `LLM_BASE_URL`, `LLM_MODEL`) in the
+`ai-service` environment, then run AC-101 with known state
+(已穿越 / 已认识艾琳 / 已住进艾琳房间) + new Stage (第二天和艾琳去冒险者公会).
 
 Potential external requirement for later semantic tests:
 
 ```text
-A configured real LLM API credential
+A configured real LLM API credential (also gates AC-103/104/106/107/108/114/117)
 ```
 
 This is NOT a Phase 0 blocker.

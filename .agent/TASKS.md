@@ -726,7 +726,7 @@ TASK-110
 
 ## TASK-112 — Real-LLM Continuation Acceptance
 
-Status: `TODO`
+Status: `BLOCKED`
 
 Goal:
 
@@ -757,6 +757,21 @@ FAIL:
 Engineering Verification: PASSED required before run  
 Real-LLM Semantic Verification: REQUIRED
 
+Blocker (frozen-requirement-defined):
+
+No usable real LLM credential is present. `ai-service/app/config.py` reads
+`LLM_API_KEY` / `API_KEY` from the environment; none is set and no `.env`
+exists, so `settings.using_mock_llm == True`. AC-101 explicitly requires
+Real-LLM Semantic Verification, therefore this task is BLOCKED until a real
+provider credential is supplied. Per AGENTS.md / STATE §11, Mock PASS is NOT
+accepted as Semantic PASS — the agent must not fabricate a real-LLM result.
+Engineering path (prompt + contract) is fully wired and Mock-testable.
+
+Action:
+
+Marked BLOCKED; continue with Phase 2 engineering tasks. Revisit when a real
+LLM credential is configured (set LLM_API_KEY + LLM_BASE_URL + LLM_MODEL).
+
 Dependencies:
 
 TASK-109
@@ -767,12 +782,18 @@ TASK-111
 ## Phase 1 Gate
 
 ```text
-[ ] Planner 真实获得历史 Context
-[ ] Writer 真实获得 State / Memory / Relationship
-[ ] Recent Context 不再只有一个 Summary
-[ ] AC-101 PASS with real LLM
-[ ] AC-102 PASS
+[x] Planner 真实获得历史 Context
+[x] Writer 真实获得 State / Memory / Relationship
+[x] Recent Context 不再只有一个 Summary
+[ ] AC-101 PASS with real LLM   (BLOCKED: no real LLM credential)
+[ ] AC-102 PASS                 (Mock allowed; engineering done, run pending)
 ```
+
+Phase 1 Gate Status: PARTIAL — engineering complete; semantic gate blocked on
+real-LLM credential for AC-101 (and a Mock run for AC-102). Not yet fully
+passed, so strictly the gate is not green; per Recovery Protocol the agent
+continues with downstream engineering tasks while the semantic gate waits on
+the credential.
 
 ---
 
