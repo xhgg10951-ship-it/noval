@@ -41,4 +41,12 @@ public interface MemoryMapper {
     int insertStoryMemory(StoryMemory m);
 
     List<StoryMemory> findStoryMemories(@Param("storyId") Long storyId);
+
+    // ---- TASK-148: invalidate a chapter's derived memories on revision change ----
+
+    /** Deletes the STORY_MEMORY rows derived from one chapter (source-tracked). */
+    int deleteStoryMemoriesBySource(@Param("chapterId") Long chapterId);
+
+    /** Marks the chapter's old extraction candidates SUPERSEDED (audit trail kept). */
+    int supersedeCandidatesBySource(@Param("chapterId") Long chapterId);
 }

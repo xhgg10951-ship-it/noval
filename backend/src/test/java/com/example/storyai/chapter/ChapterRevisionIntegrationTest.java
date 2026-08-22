@@ -57,6 +57,9 @@ class ChapterRevisionIntegrationTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private com.example.storyai.chapter.service.ChapterGenerationService generationService;
+
     @MockitoBean
     private AiServiceClient aiServiceClient;
 
@@ -207,5 +210,80 @@ class ChapterRevisionIntegrationTest {
     void unknownChapterReturns404() throws Exception {
         mockMvc.perform(get("/api/chapters/999999/revisions"))
                 .andExpect(status().isNotFound());
+    }
+
+    // ---- TASK-144: regenerate same chapter -> same id, new AI_REWRITE revision ----
+
+    @Test
+    void regenerateKeepsChapterIdentityAndCreatesRewriteRevision() throws Exception {
+        Long storyId = createStory();
+        long chapterId = createActiveStageWithOneChapter(storyId);
+        JsonNode before = getChapter(chapterId);
+
+        when(aiServiceClient.generateChapter(any(GenerateChapterRequest.class)))
+                .thenAnswer(inv -> new GenerateChapterResponse(
+                        "第一章", "重写后的全新正文。", "重写摘要。"));
+
+        mockMvc.perform(post("/api/chapters/{id}/regenerate", chapterId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"authorInstruction\":\"节奏更紧凑\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(before.get("id").asInt()))
+                .andExpect(jsonPath("$.chapterNumber").value(before.get("chapterNumber").asInt()))
+                .andExpect(jsonPath("$.currentRevisionVersion").value(2))
+                .andExpect(jsonPath("$.sourceType").value("AI_REWRITE"))
+                .andExpect(jsonPath("$.content").value("重写后的全新正文。"))
+                // TASK-148 loop closed inside regenerate: memory re-extracted to COMPLETED
+                .andExpect(jsonPath("$.memoryExtractionStatus").value("COMPLETED"));
+
+        // history intact: v1 (AI_GENERATED) still readable, v2 (AI_REWRITE) current
+        String revBody = mockMvc.perform(get("/api/chapters/{id}/revisions", chapterId))
+                .andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        JsonNode revisions = objectMapper.readTree(revBody);
+        assertThat(revisions.size()).isEqualTo(2);
+        assertThat(revisions.get(0).get("sourceType").asText()).isEqualTo("AI_REWRITE");
+        assertThat(revisions.get(1).get("sourceType").asText()).isEqualTo("AI_GENERATED");
+        assertThat(revisions.get(1).get("content").asText()).contains("AI 生成的原稿");
+    }
+
+    // ---- TASK-147/148: manual edit marks STALE; re-extract invalidates derived memories ----
+
+    @Test
+    void manualEditMarksMemoryStaleAndReextractInvalidatesDerivedMemories() throws Exception {
+        Long storyId = createStory();
+        long chapterId = createActiveStageWithOneChapter(storyId);
+
+        // simulate a previously derived + applied memory from this chapter
+        jdbcTemplate.update("""
+                INSERT INTO story_memory (story_id, type, subject, description, source_chapter_id, evidence)
+                VALUES (?, 'EVENT', '旧事实', '旧正文派生的事实', ?, 'evidence')
+                """, createdStoryIds.get(0), chapterId);
+
+        // manual edit -> the exposed prose changed -> extraction must become STALE
+        mockMvc.perform(put("/api/chapters/{id}/content", chapterId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"content\":\"作者修改后的正文，事实已变化。\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.memoryExtractionStatus").value("STALE"));
+
+        Integer before = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM story_memory WHERE source_chapter_id = ?",
+                Integer.class, chapterId);
+        assertThat(before).isEqualTo(1);
+
+        // TASK-148: re-extraction invalidates derived memories, then restores COMPLETED
+        when(aiServiceClient.extractMemory(any())).thenReturn(
+                new com.example.storyai.ai.dto.ExtractMemoryResponse(List.of()));
+        generationService.reExtractChapter(chapterId);
+
+        Integer remaining = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM story_memory WHERE source_chapter_id = ?",
+                Integer.class, chapterId);
+        assertThat(remaining).isZero();
+
+        JsonNode after = getChapter(chapterId);
+        assertThat(after.get("memoryExtractionStatus").asText()).isEqualTo("COMPLETED");
+        // content untouched by re-extraction (only memories were refreshed)
+        assertThat(after.get("content").asText()).contains("作者修改后的正文");
     }
 }

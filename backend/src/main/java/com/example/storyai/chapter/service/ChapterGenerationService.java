@@ -53,6 +53,8 @@ public class ChapterGenerationService {
     private final AiServiceClient aiServiceClient;
     private final MemoryExtractionService extractionService;
     private final CandidateProcessingService processingService;
+    // TASK-148: a revised chapter invalidates its previously derived memories.
+    private final com.example.storyai.memory.mapper.MemoryMapper memoryMapper;
 
     public ChapterGenerationService(StoryService storyService,
                                     StageService stageService,
@@ -61,7 +63,8 @@ public class ChapterGenerationService {
                                     StoryContextReader contextReader,
                                     AiServiceClient aiServiceClient,
                                     MemoryExtractionService extractionService,
-                                    CandidateProcessingService processingService) {
+                                    CandidateProcessingService processingService,
+                                    com.example.storyai.memory.mapper.MemoryMapper memoryMapper) {
         this.storyService = storyService;
         this.stageService = stageService;
         this.chapterService = chapterService;
@@ -70,6 +73,7 @@ public class ChapterGenerationService {
         this.aiServiceClient = aiServiceClient;
         this.extractionService = extractionService;
         this.processingService = processingService;
+        this.memoryMapper = memoryMapper;
     }
 
     /** Generates the next pending chapter for a stage (AT-C01). */
@@ -165,6 +169,55 @@ public class ChapterGenerationService {
     }
 
     /**
+     * TASK-144 — Regenerate: rewrite the SAME chapter from its SAME ChapterSpec.
+     *
+     * <p>Rules honored: chapter id unchanged, chapter number unchanged, the new
+     * prose lands as a NEW AI_REWRITE revision (history intact), an optional
+     * author instruction steers the writer, and the revision change marks memory
+     * STALE then immediately re-extracts (TASK-147/148 loop).</p>
+     *
+     * @param chapterId        chapter to rewrite
+     * @param authorInstruction optional steering text appended to recent context
+     * @return the updated chapter row
+     */
+    public Chapter regenerateChapter(Long chapterId, String authorInstruction) {
+        Chapter chapter = chapterService.getChapter(chapterId);
+        if (chapter.getPlanId() == null) {
+            throw new IllegalStateException("该章节没有关联的章节计划，无法重新生成");
+        }
+        Stage stage = stageService.getStage(chapter.getStageId());
+        Story story = storyService.getStory(stage.getStoryId());
+        List<StoryConstraint> constraints = storyService.getConstraints(stage.getStoryId());
+        ChapterPlan plan = stageService.getPlans(stage.getId()).stream()
+                .filter(p -> p.getId().equals(chapter.getPlanId()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "章节对应的计划不存在（可能已被移除），无法重新生成"));
+
+        String recentContext = contextReader.getRecentContextWithEnding(story.getId(), 3, 800);
+        if (authorInstruction != null && !authorInstruction.isBlank()) {
+            recentContext = "作者对本次重写的指示：" + authorInstruction.trim() + "\n\n" + recentContext;
+        }
+
+        GenerateChapterRequest request = buildRequest(story, constraints, stage, plan, recentContext);
+        GenerateChapterResponse ai = aiServiceClient.generateChapter(request); // OUTSIDE tx
+        validate(ai);
+
+        // NEW immutable revision; createRevision flips memory to STALE for us.
+        revisionService.createRevision(chapterId, ai.content(),
+                com.example.storyai.chapter.model.ChapterRevision.SOURCE_AI_REWRITE);
+
+        // TASK-148 loop closes here: invalidate derived memories + re-extract.
+        reExtractChapter(chapterId);
+
+        Chapter refreshed = chapterService.getChapter(chapterId);
+        // keep length telemetry in sync with the exposed content
+        refreshed.setActualCharacterCount(
+                com.example.storyai.common.util.TextLengthUtil.countCharacters(ai.content()));
+        return chapterService.saveChapter(refreshed);
+    }
+
+    /**
      * v1 context assembly (TASK-022): story constraints + stage direction +
      * the plan's chapter goal + previous chapter summary as recent context.
      * CurrentState / StoryMemory / RelationshipState arrive in M4 and are left
@@ -229,6 +282,14 @@ public class ChapterGenerationService {
      */
     public void reExtractChapter(Long chapterId) {
         Chapter chapter = chapterService.getChapter(chapterId);
+        // TASK-148: the chapter's content changed — its previously derived
+        // memories are no longer trustworthy. Invalidate BEFORE re-extracting:
+        // source-tracked STORY_MEMORY rows are deleted, old candidates are marked
+        // SUPERSEDED (audit trail kept). current_state/relationship_state slots
+        // have no per-chapter provenance in v0.1; re-extraction upserts the same
+        // (story, category, subject, field) slots so corrected facts overwrite.
+        memoryMapper.deleteStoryMemoriesBySource(chapterId);
+        memoryMapper.supersedeCandidatesBySource(chapterId);
         chapter.setMemoryExtractionStatus(
                 com.example.storyai.chapter.model.MemoryExtractionStatus.PENDING);
         chapterService.saveChapter(chapter);

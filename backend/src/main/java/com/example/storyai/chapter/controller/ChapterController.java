@@ -91,6 +91,17 @@ public class ChapterController {
         return withRevisionVersion(new ChapterResponse(revisionService.approve(chapterId)));
     }
 
+    /** TASK-144 — regenerate the same chapter from its same ChapterSpec. */
+    @PostMapping("/api/chapters/{chapterId}/regenerate")
+    public ChapterResponse regenerate(@PathVariable Long chapterId,
+                                      @org.springframework.web.bind.annotation.RequestBody(
+                                              required = false)
+                                      java.util.Map<String, String> body) {
+        String instruction = body == null ? null : body.get("authorInstruction");
+        return withRevisionVersion(
+                new ChapterResponse(generationService.regenerateChapter(chapterId, instruction)));
+    }
+
     private ChapterResponse withRevisionVersion(ChapterResponse response) {
         if (response.getCurrentRevisionId() != null) {
             ChapterRevision current = revisionService.getRevision(response.getCurrentRevisionId());

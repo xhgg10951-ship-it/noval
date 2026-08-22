@@ -49,6 +49,11 @@ public class ChapterRevisionService {
      * chapter's current one. The author-facing status stays/re-enters DRAFT —
      * only an explicit approve flips it to APPROVED.
      *
+     * <p>TASK-147: any revision change other than the original AI generation
+     * (manual edit / AI rewrite / AI polish) marks the chapter's memory
+     * extraction STALE — derived facts may no longer match the exposed prose.
+     * Re-extraction happens through reExtractChapter (TASK-148).</p>
+     *
      * @param sourceType AI_GENERATED / MANUAL_EDIT / AI_REWRITE / AI_POLISH
      * @return the persisted revision
      */
@@ -68,6 +73,10 @@ public class ChapterRevisionService {
         chapter.setContent(content);
         chapter.setCurrentRevisionId(revision.getId());
         chapter.setStatus("DRAFT");
+        if (!ChapterRevision.SOURCE_AI_GENERATED.equals(sourceType)) {
+            chapter.setMemoryExtractionStatus(
+                    com.example.storyai.chapter.model.MemoryExtractionStatus.STALE);
+        }
         chapterService.saveChapter(chapter);
         return revision;
     }

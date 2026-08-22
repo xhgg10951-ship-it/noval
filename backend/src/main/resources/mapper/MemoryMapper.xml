@@ -134,4 +134,20 @@
         ORDER BY id ASC
     </select>
 
+    <!-- TASK-148: a revised chapter's derived facts are no longer trustworthy.
+         story_memory rows are source-tracked -> deleted; candidates keep the
+         audit trail but are marked SUPERSEDED so they are never re-applied. -->
+    <delete id="deleteStoryMemoriesBySource">
+        DELETE FROM story_memory
+        WHERE source_chapter_id = #{chapterId}
+    </delete>
+
+    <update id="supersedeCandidatesBySource">
+        UPDATE memory_candidate
+        SET processing_status = 'SUPERSEDED',
+            applied = 0
+        WHERE source_chapter_id = #{chapterId}
+          AND processing_status IN ('PENDING', 'APPLIED')
+    </update>
+
 </mapper>

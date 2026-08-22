@@ -23,6 +23,7 @@ public class ChapterResponse {
     private Integer currentRevisionVersion;
     private String sourceType; // source of the current revision
     private String status; // DRAFT / APPROVED
+    private String memoryExtractionStatus; // PENDING / COMPLETED / FAILED / STALE
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -41,6 +42,7 @@ public class ChapterResponse {
         this.generationStatus = c.getGenerationStatus();
         this.currentRevisionId = c.getCurrentRevisionId();
         this.status = c.getStatus();
+        this.memoryExtractionStatus = c.getMemoryExtractionStatus();
         this.createdAt = c.getCreatedAt();
         this.updatedAt = c.getUpdatedAt();
     }
@@ -147,6 +149,14 @@ public class ChapterResponse {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getMemoryExtractionStatus() {
+        return memoryExtractionStatus;
+    }
+
+    public void setMemoryExtractionStatus(String memoryExtractionStatus) {
+        this.memoryExtractionStatus = memoryExtractionStatus;
     }
 
     public LocalDateTime getCreatedAt() {

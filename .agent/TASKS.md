@@ -2038,7 +2038,7 @@ TASK-142
 
 ## TASK-144 — Implement Regenerate
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2050,6 +2050,17 @@ Goal:
 - Chapter Number 不变；
 - 新 Revision；
 - 可接受 author instruction。
+
+Implementation:
+
+- `ChapterGenerationService.regenerateChapter(chapterId, instruction)`：
+  加载同一 plan → 复用 buildRequest（instruction 并入 recentContext）→
+  writer → validate → createRevision(AI_REWRITE)（id/编号天然不变）→
+  reExtractChapter 闭环（STALE → 失效 → 重抽 → COMPLETED）
+- `POST /api/chapters/{chapterId}/regenerate`（body 可选 authorInstruction）
+
+Engineering Verification: PASSED — regenerateKeepsChapterIdentity... ✓
+（同 id/同编号/v2 AI_REWRITE/旧稿保留/memory COMPLETED）
 
 Real-LLM Semantic Verification:
 
@@ -2125,7 +2136,7 @@ TASK-142
 
 ## TASK-147 — Mark Memory Stale on Revision Change
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2143,6 +2154,16 @@ AI_POLISH
 memoryExtractionStatus=STALE
 ```
 
+Implementation:
+
+- `ChapterRevisionService.createRevision`：sourceType != AI_GENERATED 时置 STALE
+  （单一收口，未来新增来源自动覆盖）
+- ChapterResponse 暴露 memoryExtractionStatus
+
+Engineering Verification: PASSED — manualEditMarksMemoryStale... 断言编辑后 STALE ✓
+
+Real-LLM Semantic Verification: NOT_REQUIRED
+
 Dependencies:
 
 TASK-142
@@ -2151,7 +2172,7 @@ TASK-142
 
 ## TASK-148 — Re-extract and Reconcile Chapter-derived Memory
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2163,6 +2184,22 @@ Goal:
 - status → COMPLETED。
 
 第一版不做复杂 semantic merge。
+
+Implementation:
+
+- `MemoryMapper.deleteStoryMemoriesBySource`：删除该章派生的 STORY_MEMORY
+  （source_chapter_id 可追踪）
+- `MemoryMapper.supersedeCandidatesBySource`：该章旧 candidates 标记 SUPERSEDED
+  （审计保留，绝不再次 apply）
+- `reExtractChapter` 开头执行失效，再重抽 → AUTO apply → COMPLETED
+- 已知限制（如实记录）：current_state / relationship_state 表无 per-chapter
+  来源列（v0.1 schema 限制）；重抽通过 upsert 覆盖同名 slot 实现事实纠正，
+  无法追踪来源的 slot 不做删除。列入 v0.1.2 候选（provenance 列）。
+
+Engineering Verification: PASSED — manualEdit...Reextract... 断言：
+编辑后 STALE → reExtract 后 story_memory 派生行=0、状态 COMPLETED、正文未被重写 ✓
+
+Real-LLM Semantic Verification: NOT_REQUIRED（AC-108 全流程属 TASK-149）
 
 Dependencies:
 
