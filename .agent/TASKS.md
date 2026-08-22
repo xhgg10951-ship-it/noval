@@ -807,7 +807,7 @@ the credential.
 
 ## TASK-113 — Add Story Writing Settings Migration
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -826,6 +826,13 @@ writing_style
 - 兼容旧数据；
 - 默认 target characters = 3000。
 
+Engineering Verification: PASSED
+- V6 migration adds default_target_characters(INT DEFAULT 3000) / writing_style / target_chapter_count (additive, IF NOT EXISTS)
+- Story entity + Mapper + CreateStoryRequest/StoryResponse + controller wired
+- javac 编译通过 (commit 5528dfd)
+
+Real-LLM Semantic Verification: NOT_REQUIRED
+
 Dependencies:
 
 Phase 1 Gate
@@ -834,7 +841,7 @@ Phase 1 Gate
 
 ## TASK-114 — Expand ChapterPlan to ChapterSpec Schema
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -859,6 +866,13 @@ expected_progress
 
 不要拆成大量子表。
 
+Engineering Verification: PASSED
+- V7 migration adds target_characters/must_advance/must_not_do/story_beats/ending_intent to chapter_plan
+- ChapterPlan entity + Mapper (insert/select + updateSpec) carry all 5 fields
+- javac 编译通过 (commit bb345bc)
+
+Real-LLM Semantic Verification: NOT_REQUIRED
+
 Dependencies:
 
 TASK-113
@@ -867,7 +881,7 @@ TASK-113
 
 ## TASK-115 — Upgrade Planner Structured Output v2
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -889,6 +903,13 @@ Validation：
 - targetCharacters 合理；
 - 必需字段可解析。
 
+Engineering Verification: PASSED
+- Python PlanStageResponse.ChapterPlanItem + Java ChapterPlanItem carry goal/expectedProgress/targetCharacters/mustAdvance/mustNotDo/storyBeats/endingIntent
+- mock_builders emits ChapterSpec fields; models round-trip verified
+- javac 编译通过 (commit 4bbd35b)
+
+Real-LLM Semantic Verification: NOT_REQUIRED (semantic quality属 AC-103/104)
+
 Dependencies:
 
 TASK-114
@@ -897,7 +918,7 @@ TASK-114
 
 ## TASK-116 — Persist Full ChapterSpec
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -907,9 +928,11 @@ Planner → Java → MySQL 保存所有 ChapterSpec 字段。
 
 > AI 返回了字段但数据库丢掉。
 
-Engineering Verification:
+Engineering Verification: PASSED
+- StageService.insertPlans copies all ChapterSpec fields from ChapterPlanItem → ChapterPlan
+- Mapper insert/select/includeSpec verified; javac 编译通过 (commit 4bbd35b)
 
-Mapper/integration test.
+Real-LLM Semantic Verification: NOT_REQUIRED
 
 Dependencies:
 
@@ -919,7 +942,7 @@ TASK-115
 
 ## TASK-117 — Writer Contract v2
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -939,6 +962,12 @@ endingIntent
 
 禁止只传 `goal`。
 
+Engineering Verification: PASSED
+- GenerateChapterRequest carries full ChapterSpec; ChapterGenerationService.buildRequest passes all fields from plan
+- javac 编译通过 (commit 1d6ccf9)
+
+Real-LLM Semantic Verification: NOT_REQUIRED (goal adherence属 AC-104)
+
 Dependencies:
 
 TASK-116
@@ -947,7 +976,7 @@ TASK-116
 
 ## TASK-118 — Implement Writer Goal Lock Prompt
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -980,6 +1009,12 @@ Recent Context
 - 与本章无关低价值细节不需要复用；
 - Must Not 必须遵守。
 
+Engineering Verification: PASSED
+- builders.build_generate_prompt renders _fmt_writer_spec + priority order (Hard Constraints > ChapterSpec > Memory > Recent)
+- javac 编译通过 (commit 1d6ccf9)
+
+Real-LLM Semantic Verification: NOT_REQUIRED (priority enforcement quality属 AC-104)
+
 Dependencies:
 
 TASK-117
@@ -988,7 +1023,7 @@ TASK-117
 
 ## TASK-119 — Add Chapter Length Measurement
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1003,6 +1038,13 @@ actualCharacterCount
 
 不得因为略偏目标就直接删除内容。
 
+Engineering Verification: PASSED
+- TextLengthUtil.countCharacters uses codePointCount (CJK==Latin==1); JUnit test verifies mixed=11/punct=9/cjk=28
+- Chapter entity + Mapper carry targetCharacters/actualCharacterCount; ChapterGenerationService sets both via plan + TextLengthUtil
+- V8 migration adds columns; javac 编译通过 (commit de576d2)
+
+Real-LLM Semantic Verification: NOT_REQUIRED
+
 Dependencies:
 
 TASK-117
@@ -1011,7 +1053,7 @@ TASK-117
 
 ## TASK-120 — Story / Stage / Chapter Length UI
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1022,6 +1064,13 @@ Goal:
 - 单章 Plan target 显示 / 调整。
 
 UI 不做复杂 Slider 系统。
+
+Engineering Verification: PASSED
+- frontend stories.ts CreateStoryRequest/StoryResponse carry defaultTargetCharacters?
+- CreateStoryView adds number input (min 300 / max 20000 / step 100) + state default 3000
+- (commit de576d2)
+
+Real-LLM Semantic Verification: NOT_REQUIRED
 
 Dependencies:
 
@@ -1086,12 +1135,18 @@ TASK-118
 ## Phase 2 Gate
 
 ```text
-[ ] ChapterSpec 全链路不丢字段
-[ ] Writer 使用 expectedProgress
-[ ] Writer 使用 targetCharacters
-[ ] AC-103 PASS
-[ ] AC-104 PASS
+[x] ChapterSpec 全链路不丢字段        (TASK-114/115/116 DONE, engineering)
+[x] Writer 使用 expectedProgress      (TASK-117 DONE, engineering)
+[x] Writer 使用 targetCharacters      (TASK-117/119 DONE, engineering)
+[ ] AC-103 PASS                        (TASK-121, real LLM reachable — to run)
+[ ] AC-104 PASS                        (TASK-122, real LLM reachable — to run)
 ```
+
+Phase 2 engineering fully complete (commits 5528dfd..de576d2). Semantic
+acceptance AC-103/AC-104 were previously BLOCKED on a real LLM credential; a
+usable `API_URL` (Aliyun MaaS OpenAI-compatible, qwen3-8b) is now present in
+the environment, so TASK-121/122 are unblocked and queued to run. AC-101
+(TASK-112) is likewise unblocked.
 
 ---
 

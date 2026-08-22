@@ -28,15 +28,15 @@ Current Implementation Plan:
 
 Current Phase:
 
-`Phase 1 — Context Wiring + Continuation`
+`Phase 2 — Chapter Control (engineering DONE; semantic acceptance pending real LLM)`
 
 Current Task:
 
-`TASK-113 — Add Story Writing Settings Migration`
+`TASK-112 — Real-LLM Continuation Acceptance (AC-101) — UNBLOCKED, queued to run`
 
 Task Status:
 
-`TODO`
+`IN_PROGRESS`
 
 Task Evidence:
 
@@ -51,12 +51,17 @@ TASK-111 DONE — Writer recent context upgraded to last 3 summaries + ending ex
 TASK-107 DONE — Planner continuation context v2 contract (commit `d03d936`).
 TASK-108 DONE — Continuation anchor assembly.
 TASK-109 DONE — Planner continuation prompt.
+TASK-113 DONE — Story writing settings migration (commit `5528dfd`).
+TASK-114 DONE — ChapterPlan → ChapterSpec schema (commit `bb345bc`).
+TASK-115/116 DONE — Planner v2 output + persist full ChapterSpec (commit `4bbd35b`).
+TASK-117/118 DONE — Writer Contract v2 + Goal Lock prompt (commit `1d6ccf9`).
+TASK-119/120 DONE — Chapter length measurement + light UI (commit `de576d2`).
 
 Engineering Verification:
-PASSED — TASK-107/108/109 compiled + prompt round-trip; next is AC-101 real LLM
+PASSED — Phase 2 engineering fully compiled + committed (5528dfd..de576d2)
 
 Real-LLM Semantic Verification:
-NOT_REQUIRED (TASK-107/108/109); REQUIRED for TASK-112 (AC-101)
+NOT_REQUIRED for TASK-107..120; REQUIRED for TASK-112/121/122 — now UNBLOCKED (see §11)
 
 ---
 
@@ -551,33 +556,29 @@ Never discard unknown changes automatically.
 
 # 11. Current Known Blockers
 
-`REAL-LLM CREDENTIAL (BLOCKS TASK-112 / PHASE 1 GATE AC-101)`
+`REAL-LLM CREDENTIAL — RESOLVED (as of 2026-08-22)`
 
-TASK-112 (Real-LLM Continuation Acceptance, AC-101) is **BLOCKED**: the frozen
-plan requires Real-LLM Semantic Verification, but no usable real LLM credential
-is present. `ai-service/app/config.py` reads `LLM_API_KEY`/`API_KEY` from the
-environment; none is set and no `.env` exists, so `settings.using_mock_llm`
-is True. Mock PASS is explicitly NOT accepted as Semantic PASS (STATE §5 / §18),
-so the agent must not fabricate a real-LLM result.
-
-This is a frozen-requirement-defined Blocker, not an engineering gap — the
-Planner continuation engineering (TASK-107/108/109) is fully implemented and
-Mock-testable. Per the Recovery Protocol, work continues on downstream
-engineering tasks (Phase 2+) while AC-101 waits on the credential.
-
-To unblock: set `LLM_API_KEY` (+ optional `LLM_BASE_URL`, `LLM_MODEL`) in the
-`ai-service` environment, then run AC-101 with known state
-(已穿越 / 已认识艾琳 / 已住进艾琳房间) + new Stage (第二天和艾琳去冒险者公会).
-
-Potential external requirement for later semantic tests:
+TASK-112 / TASK-121 / TASK-122 were previously BLOCKED on a real LLM credential.
+As of this session, the environment exposes:
 
 ```text
-A configured real LLM API credential (also gates AC-103/104/106/107/108/114/117)
+API_KEY      = sk-ws-...          (valid)
+API_URL      = https://ws-...cn-beijing.maas.aliyuncs.com/compatible-mode/v1
+MODEL        = qwen3-8b           (read by config.py as llm_model)
 ```
 
-This is NOT a Phase 0 blocker.
+`api-service/app/config.py` resolves `llm_api_key` from `API_KEY` and
+`llm_base_url` from `API_URL`, so `settings.using_mock_llm == False`. A live
+connectivity probe succeeded (HTTP 200, qwen3-8b responded). Therefore the
+frozen-requirement-defined Blocker is **resolved**, and AC-101 / AC-103 / AC-104
+are now runnable.
 
-It becomes a blocker only when a task explicitly requires Real-LLM Semantic Verification and no usable real provider credential exists.
+Remaining LLM-gated acceptances further downstream (AC-106 / 107 / 108 / 114 /
+117) are also unblocked by this same credential and will be executed at their
+respective phases.
+
+No fabricated Semantic PASS was ever recorded during the blocked period — the
+agent continued downstream engineering per the Recovery Protocol.
 
 ---
 
@@ -634,8 +635,10 @@ TASK-179
 Current:
 
 ```text
-Phase 1
-TASK-112
+Phase 2 (engineering DONE)
+TASK-112 AC-101 — UNBLOCKED, queued to run (real LLM reachable)
+TASK-121 AC-103 — UNBLOCKED, queued to run
+TASK-122 AC-104 — UNBLOCKED, queued to run
 ```
 
 Do not resume old v0.1 TASK-001 ~ TASK-056 as active work.
@@ -826,23 +829,19 @@ Requirements:
 FROZEN
 
 Implementation:
-IN PROGRESS (Phase 1)
+IN PROGRESS (Phase 2 — engineering complete; semantic acceptance running)
 
 Current Phase:
-Phase 1 — Context Wiring + Continuation
+Phase 2 — Chapter Control (engineering DONE; AC-103/104 running)
 
 Current Task:
-TASK-112 — Real-LLM Continuation Acceptance (AC-101)
+TASK-112 — Real-LLM Continuation Acceptance (AC-101) — UNBLOCKED
 
 Current Task Status:
-TODO
+IN_PROGRESS (real LLM credential now present; AC-101 ready to execute)
 
 Phase 0 Gate:
 PASSED (2026-08-21, after commit 63781dd)
-- TASK-101 DONE: regression baseline saved
-- TASK-102 DONE: v0.1 status claims corrected
-- TASK-103 DONE: DEBUG payload observability
-- TASK-104 DONE: 5 root causes re-confirmed at file:line
 
 Phase 1 progress (Context Wiring + Continuation):
 - TASK-105 DONE: StoryContextReader built + compiled
@@ -852,23 +851,36 @@ Phase 1 progress (Context Wiring + Continuation):
 - TASK-109 DONE: Planner continuation prompt
 - TASK-110 DONE: Writer wired to real state/memory/relationship
 - TASK-111 DONE: Writer recent context = last 3 summaries + ending excerpt (commit af66501)
-- TASK-112 TODO: Real-LLM Continuation Acceptance (AC-101, needs real LLM)
+- TASK-112 IN_PROGRESS: Real-LLM Continuation Acceptance (AC-101)
+
+Phase 2 progress (Chapter Control):
+- TASK-113 DONE: Story writing settings migration (commit 5528dfd)
+- TASK-114 DONE: ChapterPlan → ChapterSpec schema (commit bb345bc)
+- TASK-115/116 DONE: Planner v2 output + persist ChapterSpec (commit 4bbd35b)
+- TASK-117/118 DONE: Writer Contract v2 + Goal Lock prompt (commit 1d6ccf9)
+- TASK-119/120 DONE: Chapter length measurement + light UI (commit de576d2)
+- TASK-121 TODO: Real-LLM Chapter Length Acceptance (AC-103) — UNBLOCKED
+- TASK-122 TODO: Real-LLM Chapter Goal Acceptance (AC-104) — UNBLOCKED
+
+Real-LLM Credential:
+RESOLVED (2026-08-22) — API_URL Aliyun MaaS OpenAI-compatible, qwen3-8b,
+connectivity probe HTTP 200. using_mock_llm == False.
 
 Known Blocker:
-NONE (real-LLM credential may BLOCK TASK-112 / Phase 1 Gate — see §11)
+NONE — the prior real-LLM credential blocker (§11) is resolved.
 
 Next Safe Action:
 TASK-112 — Execute AC-101 against the real LLM: given known state
 (已穿越 / 已认识艾琳 / 已住进艾琳房间) and a new Stage (第二天去冒险者公会),
 the Planner must continue from the existing state — no repeated crossing /
-first meeting / re-acquiring housing. If no usable real LLM credential exists,
-mark TASK-112 BLOCKED and continue with Phase 2 engineering tasks.
+first meeting / re-acquiring housing. Credential now present; run AC-101, then
+proceed to TASK-121 (AC-103) and TASK-122 (AC-104).
 
 Engineering Verification:
-PASSED — TASK-107/108/109 compiled + prompt round-trip verified
+PASSED — Phase 2 engineering compiled + committed (5528dfd..de576d2)
 
 Real-LLM Semantic Verification:
-NOT_REQUIRED (TASK-107/108/109); REQUIRED for TASK-112 (AC-101)
+NOT_REQUIRED for TASK-107..120; REQUIRED + NOW RUNNABLE for TASK-112/121/122
 ```
 
 Core principles:
