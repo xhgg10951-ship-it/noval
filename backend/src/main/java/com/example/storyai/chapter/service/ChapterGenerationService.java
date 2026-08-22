@@ -108,15 +108,37 @@ public class ChapterGenerationService {
         chapter.setTargetCharacters(nextPlan.getTargetCharacters());
         chapter.setActualCharacterCount(
                 com.example.storyai.common.util.TextLengthUtil.countCharacters(ai.content()));
+        // TASK-124: the chapter is persisted with extraction PENDING; only set to
+        // COMPLETED after a successful extraction pass. This makes the recovery
+        // hole (TASK-126) detectable: a persisted-but-FAILED chapter is retried,
+        // never silently advanced.
+        chapter.setMemoryExtractionStatus(
+                com.example.storyai.chapter.model.MemoryExtractionStatus.PENDING);
 
         Chapter saved = chapterService.saveChapter(chapter);
 
         // M4 (TASK-032): Save Chapter -> Extract Memory -> Save Candidates -> Apply AUTO -> Checkpoint.
         // Extraction calls Python OUTSIDE the generation tx; candidate persistence + AUTO apply run
         // in their own transactions inside the memory services.
-        List<MemoryCandidate> candidates = extractionService.extractForChapter(saved);
-        for (MemoryCandidate c : candidates) {
-            processingService.autoProcess(c); // AUTO -> apply, REVIEW -> pending, IGNORE -> ignored
+        // TASK-124: any extraction failure marks the chapter FAILED but leaves the
+        // chapter intact, so the Next Safe Action Resolver (TASK-125) retries the
+        // SAME chapter instead of skipping to the next plan.
+        try {
+            List<MemoryCandidate> candidates = extractionService.extractForChapter(saved);
+            for (MemoryCandidate c : candidates) {
+                processingService.autoProcess(c); // AUTO -> apply, REVIEW -> pending, IGNORE -> ignored
+            }
+            saved.setMemoryExtractionStatus(
+                    com.example.storyai.chapter.model.MemoryExtractionStatus.COMPLETED);
+            chapterService.saveChapter(saved); // checkpoint the COMPLETED status
+        } catch (Exception ex) {
+            log.warn("Memory extraction failed for chapter {}: {}", saved.getId(), ex.getMessage());
+            saved.setMemoryExtractionStatus(
+                    com.example.storyai.chapter.model.MemoryExtractionStatus.FAILED);
+            chapterService.saveChapter(saved); // persist FAILED so recovery can retry
+            // Re-throw so the caller (job/continuous runner) sees the failure and
+            // pauses safely rather than treating the chapter as fully done.
+            throw ex;
         }
         return saved;
     }

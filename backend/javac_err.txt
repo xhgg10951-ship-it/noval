@@ -1,0 +1,4 @@
+src\main\java\com\example\storyai\ai\AiServiceClient.java:58: 警告: [removal] SimpleClientHttpRequestFactory 中的 setOutputStreaming(boolean) 已过时, 且标记为待删除
+        factory.setOutputStreaming(false);
+               ^
+1 个警告

@@ -31,7 +31,14 @@ public class ChapterService {
         if (chapter.getGenerationStatus() == null) {
             chapter.setGenerationStatus("GENERATED");
         }
-        chapterMapper.insert(chapter);
+        if (chapter.getId() == null) {
+            chapterMapper.insert(chapter);
+        } else {
+            // TASK-123/124: re-save after extraction to checkpoint
+            // memory_extraction_status (PENDING -> COMPLETED/FAILED) without
+            // re-inserting the row.
+            chapterMapper.update(chapter);
+        }
         return chapterMapper.findById(chapter.getId());
     }
 

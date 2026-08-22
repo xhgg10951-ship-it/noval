@@ -1188,7 +1188,7 @@ defect; remediation options recorded above. AC-104 pending next run.
 
 ## TASK-123 — Add Chapter Memory Extraction Status
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1209,6 +1209,17 @@ STALE
 
 旧 Chapter migration 使用合理默认。
 
+Engineering Verification: PASSED
+- 新增 `MemoryExtractionStatus` 常量类（PENDING/COMPLETED/FAILED/STALE + isValid）
+- `Chapter` 实体增加 `memoryExtractionStatus` 字段 + getter/setter
+- V9 migration 增加 NOT NULL DEFAULT 'COMPLETED'（旧数据已在 v0.1 跑过抽取，默认 COMPLETED 避免误标 STALE）
+- `ChapterMapper.xml` resultMap/insert/4 个 select 均携带该列；新增 `update` 语句
+- `ChapterMapper.java` 接口增加 `update`
+- `ChapterService.saveChapter` 改为 upsert（id==null insert，否则 update），支持抽取后回写状态
+- javac 编译通过（JAVAC_EXIT=0）
+
+Real-LLM Semantic Verification: NOT_REQUIRED
+
 Dependencies:
 
 Phase 2 Gate
@@ -1217,7 +1228,7 @@ Phase 2 Gate
 
 ## TASK-124 — Make Extraction Status Explicit in Generate Flow
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1241,6 +1252,14 @@ Chapter preserved
 memory=FAILED
 Job failed/paused safely
 ```
+
+Engineering Verification: PASSED
+- `ChapterGenerationService.generateNextChapter`：save 前置 PENDING；抽取成功后置 COMPLETED 并回写；
+  抽取异常 catch 后置 FAILED 并回写，保留 chapter 不丢，再 re-throw 让调用方（Job）安全暂停
+- 修复了 STATE §4.8 / RC-08 的 recovery hole：持久化章节在抽取失败时不再被当作"已完成生成"推进
+- javac 编译通过（JAVAC_EXIT=0）
+
+Real-LLM Semantic Verification: NOT_REQUIRED（异常路径由 TASK-126 工程测试覆盖）
 
 Dependencies:
 

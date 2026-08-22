@@ -13,6 +13,9 @@ public interface ChapterMapper {
 
     int insert(Chapter chapter);
 
+    /** TASK-123/124: re-persist a chapter row (e.g. to checkpoint memory_extraction_status). */
+    int update(Chapter chapter);
+
     Chapter findById(Long id);
 
     Chapter findByPlanId(Long planId);

@@ -23,6 +23,8 @@ public class Chapter {
     // ---- TASK-119: chapter length measurement ----
     private Integer targetCharacters;
     private Integer actualCharacterCount;
+    // ---- TASK-123: explicit memory extraction status (PENDING/COMPLETED/FAILED/STALE) ----
+    private String memoryExtractionStatus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -112,6 +114,14 @@ public class Chapter {
 
     public void setActualCharacterCount(Integer actualCharacterCount) {
         this.actualCharacterCount = actualCharacterCount;
+    }
+
+    public String getMemoryExtractionStatus() {
+        return memoryExtractionStatus;
+    }
+
+    public void setMemoryExtractionStatus(String memoryExtractionStatus) {
+        this.memoryExtractionStatus = memoryExtractionStatus;
     }
 
     public LocalDateTime getCreatedAt() {
