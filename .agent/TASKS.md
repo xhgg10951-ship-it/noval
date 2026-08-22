@@ -1893,7 +1893,7 @@ Phase 4 Gate Result: **PASSED** (2026-08-22, after TASK-139; full `mvn test` 40/
 
 ## TASK-140 — Add ChapterRevision Schema
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1928,6 +1928,23 @@ DRAFT
 APPROVED
 ```
 
+Implementation:
+
+- `V12__chapter_revision.sql`（additive）：chapter_revision 表
+  （uk_chapter_version 唯一键 + ON DELETE CASCADE）+ chapter 两列
+- `ChapterRevision` 实体 + `ChapterRevisionMapper`(insert/findById/findByChapterId/
+  findMaxVersion，insert-only 不可变)
+- `ChapterRevisionService.createRevision`：事务内 version=max+1 → insert →
+  同步 chapter.content/current_revision_id 并重置 DRAFT
+- `ChapterGenerationService`：生成路径自动产生 AI_GENERATED revision；
+  抽取回写改用重读行（修复 stale 副本会把 revision 指针覆盖回 NULL 的隐患）
+- ChapterMapper.xml 全列携带新字段；ChapterResponse 暴露
+  currentRevisionId/currentRevisionVersion/sourceType/status
+
+Engineering Verification: PASSED — mvn test 44/44（2026-08-22）
+
+Real-LLM Semantic Verification: NOT_REQUIRED
+
 Dependencies:
 
 Phase 4 Gate
@@ -1936,7 +1953,7 @@ Phase 4 Gate
 
 ## TASK-141 — Migrate Existing Chapter Content into Revision Model
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1952,6 +1969,18 @@ AI_GENERATED revision
 
 不得丢已有正文。
 
+Implementation:
+
+- V12 迁移内置回填（guarded，可安全重跑）：
+  - `INSERT INTO chapter_revision ... SELECT c.id, 1, c.content, 'AI_GENERATED'`
+    （LEFT JOIN 防重复）
+  - `UPDATE chapter JOIN revision#1 SET current_revision_id`
+- 本地库实测：44 章 → 44 条 AI_GENERATED revision，44/44 指针回填，零内容丢失
+
+Engineering Verification: PASSED（V12 应用后 SQL 计数验证）
+
+Real-LLM Semantic Verification: NOT_REQUIRED
+
 Dependencies:
 
 TASK-140
@@ -1960,7 +1989,7 @@ TASK-140
 
 ## TASK-142 — Manual Edit Backend
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1971,6 +2000,16 @@ Goal:
 Acceptance base:
 
 AC-107
+
+Implementation:
+
+- `PUT /api/chapters/{chapterId}/content`（EditChapterContentRequest @NotBlank）
+  → `createRevision(chapterId, content, MANUAL_EDIT)` → 新版本 + 指针切换 + 回 DRAFT
+- 旧 revision 原样保留（测试断言 v1 内容仍可读）
+
+Engineering Verification: PASSED — ChapterRevisionIntegrationTest.manualEdit... ✓
+
+Real-LLM Semantic Verification: NOT_REQUIRED（AC-107 全流程属 TASK-149）
 
 Dependencies:
 
@@ -2024,7 +2063,7 @@ TASK-141
 
 ## TASK-145 — Revision History API + UI
 
-Status: `TODO`
+Status: `IN_PROGRESS`
 
 Goal:
 
@@ -2037,6 +2076,16 @@ Goal:
 
 不做复杂 diff viewer。
 
+Implementation:
+
+- API DONE：`GET /api/chapters/{chapterId}/revisions`（newest first，
+  ChapterRevisionResponse 含 version/content/sourceType/createdAt）
+- UI 待做（与 TASK-143 一并进入 ChapterPanel）
+
+Engineering Verification: PASSED (API) — listRevisions 断言 newest-first + sourceType ✓
+
+Real-LLM Semantic Verification: NOT_REQUIRED
+
 Dependencies:
 
 TASK-142
@@ -2046,7 +2095,7 @@ TASK-144
 
 ## TASK-146 — Approve Chapter
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2057,6 +2106,16 @@ DRAFT → APPROVED
 ```
 
 不实现发布平台状态。
+
+Implementation:
+
+- `POST /api/chapters/{chapterId}/approve`（幂等；再次编辑自动回 DRAFT）
+- ChapterResponse.status 暴露给 UI
+
+Engineering Verification: PASSED — approveFlips...ReopenDraft ✓（approve→APPROVED、
+幂等、编辑回 DRAFT）
+
+Real-LLM Semantic Verification: NOT_REQUIRED
 
 Dependencies:
 

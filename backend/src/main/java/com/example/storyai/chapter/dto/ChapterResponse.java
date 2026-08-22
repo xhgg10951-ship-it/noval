@@ -18,6 +18,11 @@ public class ChapterResponse {
     private String content;
     private String summary;
     private String generationStatus;
+    // ---- v0.1.1 Phase 5 (TASK-140): revision + approval lifecycle ----
+    private Long currentRevisionId;
+    private Integer currentRevisionVersion;
+    private String sourceType; // source of the current revision
+    private String status; // DRAFT / APPROVED
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -34,6 +39,8 @@ public class ChapterResponse {
         this.content = c.getContent();
         this.summary = c.getSummary();
         this.generationStatus = c.getGenerationStatus();
+        this.currentRevisionId = c.getCurrentRevisionId();
+        this.status = c.getStatus();
         this.createdAt = c.getCreatedAt();
         this.updatedAt = c.getUpdatedAt();
     }
@@ -108,6 +115,38 @@ public class ChapterResponse {
 
     public void setGenerationStatus(String generationStatus) {
         this.generationStatus = generationStatus;
+    }
+
+    public Long getCurrentRevisionId() {
+        return currentRevisionId;
+    }
+
+    public void setCurrentRevisionId(Long currentRevisionId) {
+        this.currentRevisionId = currentRevisionId;
+    }
+
+    public Integer getCurrentRevisionVersion() {
+        return currentRevisionVersion;
+    }
+
+    public void setCurrentRevisionVersion(Integer currentRevisionVersion) {
+        this.currentRevisionVersion = currentRevisionVersion;
+    }
+
+    public String getSourceType() {
+        return sourceType;
+    }
+
+    public void setSourceType(String sourceType) {
+        this.sourceType = sourceType;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -48,6 +48,7 @@ public class ChapterGenerationService {
     private final StoryService storyService;
     private final StageService stageService;
     private final ChapterService chapterService;
+    private final ChapterRevisionService revisionService;
     private final StoryContextReader contextReader;
     private final AiServiceClient aiServiceClient;
     private final MemoryExtractionService extractionService;
@@ -56,6 +57,7 @@ public class ChapterGenerationService {
     public ChapterGenerationService(StoryService storyService,
                                     StageService stageService,
                                     ChapterService chapterService,
+                                    ChapterRevisionService revisionService,
                                     StoryContextReader contextReader,
                                     AiServiceClient aiServiceClient,
                                     MemoryExtractionService extractionService,
@@ -63,6 +65,7 @@ public class ChapterGenerationService {
         this.storyService = storyService;
         this.stageService = stageService;
         this.chapterService = chapterService;
+        this.revisionService = revisionService;
         this.contextReader = contextReader;
         this.aiServiceClient = aiServiceClient;
         this.extractionService = extractionService;
@@ -125,6 +128,15 @@ public class ChapterGenerationService {
         // cannot be regenerated after a Replan Remaining.
         stageService.markPlanCompleted(nextPlan.getId());
 
+        // v0.1.1 Phase 5 (TASK-140): the generated prose becomes immutable
+        // revision #N (AI_GENERATED); the chapter points at it and stays DRAFT.
+        revisionService.createRevision(saved.getId(), ai.content(),
+                com.example.storyai.chapter.model.ChapterRevision.SOURCE_AI_GENERATED);
+
+        // Re-read: all later writes must use a row carrying the revision pointer —
+        // writing the stale `saved` copy would clobber current_revision_id to NULL.
+        final Chapter persisted = chapterService.getChapter(saved.getId());
+
         // M4 (TASK-032): Save Chapter -> Extract Memory -> Save Candidates -> Apply AUTO -> Checkpoint.
         // Extraction calls Python OUTSIDE the generation tx; candidate persistence + AUTO apply run
         // in their own transactions inside the memory services.
@@ -132,23 +144,24 @@ public class ChapterGenerationService {
         // chapter intact, so the Next Safe Action Resolver (TASK-125) retries the
         // SAME chapter instead of skipping to the next plan.
         try {
-            List<MemoryCandidate> candidates = extractionService.extractForChapter(saved);
+            List<MemoryCandidate> candidates = extractionService.extractForChapter(persisted);
             for (MemoryCandidate c : candidates) {
                 processingService.autoProcess(c); // AUTO -> apply, REVIEW -> pending, IGNORE -> ignored
             }
-            saved.setMemoryExtractionStatus(
+            persisted.setMemoryExtractionStatus(
                     com.example.storyai.chapter.model.MemoryExtractionStatus.COMPLETED);
-            chapterService.saveChapter(saved); // checkpoint the COMPLETED status
+            chapterService.saveChapter(persisted); // checkpoint the COMPLETED status
         } catch (Exception ex) {
-            log.warn("Memory extraction failed for chapter {}: {}", saved.getId(), ex.getMessage());
-            saved.setMemoryExtractionStatus(
+            log.warn("Memory extraction failed for chapter {}: {}", persisted.getId(), ex.getMessage());
+            persisted.setMemoryExtractionStatus(
                     com.example.storyai.chapter.model.MemoryExtractionStatus.FAILED);
-            chapterService.saveChapter(saved); // persist FAILED so recovery can retry
+            chapterService.saveChapter(persisted); // persist FAILED so recovery can retry
             // Re-throw so the caller (job/continuous runner) sees the failure and
             // pauses safely rather than treating the chapter as fully done.
             throw ex;
         }
-        return saved;
+        // re-read so callers (API response) see the final row incl. revision pointers
+        return chapterService.getChapter(saved.getId());
     }
 
     /**

@@ -25,6 +25,9 @@ public class Chapter {
     private Integer actualCharacterCount;
     // ---- TASK-123: explicit memory extraction status (PENDING/COMPLETED/FAILED/STALE) ----
     private String memoryExtractionStatus;
+    // ---- v0.1.1 Phase 5 / TASK-140: revision model + author approval lifecycle ----
+    private Long currentRevisionId; // revision whose content this row exposes
+    private String status;          // DRAFT until the author approves; APPROVED afterwards
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -122,6 +125,22 @@ public class Chapter {
 
     public void setMemoryExtractionStatus(String memoryExtractionStatus) {
         this.memoryExtractionStatus = memoryExtractionStatus;
+    }
+
+    public Long getCurrentRevisionId() {
+        return currentRevisionId;
+    }
+
+    public void setCurrentRevisionId(Long currentRevisionId) {
+        this.currentRevisionId = currentRevisionId;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public LocalDateTime getCreatedAt() {

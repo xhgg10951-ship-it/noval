@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.storyai.chapter.mapper.ChapterRevisionMapper">
+
+    <resultMap id="ChapterRevisionResult" type="com.example.storyai.chapter.model.ChapterRevision">
+        <id column="id" property="id"/>
+        <result column="chapter_id" property="chapterId"/>
+        <result column="version_number" property="versionNumber"/>
+        <result column="content" property="content"/>
+        <result column="source_type" property="sourceType"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <!-- Revisions are immutable: insert-only, never updated or deleted (TASK-140). -->
+    <insert id="insert" parameterType="com.example.storyai.chapter.model.ChapterRevision"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO chapter_revision
+            (chapter_id, version_number, content, source_type)
+        VALUES
+            (#{chapterId}, #{versionNumber}, #{content}, #{sourceType})
+    </insert>
+
+    <select id="findById" resultMap="ChapterRevisionResult">
+        SELECT id, chapter_id, version_number, content, source_type, created_at
+        FROM chapter_revision
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByChapterId" resultMap="ChapterRevisionResult">
+        SELECT id, chapter_id, version_number, content, source_type, created_at
+        FROM chapter_revision
+        WHERE chapter_id = #{chapterId}
+        ORDER BY version_number DESC
+    </select>
+
+    <select id="findMaxVersion" resultType="java.lang.Integer">
+        SELECT COALESCE(MAX(version_number), 0)
+        FROM chapter_revision
+        WHERE chapter_id = #{chapterId}
+    </select>
+
+</mapper>
