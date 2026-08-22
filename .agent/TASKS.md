@@ -2335,7 +2335,7 @@ Phase 5 Gate
 
 ## TASK-151 — Add Arc Schema
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2357,6 +2357,15 @@ target_end_chapter
 status
 ```
 
+Implementation:
+
+- `V13__arc.sql`：arc 表（FK cascade + chk_arc_range CHECK 约束），
+  status ∈ PLANNED/ACTIVE/COMPLETED；已应用本地库
+
+Engineering Verification: PASSED — V13 应用成功
+
+Real-LLM Semantic Verification: NOT_REQUIRED
+
 Dependencies:
 
 TASK-150
@@ -2365,7 +2374,7 @@ TASK-150
 
 ## TASK-152 — Arc Persistence + Minimal API
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2378,6 +2387,21 @@ Goal:
 
 不建设复杂 Arc Version。
 
+Implementation:
+
+- `Arc` 实体 + `ArcMapper`(insert/findById/findByStoryId/findCurrentByChapter/
+  findActive/update/updateStatus) + `ArcService`（404 守卫、范围校验 1≤start≤end、
+  同故事内 range 不重叠、设 ACTIVE 时自动清其他 ACTIVE）
+- `ArcController`：POST/GET list/GET current?chapter=N(严格范围，无 fallback→404)/
+  GET by id/PUT update
+- 注：Planner context 用 findCurrent（range 未命中时回退 ACTIVE 卷——规划总需要
+  某种卷上下文）；API current 端点用严格查询
+
+Engineering Verification: PASSED — ArcIntegrationTest 4/4
+（create+list+按章解析 / 重叠拒绝 / 倒序范围拒绝 / 激活互斥）
+
+Real-LLM Semantic Verification: NOT_REQUIRED
+
 Dependencies:
 
 TASK-151
@@ -2386,7 +2410,7 @@ TASK-151
 
 ## TASK-153 — Minimal Arc UI
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2397,6 +2421,15 @@ Goal:
 - chapter range。
 
 不做复杂 Timeline。
+
+Implementation:
+
+- 新组件 `ArcPanel.vue`（StoryDetailView 挂载）：卷列表（状态徽标/范围/目标）、
+  内联编辑、设为当前卷、创建表单；`api/arcs.ts` 类型 + API
+
+Engineering Verification: PASSED — npm run build ✓
+
+Real-LLM Semantic Verification: NOT_REQUIRED
 
 Dependencies:
 

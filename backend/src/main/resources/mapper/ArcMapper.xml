@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.storyai.arc.mapper.ArcMapper">
+
+    <resultMap id="ArcResult" type="com.example.storyai.arc.model.Arc">
+        <id column="id" property="id"/>
+        <result column="story_id" property="storyId"/>
+        <result column="title" property="title"/>
+        <result column="goal" property="goal"/>
+        <result column="target_start_chapter" property="targetStartChapter"/>
+        <result column="target_end_chapter" property="targetEndChapter"/>
+        <result column="status" property="status"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <sql id="ArcColumns">
+        id, story_id, title, goal, target_start_chapter, target_end_chapter,
+        status, created_at, updated_at
+    </sql>
+
+    <insert id="insert" parameterType="com.example.storyai.arc.model.Arc"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO arc
+            (story_id, title, goal, target_start_chapter, target_end_chapter, status)
+        VALUES
+            (#{storyId}, #{title}, #{goal}, #{targetStartChapter}, #{targetEndChapter},
+             COALESCE(#{status}, 'PLANNED'))
+    </insert>
+
+    <select id="findById" resultMap="ArcResult">
+        SELECT <include refid="ArcColumns"/>
+        FROM arc
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByStoryId" resultMap="ArcResult">
+        SELECT <include refid="ArcColumns"/>
+        FROM arc
+        WHERE story_id = #{storyId}
+        ORDER BY target_start_chapter ASC
+    </select>
+
+    <!-- "Current Arc": range covers the chapter number; ranges are author-managed
+         and must not overlap (validated at write time in the service). -->
+    <select id="findCurrentByChapter" resultMap="ArcResult">
+        SELECT <include refid="ArcColumns"/>
+        FROM arc
+        WHERE story_id = #{storyId}
+          AND target_start_chapter &lt;= #{chapterNumber}
+          AND target_end_chapter &gt;= #{chapterNumber}
+        LIMIT 1
+    </select>
+
+    <select id="findActive" resultMap="ArcResult">
+        SELECT <include refid="ArcColumns"/>
+        FROM arc
+        WHERE story_id = #{storyId} AND status = 'ACTIVE'
+        LIMIT 1
+    </select>
+
+    <update id="update" parameterType="com.example.storyai.arc.model.Arc">
+        UPDATE arc
+        SET title = #{title},
+            goal = #{goal},
+            target_start_chapter = #{targetStartChapter},
+            target_end_chapter = #{targetEndChapter},
+            status = #{status},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE arc
+        SET status = #{status},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+</mapper>

@@ -3,6 +3,7 @@ import { computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useStoryStore } from '@/stores/story'
 import StagePlanning from '@/components/StagePlanning.vue'
+import ArcPanel from '@/components/ArcPanel.vue'
 import MemoryPanel from '@/components/MemoryPanel.vue'
 import AssistancePanel from '@/components/AssistancePanel.vue'
 
@@ -78,6 +79,9 @@ function goBack(): void {
           </li>
         </ul>
       </section>
+
+      <!-- v0.1.1 Phase 6: long-form arcs (TASK-153) -->
+      <ArcPanel v-if="storyId" :story-id="storyId" class="story-detail__section" />
 
       <!-- Stage planning vertical slice (M2) -->
       <StagePlanning v-if="storyId" :story-id="storyId" class="story-detail__section" />
