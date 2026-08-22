@@ -27,7 +27,9 @@ public record PlanStageRequest(
         Integer currentChapterNumber,
         List<String> completedStageSummaries,
         List<String> recentChapterSummaries,
-        ContinuationAnchor continuationAnchor
+        ContinuationAnchor continuationAnchor,
+        // ---- v0.1.1 Phase 6 (TASK-154): long-form position ----
+        LongFormPosition longFormPosition
 ) {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -60,6 +62,22 @@ public record PlanStageRequest(
             String currentImmediateGoal,
             String lastChapterSummary,
             String lastChapterEnding
+    ) {
+    }
+
+    /**
+     * TASK-154 — long-form position: where this story sits within its total
+     * length and its current arc. The pace guard (TASK-155) reasons over these
+     * numbers; all fields optional so short stories simply omit the block.
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record LongFormPosition(
+            Integer targetChapterCount,
+            Integer currentChapterNumber,
+            String arcTitle,
+            String arcGoal,
+            Integer arcStartChapter,
+            Integer arcEndChapter
     ) {
     }
 }

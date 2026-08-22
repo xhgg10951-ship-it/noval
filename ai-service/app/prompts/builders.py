@@ -52,6 +52,7 @@ def log_request_shape(name: str, req) -> None:
         "completedStageSummaries": _len(getattr(req, "completedStageSummaries", None)),
         "recentChapterSummaries": _len(getattr(req, "recentChapterSummaries", None)),
         "currentChapterNumber": getattr(req, "currentChapterNumber", None),
+        "longFormPosition": _len(getattr(getattr(req, "longFormPosition", None), "model_dump", lambda: None)() or {}),
     }
     _request_logger.debug("[%s] received request shape: %s", name, shape)
 
@@ -114,6 +115,8 @@ def build_plan_prompt(req: PlanStageRequest) -> Tuple[str, str]:
 
 {anchor_block}
 
+{_fmt_long_form_position(req)}
+
 近期上下文：
 {req.recentContext or '(无)'}
 
@@ -172,6 +175,50 @@ def _fmt_continuation(req: PlanStageRequest) -> str:
         "重复已经完成过的阶段。新计划必须从上述续写状态继续。"
     )
     return "\n".join(parts)
+
+
+def _fmt_long_form_position(req: PlanStageRequest) -> str:
+    """TASK-154/155: render the long-form position block + pace guard rules.
+
+    The guard is expressed as PROPORTIONAL RULES over the position numbers, never
+    as a hardcoded plot-word blacklist: what counts as "endgame content" is
+    defined structurally (belongs to the final ~10% of a long-form book) so it
+    generalises to any story.
+    """
+    pos = req.longFormPosition
+    if pos is None:
+        return ""
+    lines = ["长篇定位："]
+    if pos.targetChapterCount is not None:
+        lines.append(f"- 本书目标总章数：约 {pos.targetChapterCount} 章")
+    if pos.currentChapterNumber is not None:
+        lines.append(f"- 当前进度：第 {pos.currentChapterNumber} 章")
+    if pos.arcTitle is not None or pos.arcStartChapter is not None:
+        rng = ""
+        if pos.arcStartChapter is not None and pos.arcEndChapter is not None:
+            rng = f"（第 {pos.arcStartChapter}–{pos.arcEndChapter} 章）"
+        title = pos.arcTitle or "(未命名卷)"
+        lines.append(f"- 当前卷：《{title}》{rng}")
+        if pos.arcGoal:
+            lines.append(f"- 当前卷目标：{pos.arcGoal}")
+
+    target = pos.targetChapterCount
+    current = pos.currentChapterNumber
+    if target and current and target > 0:
+        remaining_ratio = max(0.0, (target - current) / target)
+        if remaining_ratio > 0.10:
+            lines += [
+                "",
+                "长篇节奏守则（必须遵守）：",
+                f"- 当前仅完成全书的约 {round((current / target) * 100)}%，剩余约 "
+                f"{round(remaining_ratio * 100)}%。你规划的只是接下来一个阶段的局部剧情。",
+                "- 终局性内容（全书核心真相的完整揭示、与最终敌人的决胜之战、主角回到原点、"
+                "全书主矛盾的彻底解决等收束性剧情）只允许出现在全书最后 10% 的章节里。",
+                "- 本阶段的每一章都必须服务于「当前卷」的目标，用新的事件、人物或阻力"
+                "小步推进，而不是向结局冲刺。",
+                "- 禁止在本阶段计划中出现任何终局性、收束性或总结性的章节计划。",
+            ]
+    return "\n".join(lines)
 
 
 GENERATE_OUTPUT_HINT = '{"title": str, "content": str, "summary": str}'

@@ -50,6 +50,16 @@ class ContinuationAnchor(BaseModel):
     lastChapterEnding: Optional[str] = None
 
 
+# ---- v0.1.1 Phase 6 (TASK-154): long-form position ----
+class LongFormPosition(BaseModel):
+    targetChapterCount: Optional[int] = None
+    currentChapterNumber: Optional[int] = None
+    arcTitle: Optional[str] = None
+    arcGoal: Optional[str] = None
+    arcStartChapter: Optional[int] = None
+    arcEndChapter: Optional[int] = None
+
+
 # --------------------------------------------------------------------------
 # Plan Stage
 # --------------------------------------------------------------------------
@@ -67,6 +77,8 @@ class PlanStageRequest(BaseModel):
     completedStageSummaries: List[str] = Field(default_factory=list)
     recentChapterSummaries: List[str] = Field(default_factory=list)
     continuationAnchor: Optional[ContinuationAnchor] = None
+    # ---- v0.1.1 Phase 6 (TASK-154): long-form position ----
+    longFormPosition: Optional[LongFormPosition] = None
 
 
 class ChapterPlanItem(BaseModel):

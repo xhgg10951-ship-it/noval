@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.storyai.ai.dto.GenerateChapterRequest;
 import com.example.storyai.ai.dto.PlanStageRequest;
+import com.example.storyai.arc.service.ArcService;
 import com.example.storyai.chapter.model.Chapter;
 import com.example.storyai.chapter.service.ChapterService;
 import com.example.storyai.memory.model.CurrentState;
@@ -40,15 +41,19 @@ public class StoryContextReader {
     private final MemoryService memoryService;
     private final ChapterService chapterService;
     private final StageService stageService;
+    // v0.1.1 Phase 6 (TASK-154): long-form position needs the current arc.
+    private final ArcService arcService;
 
     public StoryContextReader(StoryService storyService,
                               MemoryService memoryService,
                               ChapterService chapterService,
-                              StageService stageService) {
+                              StageService stageService,
+                              ArcService arcService) {
         this.storyService = storyService;
         this.memoryService = memoryService;
         this.chapterService = chapterService;
         this.stageService = stageService;
+        this.arcService = arcService;
     }
 
     // ---- constraints ----
@@ -306,6 +311,31 @@ public class StoryContextReader {
                 immediateGoal,
                 lastSummary,
                 lastEnding
+        );
+    }
+
+    /**
+     * TASK-154 — long-form position for the Planner: the story's total target
+     * chapter count, the current chapter number, and the arc whose range covers
+     * that position (falling back to the ACTIVE arc). All fields best-effort:
+     * a short story without arcs yields nulls and the block is omitted.
+     */
+    public PlanStageRequest.LongFormPosition buildLongFormPosition(Long storyId) {
+        var story = storyService.getStory(storyId);
+        Integer current = getCurrentChapterNumber(storyId);
+        com.example.storyai.arc.model.Arc arc = current != null
+                ? arcService.findCurrent(storyId, current)
+                : null;
+        if (story.getTargetChapterCount() == null && current == null && arc == null) {
+            return null; // nothing long-form about this project — omit the block
+        }
+        return new PlanStageRequest.LongFormPosition(
+                story.getTargetChapterCount(),
+                current,
+                arc == null ? null : arc.getTitle(),
+                arc == null ? null : arc.getGoal(),
+                arc == null ? null : arc.getTargetStartChapter(),
+                arc == null ? null : arc.getTargetEndChapter()
         );
     }
 }

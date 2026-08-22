@@ -233,7 +233,9 @@ public class StagePlanningService {
                 contextReader.getCurrentChapterNumber(storyId),
                 contextReader.getCompletedStageSummaries(storyId),
                 contextReader.getRecentChapterSummaries(storyId, 3),
-                contextReader.buildContinuationAnchor(storyId, 800)
+                contextReader.buildContinuationAnchor(storyId, 800),
+                // v0.1.1 Phase 6 (TASK-154): long-form position (target/current/arc)
+                contextReader.buildLongFormPosition(story.getId())
         );
     }
 

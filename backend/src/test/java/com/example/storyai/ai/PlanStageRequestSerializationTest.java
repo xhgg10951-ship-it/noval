@@ -34,7 +34,9 @@ class PlanStageRequestSerializationTest {
                 null,
                 List.of(),
                 List.of(),
-                null);
+                null,
+                // v0.1.1 Phase 6 (TASK-154): long-form position rides along
+                new PlanStageRequest.LongFormPosition(600, 5, "第一卷", "立足", 1, 60));
         String json = objectMapper.writeValueAsString(req);
         System.out.println("SPRING_OM_JSON=" + json);
         System.out.println("SPRING_OM_LEN=" + json.length());

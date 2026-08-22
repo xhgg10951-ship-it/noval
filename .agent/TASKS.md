@@ -2439,7 +2439,7 @@ TASK-152
 
 ## TASK-154 — Add Long-form Position to Planner Contract
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2453,6 +2453,20 @@ arcRange
 arcGoal
 ```
 
+Implementation:
+
+- `PlanStageRequest` 新增嵌套 record `LongFormPosition`
+  （targetChapterCount/currentChapterNumber/arcTitle/arcGoal/arcStartChapter/arcEndChapter）
+- `StoryContextReader.buildLongFormPosition(storyId)`：story 目标 + 当前章号 +
+  ArcService.findCurrent（range 命中回退 ACTIVE）；全空时省略整块
+- `StagePlanningService.buildRequest` 接线
+- Python `models.py` 同步 LongFormPosition Pydantic 模型；builders 渲染
+
+Engineering Verification: PASSED — mvn test 53/53（含序列化测试更新）；
+Python round-trip：pace guard 渲染 ✓ / 短篇省略 ✓
+
+Real-LLM Semantic Verification: REQUIRED（属 TASK-156 / AC-114）
+
 Dependencies:
 
 TASK-152
@@ -2461,7 +2475,7 @@ TASK-152
 
 ## TASK-155 — Implement Pace Guard Prompt
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2483,6 +2497,19 @@ arc=1–60
 - 全书主矛盾解决。
 
 不要用硬编码剧情词表代替模型规则；测试案例可以使用这些例子。
+
+Implementation:
+
+- `builders._fmt_long_form_position(req)`：渲染「长篇定位」块（总章数/当前进度/
+  当前卷+范围+卷目标）
+- **Pace Guard 用比例规则而非词表**：剩余 >10% 时注入守则——终局性/收束性剧情
+  只允许在全书最后 10%；本阶段每章必须服务于当前卷目标、小步推进；禁止任何
+  终局性章节计划。结构性定义可泛化到任意故事。
+- 短篇（无 longFormPosition）整块省略，零干扰
+
+Engineering Verification: PASSED — Python 断言：600/5 场景 guard 渲染 ✓；短篇省略 ✓
+
+Real-LLM Semantic Verification: REQUIRED（属 TASK-156 / AC-114）
 
 Dependencies:
 
