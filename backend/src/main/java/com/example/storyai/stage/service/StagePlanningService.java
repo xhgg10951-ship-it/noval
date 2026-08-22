@@ -11,6 +11,7 @@ import com.example.storyai.ai.dto.PlanStageRequest;
 import com.example.storyai.ai.dto.PlanStageResponse;
 import com.example.storyai.common.exception.AiServiceException;
 import com.example.storyai.common.exception.ResourceNotFoundException;
+import com.example.storyai.context.StoryContextReader;
 import com.example.storyai.stage.model.ChapterPlan;
 import com.example.storyai.stage.model.Stage;
 import com.example.storyai.story.model.Story;
@@ -35,13 +36,16 @@ public class StagePlanningService {
 
     private final StoryService storyService;
     private final StageService stageService;
+    private final StoryContextReader contextReader;
     private final AiServiceClient aiServiceClient;
 
     public StagePlanningService(StoryService storyService,
                                 StageService stageService,
+                                StoryContextReader contextReader,
                                 AiServiceClient aiServiceClient) {
         this.storyService = storyService;
         this.stageService = stageService;
+        this.contextReader = contextReader;
         this.aiServiceClient = aiServiceClient;
     }
 
@@ -91,13 +95,18 @@ public class StagePlanningService {
         List<PlanStageRequest.ConstraintItem> constraintItems = constraints.stream()
                 .map(c -> new PlanStageRequest.ConstraintItem(c.getType(), c.getContent()))
                 .toList();
+        // TASK-106: wire existing story context instead of empty placeholders.
+        // For a brand-new first stage these may legitimately be empty; for later
+        // stages they now carry the real Current State / Story Memory / recent
+        // chapter summaries so the Planner continues the existing story (RC-01).
+        Long storyId = story.getId();
         return new PlanStageRequest(
                 story.getCoreIdea(),
                 constraintItems,
                 direction,
-                List.of(),
-                List.of(),
-                "",
+                contextReader.getCurrentStateItems(storyId),
+                contextReader.getStoryMemoryItems(storyId),
+                contextReader.getRecentContext(storyId, 3),
                 targetChapterCount
         );
     }
