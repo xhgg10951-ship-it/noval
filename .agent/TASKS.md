@@ -244,7 +244,21 @@ None
 
 ## TASK-102 — Correct v0.1 Status Claims
 
-Status: `TODO`
+Status: `DONE`
+
+Evidence:
+
+Active `.agent/STATE.md` §2.1 enumerates the three required corrections
+(Writer Memory NOT wired; Baseline-vs-Memory real-prose experiment NOT run;
+Mock PASS ≠ Semantic PASS). Historical `.agent/history/` + `docs/history/`
+files left untouched per AGENTS.md (non-active evidence). README.md and
+active STATE.md already stated Real-LLM NOT ACCEPTED.
+
+Engineering Verification:
+PASSED — inaccurate claims explicitly corrected in active docs
+
+Real-LLM Semantic Verification:
+NOT_REQUIRED
 
 Goal:
 

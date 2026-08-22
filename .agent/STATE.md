@@ -32,23 +32,22 @@ Current Phase:
 
 Current Task:
 
-`TASK-101 — Snapshot v0.1 Regression Evidence`
+`TASK-103 — Capture Current AI Request Payloads`
 
 Task Status:
 
-`DONE`
+`TODO`
 
 Task Evidence:
 
-`.agent/EVIDENCE_v0.1_REGRESSION.md` (code-level regression baseline captured;
-Planner/Writer empty-context wiring proven at file:line; prompts quoted
-verbatim; Mock repetitive artifact recorded)
+TASK-101/102 DONE — regression baseline at `.agent/EVIDENCE_v0.1_REGRESSION.md`;
+status corrections recorded in §2.1.
 
 Engineering Verification:
-PASSED — regression evidence saved and reviewable
+NOT_RUN — TASK-103 adds payload observability
 
 Real-LLM Semantic Verification:
-NOT_REQUIRED — TASK-101 is evidence capture, not an AI-behavior change
+NOT_REQUIRED
 
 ---
 
@@ -97,6 +96,27 @@ The repository also contains working concepts for:
 However:
 
 > real-LLM semantic quality and long-form authoring behavior are not accepted yet.
+
+### 2.1 Status Corrections Applied (TASK-102)
+
+The following inaccurate v0.1 claims are corrected / superseded as of this
+baseline. Historical files under `.agent/history/` and `docs/history/` are
+evidence only and are NOT edited; the truthful status above is authoritative.
+
+1. **"Writer used Structured Memory"** — FALSE. Active code
+   (`ChapterGenerationService.buildRequest`) sends empty `currentState` /
+   `storyMemories` / `relationshipState` (proven in
+   `.agent/EVIDENCE_v0.1_REGRESSION.md` §3, RC-02). Any prior Agent statement
+   claiming Writer Memory integration was complete is stale / incorrect.
+2. **"Baseline vs Memory real-prose experiment completed"** — FALSE. No
+   real-LLM prose comparison was ever executed; the historical experiment only
+   observed structured Current State / Story Memory *rows* under Mock and
+   recorded prose comparison as a known limitation. It did NOT prove Memory
+   improves generated prose.
+3. **"Mock PASS = Semantic PASS"** — FALSE. Mock only proves HTTP / DTO /
+   parsing / persistence / context-wiring / workflow / state machine. It can
+   never prove writing quality, Planner continuation, length control, Memory
+   benefit in prose, or long-form pace (see AC-117).
 
 ---
 
@@ -787,7 +807,7 @@ Current Phase:
 Phase 0 — Correct Evidence Base
 
 Current Task:
-TASK-102 — Correct v0.1 Status Claims
+TASK-103 — Capture Current AI Request Payloads
 
 Current Task Status:
 TODO
@@ -796,10 +816,10 @@ Known Blocker:
 NONE
 
 Next Safe Action:
-Correct inaccurate Agent/README status claims (TASK-102); do not modify generation logic until evidence reviewed.
+Add minimal debug observability for PlanStageRequest / GenerateChapterRequest / ExtractMemoryRequest (no API key logging); enable Prompt/Payload review before Phase 1.
 
 Engineering Verification:
-PASSED
+NOT_RUN
 
 Real-LLM Semantic Verification:
 NOT_REQUIRED
