@@ -1076,7 +1076,7 @@ TASK-119
 
 ## TASK-121 — Real-LLM Chapter Length Acceptance
 
-Status: `TODO`
+Status: `IN_PROGRESS`
 
 Goal:
 
@@ -1097,7 +1097,18 @@ PASS:
 
 且没有明显重复灌水。
 
-Real-LLM Semantic Verification: REQUIRED
+Engineering Verification: PASSED
+- ChapterSpec targetCharacters 全链路接线（TASK-117/119）；TextLengthUtil 计数规则一致
+- 新增 Writer length-expand guard (`app/services/writer.py`)：首稿低于 2250 时单次扩写
+  回填，要求"不改事实、只补细节"，且扩写后更长才采纳；无新基础设施
+- 第一轮真实 LLM 实测（无 guard / 弱指令）：5/5 均 < 2250（1171/962/992/1276/1107），
+  qwen3-8b 系统性产出 ~1000 字章节，确属真实语义缺口（章节过短根因再现）
+- 加固 ChapterSpec 长度指令 + 加入 expand guard 后重测：ch6 经扩写达 2531（入带），
+  其余章节显著上升（1843/1706/...），guard 生效（commit 39911e2）
+
+Real-LLM Semantic Verification: REQUIRED — re-running with guard (background)
+- 历史发现（诚实记录）：qwen3-8b 单独无法稳定达到 3000 字目标；expand guard 是
+  确定性工程补救措施，直接服务冻结根因"章节过短"。最终 PASS/FAIL 以带 guard 的重测为准。
 
 Dependencies:
 
