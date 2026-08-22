@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`Phase 0 — Correct Evidence Base`
+`Phase 1 — Context Wiring + Continuation`
 
 Current Task:
 
-`TASK-103 — Capture Current AI Request Payloads`
+`TASK-105 — Build Shared Story Context Reader`
 
 Task Status:
 
@@ -42,9 +42,11 @@ Task Evidence:
 
 TASK-101/102 DONE — regression baseline at `.agent/EVIDENCE_v0.1_REGRESSION.md`;
 status corrections recorded in §2.1.
+TASK-103 DONE — DEBUG payload observability (commit `63781dd`).
+TASK-104 DONE — 5 root causes re-confirmed at file:line; Phase 0 Gate PASSED.
 
 Engineering Verification:
-NOT_RUN — TASK-103 adds payload observability
+NOT_RUN — Phase 1 begins with shared Context Reader
 
 Real-LLM Semantic Verification:
 NOT_REQUIRED
@@ -801,22 +803,31 @@ Requirements:
 FROZEN
 
 Implementation:
-NOT STARTED
+IN PROGRESS (Phase 1)
 
 Current Phase:
-Phase 0 — Correct Evidence Base
+Phase 1 — Context Wiring + Continuation
 
 Current Task:
-TASK-103 — Capture Current AI Request Payloads
+TASK-105 — Build Shared Story Context Reader
 
 Current Task Status:
 TODO
+
+Phase 0 Gate:
+PASSED (2026-08-21, after commit 63781dd)
+- TASK-101 DONE: regression baseline saved
+- TASK-102 DONE: v0.1 status claims corrected
+- TASK-103 DONE: DEBUG payload observability
+- TASK-104 DONE: 5 root causes re-confirmed at file:line
 
 Known Blocker:
 NONE
 
 Next Safe Action:
-Add minimal debug observability for PlanStageRequest / GenerateChapterRequest / ExtractMemoryRequest (no API key logging); enable Prompt/Payload review before Phase 1.
+TASK-105 — Build a reusable Story Context Reader in Spring Boot that assembles
+Constraints + CurrentState + Relationships + StoryMemories + recent Chapters,
+before wiring it into StagePlanningService (TASK-106) and ChapterGenerationService (TASK-110).
 
 Engineering Verification:
 NOT_RUN

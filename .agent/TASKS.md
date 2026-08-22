@@ -287,7 +287,7 @@ TASK-101
 
 ## TASK-103 — Capture Current AI Request Payloads
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -307,12 +307,25 @@ ExtractMemoryRequest
 
 不得输出 API Key。
 
+Implementation:
+
+- `backend/.../ai/AiServiceClient.java`: 每个对外请求体在 DEBUG 级别日志输出（按字段名秘密守卫脱敏，大小写不敏感，不会误伤 "monkey" 之类字段）。
+- `ai-service/app/prompts/builders.py`: `log_request_shape()` 记录各上下文字段是否非空；接入 planner / replan / generate-chapter / extract-memory 入口。
+
 Verification:
 
 能够明确看到 Planner / Writer 当前究竟收到了哪些字段。
 
-Engineering Verification: REQUIRED  
+Engineering Verification: PASSED
+- Java 通过 javac 编译（仅存在既有 deprecation 警告）
+- Python 导入通过
+- 脱敏正则复测：正确脱敏 apiKey/accessToken/password/client_secret，保留 monkey/coreIdea/normalField
+
 Real-LLM Semantic Verification: NOT_REQUIRED
+
+Evidence:
+
+Commit `63781dd` — 5 源文件变更。
 
 Dependencies:
 
@@ -322,7 +335,7 @@ TASK-101
 
 ## TASK-104 — Phase 0 Evidence Review
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -338,9 +351,22 @@ Goal:
 
 > 更新 `.agent/STATE.md`，不要机械按旧假设实现。
 
+Review Result (repository reality re-confirmed at file:line):
+
+1. **Planner context missing** — `StagePlanningService.buildRequest` 第 98–100 行：`List.of()` (currentState)、`List.of()` (storyMemories)、`""` (recentContext)。与 RC-01 / STATE §4.1 一致。
+2. **Writer state/memory missing** — `ChapterGenerationService.buildRequest` 第 138–140 行：连续三个 `List.of()` (currentState / storyMemories / relationshipState)。与 RC-02 / STATE §4.2 一致。
+3. **previous-summary loop** — `prevSummary` 是唯一传入的 recent context（第 141 行），无任何其他连续性锚点。与 RC-04 / STATE §4.3 一致。
+4. **unsafe full replan** — `StageService.java:57` `chapterPlanMapper.deleteByStageId(stageId)` 整段删除计划（含已完成 Chapter↔Plan 历史），未区分 active/completed。与 STATE §4.7 一致。
+5. **extraction retry hole** — `ChapterGenerationService.java:111` 在 save 后调用 `extractForChapter(saved)`；仓库全局无 `@Retryable` / `retryTemplate` 任何重试机制。一旦 extract 抛异常，已持久化 Chapter 将被视为“已完成生成”而推进。与 RC-08 / STATE §4.8 一致。
+
+TASK-103 仅增加观察性日志，未改动生成逻辑，故冻结根因仍然成立。STATE.md §4 / §12 与仓库事实一致，无需机械重写。
+
 Verification:
 
 Repository reality documented.
+
+Engineering Verification: PASSED — 5 根因在仓库中按 file:line 复核一致  
+Real-LLM Semantic Verification: NOT_REQUIRED
 
 Dependencies:
 
@@ -354,11 +380,18 @@ TASK-103
 必须满足：
 
 ```text
-[ ] v0.1 不再被描述为 Real-LLM Product Accepted
-[ ] 当前 Prompt / Payload 可以被审查
-[ ] 已保存 regression baseline
-[ ] STATE 与 main 代码事实一致
+[x] v0.1 不再被描述为 Real-LLM Product Accepted
+[x] 当前 Prompt / Payload 可以被审查
+[x] 已保存 regression baseline
+[x] STATE 与 main 代码事实一致
 ```
+
+Gate Result: **PASSED** (commit `63781dd` 后复核，2026-08-21)
+- v0.1 在 STATE.md / README 中仅作为 Engineering Pipeline Accepted（TASK-102）。
+- TASK-103 提供 DEBUG 级 Payload 审查能力；TASK-101 保存 regression baseline。
+- TASK-104 复核 5 根因与仓库 file:line 一致，STATE §4 无需改写。
+
+进入 Phase 1 的 prerequisites 已满足。
 
 ---
 
