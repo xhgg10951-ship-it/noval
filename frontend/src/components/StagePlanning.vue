@@ -5,6 +5,7 @@ import {
   listStages,
   getStage,
   replanStage,
+  replanRemainingStage,
   confirmStage,
   updatePlanGoal,
   extractStageError,
@@ -103,6 +104,43 @@ async function handleConfirm(): Promise<void> {
   }
 }
 
+// ---- v0.1.1 Phase 4 (TASK-138): Replan Remaining for ACTIVE/PAUSED stages ----
+const remainingCount = ref<number>(2)
+const authorInstruction = ref('')
+const replanningRemaining = ref(false)
+
+function planStatusLabel(plan: ChapterPlanResponse): string | null {
+  switch (plan.status) {
+    case 'COMPLETED': return '已完成'
+    case 'SUPERSEDED': return '已被新计划替代'
+    case 'ACTIVE': return null // the default, no badge noise
+    default: return plan.status
+  }
+}
+
+async function handleReplanRemaining(): Promise<void> {
+  if (!stage.value) return
+  errorMsg.value = ''
+  if (!Number.isInteger(remainingCount.value) || remainingCount.value < 1 || remainingCount.value > 50) {
+    errorMsg.value = '剩余章节数需为 1–50 的整数'
+    return
+  }
+  replanningRemaining.value = true
+  try {
+    stage.value = await replanRemainingStage(
+      stage.value.id,
+      remainingCount.value,
+      authorInstruction.value,
+    )
+    authorInstruction.value = ''
+    await refreshStages()
+  } catch (err) {
+    errorMsg.value = extractStageError(err)
+  } finally {
+    replanningRemaining.value = false
+  }
+}
+
 function startEditGoal(plan: ChapterPlanResponse): void {
   editingPlanId.value = plan.id
   editingGoal.value = plan.goal
@@ -185,7 +223,7 @@ function statusLabel(status: string): string {
       <p class="stage-detail__direction">{{ stage.direction }}</p>
 
       <ul class="plan-list">
-        <li v-for="plan in stage.plans" :key="plan.id" class="plan-item">
+        <li v-for="plan in stage.plans" :key="plan.id" class="plan-item" :class="{ 'plan-item--superseded': plan.status === 'SUPERSEDED' }">
           <span class="plan-item__order">{{ plan.chapterOrder }}</span>
           <div class="plan-item__body">
             <template v-if="editingPlanId === plan.id">
@@ -200,6 +238,9 @@ function statusLabel(status: string): string {
             <template v-else>
               <p class="plan-item__goal">{{ plan.goal }}</p>
               <p v-if="plan.expectedProgress" class="plan-item__progress">{{ plan.expectedProgress }}</p>
+              <span v-if="planStatusLabel(plan)" class="badge badge--muted">
+                {{ planStatusLabel(plan) }} · 计划版本 v{{ plan.planVersion }}
+              </span>
               <button
                 v-if="stage.status === 'PLANNING'"
                 class="btn btn--ghost btn--small"
@@ -223,6 +264,27 @@ function statusLabel(status: string): string {
         </button>
         <button class="btn btn--primary" :disabled="confirming" @click="handleConfirm">
           {{ confirming ? '确认中…' : '确认计划' }}
+        </button>
+      </div>
+
+      <!-- v0.1.1 Phase 4 (TASK-138): Replan Remaining — change the future, never the past -->
+      <div v-if="stage.status === 'ACTIVE' || stage.status === 'PAUSED'" class="stage-controls stage-controls--remaining">
+        <p class="stage-controls__hint">
+          重新规划只影响<b>未生成</b>的章节：已完成章节及其历史计划会原样保留。
+          若正在后台生成，请先暂停或停止，到达安全检查点后再操作。
+        </p>
+        <label class="stage-controls__label">
+          剩余章节数
+          <input v-model.number="remainingCount" type="number" min="1" max="50" class="form__input form__input--count" />
+        </label>
+        <textarea
+          v-model="authorInstruction"
+          class="form__textarea"
+          rows="2"
+          placeholder="可选：对剩余章节的调整指示，例：后半段转向地下城探索，减少城镇日常。"
+        ></textarea>
+        <button class="btn btn--ghost" :disabled="replanningRemaining" @click="handleReplanRemaining">
+          {{ replanningRemaining ? '重新规划剩余章节中…' : '重新规划剩余章节' }}
         </button>
       </div>
 

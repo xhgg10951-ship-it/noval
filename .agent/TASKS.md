@@ -1789,7 +1789,7 @@ TASK-136
 
 ## TASK-138 — Replan Remaining UI
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1799,7 +1799,23 @@ ACTIVE / PAUSED Stage 允许作者：
 重新规划剩余章节
 ```
 
-不得显示成“删除整个计划”。
+不得显示成"删除整个计划"。
+
+Implementation:
+
+- `api/stages.ts`：ChapterPlanResponse 增加计划版本字段；新增
+  `replanRemainingStage(stageId, count, instruction?)`
+- `StagePlanning.vue`：
+  - ACTIVE（及兼容 PAUSED）stage 显示「重新规划剩余章节」控件：
+    剩余章节数输入 + 可选作者指示 textarea + 明确提示"只影响未生成章节，
+    已完成章节与历史计划保留；后台生成中需先暂停"
+  - 计划列表为 SUPERSEDED 行显示灰化 + 「已被新计划替代 · vN」徽标，
+    COMPLETED 行显示「已完成 · vN」——绝不呈现为删除操作
+- `main.css`：badge--muted / plan-item--superseded / stage-controls--remaining 样式
+
+Engineering Verification: PASSED — `npm run build` 成功（2026-08-22）
+
+Real-LLM Semantic Verification: NOT_REQUIRED
 
 Dependencies:
 

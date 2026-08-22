@@ -8,6 +8,9 @@ export interface ChapterPlanResponse {
   chapterOrder: number
   goal: string
   expectedProgress: string | null
+  planVersion: number
+  active: boolean
+  status: string // ACTIVE / COMPLETED / SUPERSEDED (v0.1.1 Phase 4)
   createdAt: string
   updatedAt: string
 }
@@ -58,6 +61,20 @@ export async function getStage(stageId: number): Promise<StageResponse> {
 
 export async function replanStage(stageId: number, targetChapterCount: number): Promise<StageResponse> {
   const { data } = await api.post<StageResponse>(`/stages/${stageId}/replan`, { targetChapterCount })
+  return data
+}
+
+// v0.1.1 Phase 4 (TASK-136): rewrite only the FUTURE of an ACTIVE/PAUSED stage.
+// Completed plans + chapters are preserved; the remainder is superseded and a
+// new plan version is generated from the current story state.
+export async function replanRemainingStage(
+  stageId: number,
+  remainingChapterCount: number,
+  authorInstruction?: string,
+): Promise<StageResponse> {
+  const body: Record<string, unknown> = { remainingChapterCount }
+  if (authorInstruction?.trim()) body.authorInstruction = authorInstruction.trim()
+  const { data } = await api.post<StageResponse>(`/stages/${stageId}/replan-remaining`, body)
   return data
 }
 
