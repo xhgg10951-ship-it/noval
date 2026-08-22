@@ -133,4 +133,44 @@ public class StoryContextReader {
                 .filter(Objects::nonNull)
                 .collect(Collectors.joining("\n\n"));
     }
+
+    /**
+     * TASK-111 — upgraded Writer continuity context: the summaries of the most
+     * recent {@code maxChapters} chapters PLUS a tail excerpt of the latest
+     * chapter's content (its ending), so a single summary can no longer be the
+     * only continuity anchor.
+     *
+     * @param endingExcerptChars max characters taken from the end of the latest
+     *                            chapter's content (0 = omit the excerpt)
+     */
+    public String getRecentContextWithEnding(Long storyId, int maxChapters, int endingExcerptChars) {
+        List<Chapter> chapters = chapterService.listByStory(storyId);
+        if (chapters == null || chapters.isEmpty()) return "";
+        List<Chapter> sorted = chapters.stream()
+                .sorted(Comparator.comparing(Chapter::getChapterNumber))
+                .toList();
+        List<Chapter> recent = sorted.stream()
+                .skip(Math.max(0, sorted.size() - maxChapters))
+                .toList();
+
+        StringBuilder sb = new StringBuilder();
+        for (Chapter c : recent) {
+            if (c.getSummary() != null && !c.getSummary().isBlank()) {
+                sb.append("【第 ").append(c.getChapterNumber()).append(" 章 摘要】\n")
+                  .append(c.getSummary()).append("\n\n");
+            }
+        }
+        if (endingExcerptChars > 0 && !recent.isEmpty()) {
+            Chapter last = recent.get(recent.size() - 1);
+            String content = last.getContent();
+            if (content != null && !content.isEmpty()) {
+                String excerpt = content.length() <= endingExcerptChars
+                        ? content
+                        : content.substring(content.length() - endingExcerptChars);
+                sb.append("【上一章结尾】\n").append(excerpt).append("\n");
+            }
+        }
+        String result = sb.toString().trim();
+        return result.isEmpty() ? "" : result;
+    }
 }

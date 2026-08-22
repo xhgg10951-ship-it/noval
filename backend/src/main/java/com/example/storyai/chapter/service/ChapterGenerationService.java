@@ -86,13 +86,11 @@ public class ChapterGenerationService {
                 .min(Comparator.comparing(ChapterPlan::getChapterOrder))
                 .orElseThrow(() -> new NoPendingChapterException(stageId));
 
-        // Continuity: summary of the most recent chapter generated for the story so far.
-        String prevSummary = chapterService.listByStory(story.getId()).stream()
-                .max(Comparator.comparing(Chapter::getChapterNumber))
-                .map(Chapter::getSummary)
-                .orElse(null);
+        // TASK-111: continuity = last 2-3 chapter summaries + latest chapter ending
+        // excerpt, so a single summary is no longer the only continuity anchor.
+        String recentContext = contextReader.getRecentContextWithEnding(story.getId(), 3, 800);
 
-        GenerateChapterRequest request = buildRequest(story, constraints, stage, nextPlan, prevSummary);
+        GenerateChapterRequest request = buildRequest(story, constraints, stage, nextPlan, recentContext);
 
         GenerateChapterResponse ai = aiServiceClient.generateChapter(request); // OUTSIDE tx
         validate(ai);
@@ -129,15 +127,16 @@ public class ChapterGenerationService {
                                                 List<StoryConstraint> constraints,
                                                 Stage stage,
                                                 ChapterPlan plan,
-                                                String prevSummary) {
+                                                String recentContext) {
         List<GenerateChapterRequest.ConstraintItem> constraintItems = constraints.stream()
                 .map(c -> new GenerateChapterRequest.ConstraintItem(c.getType(), c.getContent()))
                 .toList();
         // TASK-110: wire existing story context instead of empty placeholders.
         // For the very first chapter these may legitimately be empty; afterwards
         // they carry the real Current State / Story Memory / Relationships so the
-        // Writer actually uses them (fixes RC-02). recentContext upgrade to
-        // multi-summary + ending is TASK-111.
+        // Writer actually uses them (fixes RC-02).
+        // TASK-111: recentContext is now last 2-3 chapter summaries + latest
+        // chapter ending excerpt (see generateNextChapter).
         Long storyId = story.getId();
         return new GenerateChapterRequest(
                 story.getCoreIdea(),
@@ -148,7 +147,7 @@ public class ChapterGenerationService {
                 contextReader.getWriterStateItems(storyId),
                 contextReader.getWriterMemoryItems(storyId),
                 contextReader.getRelationshipItems(storyId),
-                prevSummary == null ? "" : prevSummary
+                recentContext == null ? "" : recentContext
         );
     }
 
