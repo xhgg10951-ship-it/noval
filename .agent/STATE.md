@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`Phase 4 — Replan Remaining (Phase 3 Gate PASSED 2026-08-22; TASK-133/134/135 DONE, TASK-136 service layer done)`
+`Phase 4 — Replan Remaining (backend DONE: TASK-133..137; remaining: TASK-138 UI, TASK-139 AC-106 real-LLM)`
 
 Current Task:
 
-`TASK-136 — Implement Replan Remaining Service (remainder: HTTP entry + old full-replan guard + planner remaining call)`
+`TASK-138 — Replan Remaining UI (Vue)`
 
 Task Status:
 

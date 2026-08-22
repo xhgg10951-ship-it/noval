@@ -55,6 +55,13 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("NO_PENDING_CHAPTER", ex.getMessage()));
     }
 
+    /** v0.1.1 Phase 4: lifecycle/state conflicts (e.g. replan on an active stage). */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> handleStateConflict(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("STATE_CONFLICT", ex.getMessage()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
         Map<String, String> fields = new LinkedHashMap<>();

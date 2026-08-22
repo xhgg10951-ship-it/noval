@@ -1701,7 +1701,7 @@ TASK-134
 
 ## TASK-136 — Implement Replan Remaining Service
 
-Status: `IN_PROGRESS`
+Status: `DONE`
 
 Goal:
 
@@ -1719,19 +1719,30 @@ current Story State → Planner
 new version remaining plans created
 ```
 
-Implementation (partial — service layer DONE):
+Implementation:
 
-- `StageService.replanRemaining(stageId, targetChapterCount, plan, newVersion)`
-  （@Transactional）：supersedeRemaining → updatePlanCounts → insertPlans(vN)，
-  已完成 Plan 不受影响
-- 待完成：HTTP 入口（ACTIVE/PAUSED stage 的 Replan Remaining endpoint）、
-  Planner "remaining" 调用路径（携带 currentChapterNumber / 已完成摘要，只请求剩余章）、
-  旧全量 replan 入口 `POST /stages/{id}/replan` 的安全收口（PLANNING-only 或迁移），
-  以及 newVersion 单调递增的来源
+- `StageService.replanRemaining`（@Transactional，前会话完成）：supersedeRemaining →
+  updatePlanCounts → insertPlans(vN)，历史行不动
+- `StagePlanningService.replanRemaining(stageId, count, instruction)`：
+  - 仅 ACTIVE/PAUSED 允许（否则 STATE_CONFLICT 409）
+  - authorInstruction 并入 direction 文本（零 DTO 契约变更）
+  - 复用 buildRequest 的 continuation context（TASK-106/107 接线）→ Planner 知道
+    "正在连载、从当前状态续写"
+  - 新计划 order 从 max(现有 order) 之后接续编号；newVersion = max(version)+1
+- `POST /api/stages/{stageId}/replan-remaining`（ReplanRemainingRequest：
+  remainingChapterCount 1..50 + authorInstruction 可选）
+- `ChapterPlanResponse` 暴露 planVersion/active/status（UI 与验收可见）
+- GlobalExceptionHandler 新增 IllegalStateException → 409 STATE_CONFLICT
+- 旧全量 replan 收口（TASK-134 目标达成）：`replanStage` 仅 PLANNING 状态可用，
+  ACTIVE/PAUSED 引导至 replan-remaining——deleteByStageId 不再可能触及有 Chapter 的计划
 
-Engineering Verification: PASSED (service layer) — mvn compile 通过
+Engineering Verification: PASSED
+- `ReplanRemainingIntegrationTest` 6/6（2026-08-22）：
+  - replan 后 6 行计划共存：2 COMPLETED(v1) + 2 SUPERSEDED(v1) + 2 ACTIVE(v2)
+  - 续跑仅执行 v2 计划，总章数 4、编号 1..4 无重复、新章 summary 携带新目标标记
+  - ACTIVE stage 全量 replan → 409 且历史不动；PLANNING 全量 replan 仍可用
 
-Real-LLM Semantic Verification: NOT_REQUIRED（新计划续写语义属 TASK-139 / AC-106）
+Real-LLM Semantic Verification: REQUIRED for AC-106（属 TASK-139）
 
 Dependencies:
 
@@ -1741,7 +1752,7 @@ TASK-135
 
 ## TASK-137 — Replan Job Consistency
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1752,6 +1763,23 @@ Replan 后：
 - 不重复生成；
 - Pause 状态允许 Replan；
 - Running 状态要求先 Pause 到安全 checkpoint。
+
+Implementation:
+
+- `GenerationOrchestrationService.startJob`：total 改用
+  `getActiveRemainingPlans(stageId).size()`——superseded/completed 历史行不再
+  虚增进度条总数
+- `StagePlanningService.replanRemaining`：stage 存在 PENDING/RUNNING job 时拒绝
+  （409 STATE_CONFLICT，"请先暂停或停止"）；PAUSED 明确放行（冻结语义）
+- 不重复生成由 active-remaining 队列 + markPlanCompleted + uk_chapter_plan 三层保证
+
+Engineering Verification: PASSED
+- `jobTotalCountsOnlyActiveRemainingPlansAfterReplan`：4 行历史 + replan(3) 后
+  新 job total=3（非 7/非 6）
+- `replanRemainingRefusedWhileJobRunning`：gated writer 保持 RUNNING → replan 409 →
+  pause 到 checkpoint 后同一请求成功
+
+Real-LLM Semantic Verification: NOT_REQUIRED
 
 Dependencies:
 

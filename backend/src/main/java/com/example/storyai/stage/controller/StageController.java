@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.storyai.stage.dto.ChapterPlanResponse;
 import com.example.storyai.stage.dto.CreateStageRequest;
+import com.example.storyai.stage.dto.ReplanRemainingRequest;
 import com.example.storyai.stage.dto.ReplanRequest;
 import com.example.storyai.stage.dto.StageResponse;
 import com.example.storyai.stage.dto.StageSummary;
@@ -72,6 +73,18 @@ public class StageController {
     public StageResponse replan(@PathVariable Long stageId,
                                 @Valid @RequestBody ReplanRequest request) {
         var stage = planningService.replanStage(stageId, request.getTargetChapterCount());
+        return toResponse(stage, stageService.getPlans(stageId));
+    }
+
+    /**
+     * v0.1.1 Phase 4 (TASK-136): Replan Remaining for ACTIVE/PAUSED stages.
+     * Preserves completed plans + their chapters; only the future is rewritten.
+     */
+    @PostMapping("/api/stages/{stageId}/replan-remaining")
+    public StageResponse replanRemaining(@PathVariable Long stageId,
+                                         @Valid @RequestBody ReplanRemainingRequest request) {
+        var stage = planningService.replanRemaining(stageId,
+                request.getRemainingChapterCount(), request.getAuthorInstruction());
         return toResponse(stage, stageService.getPlans(stageId));
     }
 

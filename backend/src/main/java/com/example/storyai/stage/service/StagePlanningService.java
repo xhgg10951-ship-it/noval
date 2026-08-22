@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.example.storyai.ai.AiServiceClient;
 import com.example.storyai.ai.dto.PlanStageRequest;
 import com.example.storyai.ai.dto.PlanStageResponse;
+import com.example.storyai.chapter.service.GenerationJobService;
 import com.example.storyai.common.exception.AiServiceException;
 import com.example.storyai.common.exception.ResourceNotFoundException;
 import com.example.storyai.context.StoryContextReader;
@@ -38,15 +39,19 @@ public class StagePlanningService {
     private final StageService stageService;
     private final StoryContextReader contextReader;
     private final AiServiceClient aiServiceClient;
+    // TASK-137: replan must respect in-flight generation jobs.
+    private final GenerationJobService jobService;
 
     public StagePlanningService(StoryService storyService,
                                 StageService stageService,
                                 StoryContextReader contextReader,
-                                AiServiceClient aiServiceClient) {
+                                AiServiceClient aiServiceClient,
+                                GenerationJobService jobService) {
         this.storyService = storyService;
         this.stageService = stageService;
         this.contextReader = contextReader;
         this.aiServiceClient = aiServiceClient;
+        this.jobService = jobService;
     }
 
     /** Creates a new stage for the story and generates its initial plan (AT-B01). */
@@ -62,9 +67,18 @@ public class StagePlanningService {
     /**
      * Full replan (AT-B02, TASK-016): the planner regenerates the complete plan
      * for the new target count — old plans are replaced, not truncated.
+     *
+     * <p>TASK-134 guard: this WHOLESALE path is only safe before generation starts
+     * (no chapter references these plan rows yet). Once a stage is ACTIVE or
+     * COMPLETED, deleting its plans would orphan completed Chapter↔Plan history,
+     * so callers must use {@link #replanRemaining(Long, Integer, String)} instead.</p>
      */
     public Stage replanStage(Long stageId, Integer targetChapterCount) {
         Stage stage = stageService.getStage(stageId);
+        if (!"PLANNING".equals(stage.getStatus())) {
+            throw new IllegalStateException(
+                    "只有 PLANNING 状态的阶段可以整体重规划；已激活的阶段请使用「重新规划剩余章节」，已完成的历史计划不可删除");
+        }
         Story story = storyService.getStory(stage.getStoryId());
         List<StoryConstraint> constraints = storyService.getConstraints(stage.getStoryId());
 
@@ -72,6 +86,83 @@ public class StagePlanningService {
                 targetChapterCount);
         PlanStageResponse plan = callPlanner(request, true);
         return stageService.replacePlans(stageId, targetChapterCount, plan);
+    }
+
+    /**
+     * TASK-136 — Replan Remaining (v0.1.1 Phase 4). The author may change the
+     * FUTURE of an ACTIVE/PAUSED stage without destroying history:
+     *
+     * <pre>
+     * completed plans preserved
+     * old remaining → SUPERSEDED
+     * current Story State + continuation context → Planner
+     * new-version remaining plans appended after the last existing order
+     * </pre>
+     *
+     * @param stageId               target stage (must be ACTIVE or PAUSED)
+     * @param remainingChapterCount size of the new remainder
+     * @param authorInstruction     optional steering text for the Planner
+     */
+    public Stage replanRemaining(Long stageId, Integer remainingChapterCount,
+                                 String authorInstruction) {
+        Stage stage = stageService.getStage(stageId);
+        if (!"ACTIVE".equals(stage.getStatus()) && !"PAUSED".equals(stage.getStatus())) {
+            throw new IllegalStateException(
+                    "只有 ACTIVE 或 PAUSED 状态的阶段可以重新规划剩余章节，当前状态: " + stage.getStatus());
+        }
+        // TASK-137: a RUNNING/PENDING generation must reach its checkpoint first.
+        // The author pauses (or stops); replanning mid-flight would desync the
+        // job's view of the plan queue. PAUSED jobs are allowed by design.
+        com.example.storyai.chapter.model.GenerationJob latestJob =
+                jobService.findLatestByStage(stageId);
+        if (latestJob != null
+                && ("RUNNING".equals(latestJob.getStatus())
+                        || "PENDING".equals(latestJob.getStatus()))) {
+            throw new IllegalStateException(
+                    "当前阶段正在后台生成中，请先暂停或停止生成任务，到达安全检查点后再重新规划剩余章节");
+        }
+        Story story = storyService.getStory(stage.getStoryId());
+        List<StoryConstraint> constraints = storyService.getConstraints(stage.getStoryId());
+
+        // Optional author steering rides on the stage direction — no DTO contract
+        // change needed; the Planner treats direction as the arc instruction.
+        String direction = stage.getDirection();
+        if (authorInstruction != null && !authorInstruction.isBlank()) {
+            direction = direction + "\n作者对剩余章节的调整指示：" + authorInstruction.trim();
+        }
+
+        PlanStageRequest request = buildRequest(story, constraints, direction,
+                remainingChapterCount);
+        PlanStageResponse plan = callPlanner(request, true);
+
+        // Append the new remainder AFTER all existing orders and bump the version,
+        // so history keeps its original order and the active queue stays monotonic.
+        List<ChapterPlan> existing = stageService.getPlans(stageId);
+        int baseOrder = existing.stream()
+                .mapToInt(ChapterPlan::getChapterOrder).max().orElse(0);
+        int newVersion = existing.stream()
+                .mapToInt(p -> p.getPlanVersion() == null ? 1 : p.getPlanVersion())
+                .max().orElse(1) + 1;
+        PlanStageResponse shifted = shiftOrders(plan, baseOrder);
+
+        return stageService.replanRemaining(stageId, remainingChapterCount, shifted, newVersion);
+    }
+
+    /** Re-numbers planner items to start after {@code baseOrder} (order preserved relatively). */
+    private PlanStageResponse shiftOrders(PlanStageResponse plan, int baseOrder) {
+        List<PlanStageResponse.ChapterPlanItem> shifted = new java.util.ArrayList<>();
+        for (PlanStageResponse.ChapterPlanItem item : plan.chapterPlans()) {
+            shifted.add(new PlanStageResponse.ChapterPlanItem(
+                    item.order() + baseOrder,
+                    item.goal(),
+                    item.expectedProgress(),
+                    item.targetCharacters(),
+                    item.mustAdvance(),
+                    item.mustNotDo(),
+                    item.storyBeats(),
+                    item.endingIntent()));
+        }
+        return new PlanStageResponse(plan.suggestedChapterCount(), shifted);
     }
 
     public Stage confirmPlan(Long stageId) {

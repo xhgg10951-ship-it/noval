@@ -14,6 +14,10 @@ public class ChapterPlanResponse {
     private Integer chapterOrder;
     private String goal;
     private String expectedProgress;
+    // ---- TASK-133/136: plan versioning surfaced to the UI ----
+    private Integer planVersion;
+    private Boolean active;
+    private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -26,6 +30,9 @@ public class ChapterPlanResponse {
         this.chapterOrder = plan.getChapterOrder();
         this.goal = plan.getGoal();
         this.expectedProgress = plan.getExpectedProgress();
+        this.planVersion = plan.getPlanVersion();
+        this.active = plan.getActive();
+        this.status = plan.getStatus();
         this.createdAt = plan.getCreatedAt();
         this.updatedAt = plan.getUpdatedAt();
     }
@@ -68,6 +75,30 @@ public class ChapterPlanResponse {
 
     public void setExpectedProgress(String expectedProgress) {
         this.expectedProgress = expectedProgress;
+    }
+
+    public Integer getPlanVersion() {
+        return planVersion;
+    }
+
+    public void setPlanVersion(Integer planVersion) {
+        this.planVersion = planVersion;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public LocalDateTime getCreatedAt() {

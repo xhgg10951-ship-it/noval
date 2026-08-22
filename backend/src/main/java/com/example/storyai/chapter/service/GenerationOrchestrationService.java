@@ -71,7 +71,9 @@ public class GenerationOrchestrationService {
 
     /** Starts a generation job for a stage in the given mode (STEP or CONTINUOUS). */
     public GenerationJob startJob(Long stageId, GenerationJob.Mode mode) {
-        int total = stageService.getPlans(stageId).size();
+        // TASK-137: total counts only the ACTIVE REMAINING queue — superseded and
+        // completed plan rows are history and must not inflate the progress bar.
+        int total = stageService.getActiveRemainingPlans(stageId).size();
         GenerationJob job = new GenerationJob();
         job.setStageId(stageId);
         job.setMode(mode.name());
