@@ -15,10 +15,10 @@ from app.prompts.builders import build_generate_prompt, log_request_shape
 from app.schemas.models import GenerateChapterRequest, GenerateChapterResponse
 from app.services.mock_builders import mock_generate
 
-# Below this many characters we treat the draft as under-target and trigger one
-# expand pass. 2250 is the AC-103 lower band; we guard at the same floor.
+# Below this many characters we treat the draft as under-target and trigger
+# expand passes. 2250 is the AC-103 lower band; we guard at the same floor.
 _LENGTH_FLOOR = 2250
-_MAX_EXPAND_PASSES = 1
+_MAX_EXPAND_PASSES = 3
 
 
 def _count_chars(text: str) -> int:
@@ -39,19 +39,20 @@ def _expand_system() -> str:
 def _expand_user(title: str, content: str, target: int, summary: str) -> str:
     return f"""当前章节标题：{title}
 
-当前正文字数：{_count_chars(content)} 字（目标是约 {target} 字，明显偏少，需要扩充）
+当前正文字数：{_count_chars(content)} 字（硬性目标约 {target} 字，当前明显偏少）。
 
-当前正文：
+已有正文（这是不可更改的情节骨架与事实基础）：
 {content}
 
 当前摘要：
 {summary}
 
-请在保持以上所有事实、人物、对话、情节走向完全不变的前提下，将正文扩充到约 {target} 字：
-- 为每个已有场景补充环境、心理、动作与过渡细节；
-- 不得删除或改写已有句子所确立的事实；
-- 不得引入与本章目标无关的新重大事件；
-- 结尾保持原意，仅做必要的丰满。
+请基于上述已有正文，重写一版【完整、丰满、达到约 {target} 字】的章节：
+- 严格保留已有正文确立的全部事实、人物、对话与情节走向，不许改写或矛盾；
+- 在每一处场景大幅补充：环境描写、人物心理活动、动作细节、必要的过渡与节奏；
+- 可以新增服务于已有情节的细腻描写，但不得引入与本章目标无关的新重大事件；
+- 结尾保持原意并做必要丰满；
+- 最终正文必须明显长于当前版本，接近 {target} 字。
 
 请只输出 JSON。"""
 
