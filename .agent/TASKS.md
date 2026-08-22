@@ -2019,7 +2019,7 @@ TASK-141
 
 ## TASK-143 — Manual Edit UI
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2029,6 +2029,18 @@ Chapter Workspace 支持：
 - Save；
 - Cancel；
 - 当前 revision 信息。
+
+Implementation:
+
+- ChapterPanel：展开章显示 DRAFT/APPROVED 徽标 + 当前版本号；「编辑」进入
+  textarea 编辑模式（保存为新修订/取消）；操作行含批准/重新生成/修订历史
+- `api/chapters.ts`：editChapterContent/approveChapter/regenerateChapter/listRevisions
+  + ChapterResponse 扩展（revision/status/memory 字段）
+- main.css：chapter-edit/workflow/regenerate/revision-history 样式
+
+Engineering Verification: PASSED — npm run build 成功（2026-08-22）
+
+Real-LLM Semantic Verification: NOT_REQUIRED
 
 Dependencies:
 
@@ -2074,7 +2086,7 @@ TASK-141
 
 ## TASK-145 — Revision History API + UI
 
-Status: `IN_PROGRESS`
+Status: `DONE`
 
 Goal:
 
@@ -2089,11 +2101,11 @@ Goal:
 
 Implementation:
 
-- API DONE：`GET /api/chapters/{chapterId}/revisions`（newest first，
-  ChapterRevisionResponse 含 version/content/sourceType/createdAt）
-- UI 待做（与 TASK-143 一并进入 ChapterPanel）
+- API：`GET /api/chapters/{chapterId}/revisions`（newest first）
+- UI：ChapterPanel「修订历史」折叠面板——每版本显示
+  vN · 来源标签（AI 初稿/作者手改/AI 重写/AI 润色）· 时间 · 内容预览
 
-Engineering Verification: PASSED (API) — listRevisions 断言 newest-first + sourceType ✓
+Engineering Verification: PASSED — API 集成断言 + npm run build ✓
 
 Real-LLM Semantic Verification: NOT_REQUIRED
 
@@ -2189,17 +2201,18 @@ Implementation:
 
 - `MemoryMapper.deleteStoryMemoriesBySource`：删除该章派生的 STORY_MEMORY
   （source_chapter_id 可追踪）
-- `MemoryMapper.supersedeCandidatesBySource`：该章旧 candidates 标记 SUPERSEDED
-  （审计保留，绝不再次 apply）
-- `reExtractChapter` 开头执行失效，再重抽 → AUTO apply → COMPLETED
-- 已知限制（如实记录）：current_state / relationship_state 表无 per-chapter
-  来源列（v0.1 schema 限制）；重抽通过 upsert 覆盖同名 slot 实现事实纠正，
-  无法追踪来源的 slot 不做删除。列入 v0.1.2 候选（provenance 列）。
+- **slot 反查失效**（AC-107 验收暴露的缺口驱动）：current_state /
+  relationship_state 无来源列——以该章 APPLIED candidates 为 provenance，
+  `invalidateAppliedSlots` 用与 apply 路径相同的 field→category 映射反删精确 slot
+  （deleteCurrentStateSlot / deleteRelationshipSlot），旧 candidates 标记 SUPERSEDED
+- **顺序关键**：失效必须先于重抽构建请求，否则 existingState 快照含待纠正事实，
+  extractor 会回显污染（AC-107 首轮真实运行实际观测到"铁剑"回显）
+- reExtractChapter：失效 → PENDING → 重抽 → AUTO apply → COMPLETED
 
-Engineering Verification: PASSED — manualEdit...Reextract... 断言：
-编辑后 STALE → reExtract 后 story_memory 派生行=0、状态 COMPLETED、正文未被重写 ✓
+Engineering Verification: PASSED — mvn test 46/46 + AC-107 real-LLM 终态：
+铁剑引用=0、Current State 被新正文事实替换、旧 candidates 全 SUPERSEDED
 
-Real-LLM Semantic Verification: NOT_REQUIRED（AC-108 全流程属 TASK-149）
+Real-LLM Semantic Verification: PASSED (2026-08-22, 与 TASK-149 同轮)
 
 Dependencies:
 
@@ -2209,7 +2222,7 @@ TASK-147
 
 ## TASK-149 — Manual Edit + Memory Refresh Acceptance
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2230,6 +2243,27 @@ author removes event
 - old Revision exists；
 - 铁剑不再作为 Current State。
 
+Engineering Verification: PASSED (2026-08-22, full stack real run)
+- 场景：story 479 / stage 356 / chapter 505（qwen3-8b 真实写作"购买铁剑"章节，
+  338 字）→ 首次抽取 AUTO apply 出 CURRENT_STATE「林夜/状态=…购买了铁剑」→
+  作者 PUT 编辑为无铁剑正文 → v2 MANUAL_EDIT + STALE → CONTINUOUS job 触发
+  resolver EXTRACT_MEMORY → 失效+重抽 → COMPLETED
+- 首轮发现真实缺口并修复：重抽后铁剑 slot 残留——current_state 无来源列，
+  旧实现仅 supersede candidates 不删 slot；且旧代码失效在抽取之后，导致
+  existingState 回显污染。修复：candidate 反查精确删 slot + 先失效后抽取。
+
+Real-LLM Semantic Verification: PASSED (2026-08-22)
+- AC-107 PASS：
+  - new Revision active：v3 MANUAL_EDIT 为当前（v1 AI_GENERATED/v2 均保留可读）
+  - old Revision exists ✓
+  - 铁剑不再作为 Current State：`iron_refs=0`，Current State 被新事实
+    「首次进入城镇，正在前往冒险者公会」替换
+- AC-108 PASS（同轮验证 memory refresh 一致性）：
+  - 该章全部旧 candidates（含铁剑相关）SUPERSEDED，绝不再次 apply
+  - 新 APPLIED candidates 与编辑后正文一致（无铁剑）
+  - chapter.memoryExtractionStatus=COMPLETED；content 未被重抽改动
+- 证据：DB 终态查询记录于本条目；运行栈 backend+Python(qwen3-8b)+MySQL 全真实
+
 Dependencies:
 
 TASK-148
@@ -2240,13 +2274,15 @@ TASK-143
 ## Phase 5 Gate
 
 ```text
-[ ] Manual Edit PASS
-[ ] Revision History PASS
-[ ] Regenerate works
-[ ] Memory refresh PASS
-[ ] AC-107 PASS
-[ ] AC-108 PASS
+[x] Manual Edit PASS — API + UI + 集成测试；AC-107 real-LLM PASS
+[x] Revision History PASS — newest-first API + 折叠历史面板
+[x] Regenerate works — 同 id/编号、AI_REWRITE 新版本、旧稿保留
+[x] Memory refresh PASS — STALE → 失效（含 slot 反查）→ 重抽 → COMPLETED；AC-108 PASS
+[x] AC-107 PASS — real LLM 全链路（写作→编辑→重抽）
+[x] AC-108 PASS — 派生记忆与编辑后正文一致，旧事实绝不复活
 ```
+
+Phase 5 Gate Result: **PASSED** (2026-08-22, after TASK-149; full `mvn test` 46/46)
 
 ---
 

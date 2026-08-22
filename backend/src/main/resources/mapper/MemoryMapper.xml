@@ -57,6 +57,16 @@
         WHERE id = #{id}
     </update>
 
+    <!-- TASK-148: reverse-lookup source — the chapter's applied candidates tell us
+         exactly which live-memory slots this chapter created. -->
+    <select id="findAppliedCandidatesBySource" resultMap="CandidateResult">
+        SELECT id, story_id, source_chapter_id, type, subject, field,
+               suggested_action, evidence, processing_status, applied, created_at, updated_at
+        FROM memory_candidate
+        WHERE source_chapter_id = #{chapterId} AND processing_status = 'APPLIED'
+        ORDER BY id ASC
+    </select>
+
     <!-- ============ current_state (upsert by slot) ============ -->
     <resultMap id="CurrentStateResult" type="com.example.storyai.memory.model.CurrentState">
         <id column="id" property="id"/>
@@ -82,6 +92,15 @@
         ORDER BY category, subject, field
     </select>
 
+    <!-- TASK-148: exact-slot removal (reverse-derived from an APPLIED candidate) -->
+    <delete id="deleteCurrentStateSlot">
+        DELETE FROM current_state
+        WHERE story_id = #{storyId}
+          AND category = #{category}
+          AND subject = #{subject}
+          AND field = #{field}
+    </delete>
+
     <!-- ============ relationship_state (upsert by pair) ============ -->
     <resultMap id="RelationshipResult" type="com.example.storyai.memory.model.RelationshipState">
         <id column="id" property="id"/>
@@ -105,6 +124,14 @@
         WHERE story_id = #{storyId}
         ORDER BY subject_a, subject_b
     </select>
+
+    <!-- TASK-148: exact-pair removal (reverse-derived from an APPLIED candidate) -->
+    <delete id="deleteRelationshipSlot">
+        DELETE FROM relationship_state
+        WHERE story_id = #{storyId}
+          AND subject_a = #{subjectA}
+          AND subject_b = #{subjectB}
+    </delete>
 
     <!-- ============ story_memory ============ -->
     <resultMap id="StoryMemoryResult" type="com.example.storyai.memory.model.StoryMemory">
@@ -135,19 +162,10 @@
     </select>
 
     <!-- TASK-148: a revised chapter's derived facts are no longer trustworthy.
-         story_memory rows are source-tracked -> deleted; candidates keep the
-         audit trail but are marked SUPERSEDED so they are never re-applied. -->
+         story_memory rows are source-tracked -> deleted. -->
     <delete id="deleteStoryMemoriesBySource">
         DELETE FROM story_memory
         WHERE source_chapter_id = #{chapterId}
     </delete>
-
-    <update id="supersedeCandidatesBySource">
-        UPDATE memory_candidate
-        SET processing_status = 'SUPERSEDED',
-            applied = 0
-        WHERE source_chapter_id = #{chapterId}
-          AND processing_status IN ('PENDING', 'APPLIED')
-    </update>
 
 </mapper>

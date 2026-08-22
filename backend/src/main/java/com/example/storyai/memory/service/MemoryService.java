@@ -47,6 +47,23 @@ public class MemoryService {
         return memoryMapper.findPendingCandidates(storyId);
     }
 
+    /** TASK-148: the chapter's APPLIED candidates (slot reverse-lookup source). */
+    public List<MemoryCandidate> listAppliedBySource(Long chapterId) {
+        return memoryMapper.findAppliedCandidatesBySource(chapterId);
+    }
+
+    /** TASK-148: removes one exact current-state slot. */
+    @Transactional
+    public int deleteCurrentStateSlot(Long storyId, String category, String subject, String field) {
+        return memoryMapper.deleteCurrentStateSlot(storyId, category, subject, field);
+    }
+
+    /** TASK-148: removes one exact relationship slot. */
+    @Transactional
+    public int deleteRelationshipSlot(Long storyId, String subjectA, String subjectB) {
+        return memoryMapper.deleteRelationshipSlot(storyId, subjectA, subjectB);
+    }
+
     public MemoryCandidate getCandidate(Long id) {
         return memoryMapper.findCandidateById(id);
     }

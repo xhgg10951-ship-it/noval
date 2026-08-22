@@ -284,12 +284,13 @@ public class ChapterGenerationService {
         Chapter chapter = chapterService.getChapter(chapterId);
         // TASK-148: the chapter's content changed — its previously derived
         // memories are no longer trustworthy. Invalidate BEFORE re-extracting:
-        // source-tracked STORY_MEMORY rows are deleted, old candidates are marked
-        // SUPERSEDED (audit trail kept). current_state/relationship_state slots
-        // have no per-chapter provenance in v0.1; re-extraction upserts the same
-        // (story, category, subject, field) slots so corrected facts overwrite.
+        // source-tracked STORY_MEMORY rows are deleted; current_state /
+        // relationship_state slots created by this chapter's APPLIED candidates
+        // are reverse-looked-up and removed (those tables have no provenance
+        // column, the candidate rows ARE the provenance). Old candidates become
+        // SUPERSEDED so they can never be re-applied.
         memoryMapper.deleteStoryMemoriesBySource(chapterId);
-        memoryMapper.supersedeCandidatesBySource(chapterId);
+        processingService.invalidateAppliedSlots(chapterId);
         chapter.setMemoryExtractionStatus(
                 com.example.storyai.chapter.model.MemoryExtractionStatus.PENDING);
         chapterService.saveChapter(chapter);

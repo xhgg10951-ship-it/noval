@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`Phase 5 — Chapter Revision (Phase 4 Gate PASSED 2026-08-22)`
+`Phase 6 — Long-form Pace (Phase 5 Gate PASSED 2026-08-22)`
 
 Current Task:
 
-`TASK-140 — Add ChapterRevision Schema`
+`TASK-150 — targetChapterCount pace wiring (see TASKS.md Phase 6)`
 
 Task Status:
 
@@ -864,6 +864,18 @@ v2 plans continue strictly after established facts; author instruction honored.
 Additional real defects fixed en route: stale-total STEP completion (now
 DB-facts via resolver), resolver counting superseded rows as pending,
 runStep NoPendingChapterException convergence with CONTINUOUS.
+
+Phase 5 Gate:
+PASSED (2026-08-22) — TASK-140..149, full mvn test 46/46.
+ChapterRevision model (V12 additive + 44-chapter backfill), manual edit,
+approve lifecycle, regenerate (same id/number/spec), revision history API+UI,
+memory STALE on any non-AI_GENERATED revision change, derived-memory
+invalidation via candidate reverse-lookup (current_state/relationship_state
+have no provenance column — the APPLIED candidate rows ARE the provenance;
+invalidate MUST run before re-extract or existingState echoes stale facts —
+observed live during AC-107). AC-107 + AC-108 real-LLM PASS: iron-sword fact
+removed by author edit no longer appears in Current State (iron_refs=0),
+old revisions preserved, new candidates consistent with edited prose.
 
 Environment change note (2026-08-22):
 Maven 3.9.16 + JDK17 now available in this environment (previously absent).

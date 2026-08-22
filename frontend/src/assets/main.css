@@ -549,6 +549,67 @@ body {
   color: var(--text-muted, #6b7280);
 }
 
+/* ---- v0.1.1 Phase 5 (TASK-143/145): chapter author workflow ---- */
+.chapter-edit__textarea {
+  width: 100%;
+  font-family: inherit;
+  line-height: 1.7;
+}
+
+.chapter-workflow {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 0.6rem;
+}
+
+.chapter-regenerate {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  padding: 0.6rem;
+  border: 1px dashed var(--border, #d1d5db);
+  border-radius: 6px;
+}
+
+.revision-history {
+  margin-top: 0.6rem;
+  border-top: 1px dashed var(--border, #d1d5db);
+  padding-top: 0.5rem;
+}
+
+.revision-history__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.revision-history__item {
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 6px;
+  padding: 0.5rem 0.7rem;
+}
+
+.revision-history__meta {
+  font-size: 0.78rem;
+  color: var(--text-muted, #6b7280);
+}
+
+.revision-history__content {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
 /* ---- chapter generation panel (M3, TASK-024) ---- */
 .chapter-panel {
   border-top: 1px dashed var(--border);

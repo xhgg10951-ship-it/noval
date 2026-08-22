@@ -51,7 +51,7 @@ public class ChapterController {
     /** AT-C01: generate the next pending chapter for a stage. */
     @PostMapping("/api/stages/{stageId}/chapters")
     public ChapterResponse generateNext(@PathVariable Long stageId) {
-        return new ChapterResponse(generationService.generateNextChapter(stageId));
+        return withRevisionVersion(new ChapterResponse(generationService.generateNextChapter(stageId)));
     }
 
     @GetMapping("/api/stages/{stageId}/chapters")

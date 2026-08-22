@@ -12,8 +12,22 @@ export interface ChapterResponse {
   content: string
   summary: string | null
   generationStatus: string
+  currentRevisionId: number | null
+  currentRevisionVersion: number | null
+  sourceType: string | null // AI_GENERATED / MANUAL_EDIT / AI_REWRITE / AI_POLISH
+  status: string | null // DRAFT / APPROVED (v0.1.1 Phase 5)
+  memoryExtractionStatus: string | null // PENDING / COMPLETED / FAILED / STALE
   createdAt: string
   updatedAt: string
+}
+
+export interface ChapterRevisionResponse {
+  id: number
+  chapterId: number
+  versionNumber: number
+  content: string
+  sourceType: string
+  createdAt: string
 }
 
 // ---- API calls ----
@@ -30,6 +44,36 @@ export async function listStageChapters(stageId: number): Promise<ChapterRespons
 
 export async function getChapter(chapterId: number): Promise<ChapterResponse> {
   const { data } = await api.get<ChapterResponse>(`/chapters/${chapterId}`)
+  return data
+}
+
+// v0.1.1 Phase 5 — author workflow over immutable revisions (TASK-142..146)
+
+export async function listRevisions(chapterId: number): Promise<ChapterRevisionResponse[]> {
+  const { data } = await api.get<ChapterRevisionResponse[]>(`/chapters/${chapterId}/revisions`)
+  return data
+}
+
+/** Manual edit: creates a NEW MANUAL_EDIT revision; nothing is overwritten. */
+export async function editChapterContent(chapterId: number, content: string): Promise<ChapterResponse> {
+  const { data } = await api.put<ChapterResponse>(`/chapters/${chapterId}/content`, { content })
+  return data
+}
+
+/** DRAFT -> APPROVED (idempotent). */
+export async function approveChapter(chapterId: number): Promise<ChapterResponse> {
+  const { data } = await api.post<ChapterResponse>(`/chapters/${chapterId}/approve`)
+  return data
+}
+
+/** Regenerate from the SAME ChapterSpec; creates an AI_REWRITE revision. */
+export async function regenerateChapter(
+  chapterId: number,
+  authorInstruction?: string,
+): Promise<ChapterResponse> {
+  const body: Record<string, unknown> = {}
+  if (authorInstruction?.trim()) body.authorInstruction = authorInstruction.trim()
+  const { data } = await api.post<ChapterResponse>(`/chapters/${chapterId}/regenerate`, body)
   return data
 }
 

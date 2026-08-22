@@ -27,15 +27,29 @@ public interface MemoryMapper {
                                @Param("processingStatus") String processingStatus,
                                @Param("applied") boolean applied);
 
+    /** TASK-148: the chapter's APPLIED candidates (slot reverse-lookup source). */
+    List<MemoryCandidate> findAppliedCandidatesBySource(@Param("chapterId") Long chapterId);
+
     // ---- current_state ----
     void upsertCurrentState(CurrentState s);
 
     List<CurrentState> findCurrentState(@Param("storyId") Long storyId);
 
+    /** TASK-148: removes one exact slot (reverse-derived from an APPLIED candidate). */
+    int deleteCurrentStateSlot(@Param("storyId") Long storyId,
+                               @Param("category") String category,
+                               @Param("subject") String subject,
+                               @Param("field") String field);
+
     // ---- relationship_state ----
     void upsertRelationship(RelationshipState r);
 
     List<RelationshipState> findRelationships(@Param("storyId") Long storyId);
+
+    /** TASK-148: removes one exact relationship slot. */
+    int deleteRelationshipSlot(@Param("storyId") Long storyId,
+                               @Param("subjectA") String subjectA,
+                               @Param("subjectB") String subjectB);
 
     // ---- story_memory ----
     int insertStoryMemory(StoryMemory m);
@@ -46,7 +60,4 @@ public interface MemoryMapper {
 
     /** Deletes the STORY_MEMORY rows derived from one chapter (source-tracked). */
     int deleteStoryMemoriesBySource(@Param("chapterId") Long chapterId);
-
-    /** Marks the chapter's old extraction candidates SUPERSEDED (audit trail kept). */
-    int supersedeCandidatesBySource(@Param("chapterId") Long chapterId);
 }

@@ -135,4 +135,40 @@ public class CandidateProcessingService {
     public List<MemoryCandidate> pending(Long storyId) {
         return memoryService.listPending(storyId);
     }
+
+    /**
+     * TASK-148 — invalidates the live-memory slots this chapter's APPLIED
+     * candidates created. The candidate rows are the only per-chapter provenance
+     * for current_state / relationship_state (those tables carry no source
+     * column), so each applied candidate is reverse-mapped back to its exact
+     * slot using the SAME field->category mapping the apply path used, and that
+     * slot is deleted. STORY_MEMORY rows are source-tracked and are deleted by
+     * {@code deleteStoryMemoriesBySource} at the call site.
+     *
+     * @return number of live slots removed
+     */
+    @org.springframework.transaction.annotation.Transactional
+    public int invalidateAppliedSlots(Long chapterId) {
+        List<MemoryCandidate> applied = memoryService.listAppliedBySource(chapterId);
+        int removed = 0;
+        for (MemoryCandidate c : applied) {
+            if ("CURRENT_STATE".equals(c.getType())) {
+                String field = c.getField();
+                if (field != null && !field.isBlank()) {
+                    removed += memoryService.deleteCurrentStateSlot(
+                            c.getStoryId(), categoryFor(field), c.getSubject(), field);
+                }
+            } else if ("RELATIONSHIP".equals(c.getType())) {
+                String subj = c.getSubject() == null ? "" : c.getSubject();
+                int arrow = subj.indexOf("->");
+                String a = arrow > 0 ? subj.substring(0, arrow).trim() : subj.trim();
+                String b = arrow > 0 ? subj.substring(arrow + 2).trim() : "(story)";
+                removed += memoryService.deleteRelationshipSlot(c.getStoryId(), a, b);
+            }
+            // audit trail: never re-apply an invalidated candidate
+            memoryService.updateCandidateStatus(c.getId(), "SUPERSEDED", false);
+        }
+        log.info("Invalidated {} live-memory slot(s) derived from chapter {}", removed, chapterId);
+        return removed;
+    }
 }
