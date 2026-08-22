@@ -32,7 +32,7 @@ Current Phase:
 
 Current Task:
 
-`TASK-105 — Build Shared Story Context Reader`
+`TASK-107 — Add Planner Continuation Context v2 Contract`
 
 Task Status:
 
@@ -44,9 +44,11 @@ TASK-101/102 DONE — regression baseline at `.agent/EVIDENCE_v0.1_REGRESSION.md
 status corrections recorded in §2.1.
 TASK-103 DONE — DEBUG payload observability (commit `63781dd`).
 TASK-104 DONE — 5 root causes re-confirmed at file:line; Phase 0 Gate PASSED.
+TASK-105 DONE — `StoryContextReader` built + compiled.
+TASK-106 DONE — Planner wired to real context (currentState / storyMemories / recentContext).
 
 Engineering Verification:
-NOT_RUN — Phase 1 begins with shared Context Reader
+NOT_RUN — Phase 1 continuation contract next
 
 Real-LLM Semantic Verification:
 NOT_REQUIRED

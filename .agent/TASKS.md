@@ -418,7 +418,7 @@ ai-service/app/prompts/builders.py
 
 ## TASK-105 — Build Shared Story Context Reader
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -434,6 +434,30 @@ Goal:
 
 不要现在实现复杂 Ranking Framework。
 
+Implementation:
+
+新增 `backend/.../context/StoryContextReader.java`（`@Service`）：
+
+- `getConstraintItems(storyId)` → `PlanStageRequest.ConstraintItem`
+- `getCurrentStateItems(storyId)` → `PlanStageRequest.StateItem`
+- `getStoryMemoryItems(storyId)` → `PlanStageRequest.MemoryItem`
+- `getRelationshipItems(storyId)` → `GenerateChapterRequest.RelationshipItem`
+- `getRecentContext(storyId, maxChapters)` → 最近 N 章 summary 拼接
+
+复用现有 `StoryService.getConstraints` / `MemoryService` / `ChapterService`，只读、不改写。映射逻辑集中于此组件，供 Planner / Writer 共用（消除分散重复）。
+
+Verification:
+
+Engineering Verification: PASSED
+- javac 编译通过（`target/classes` + `build-deps/*.jar`，Windows `;` 分隔符）
+- 5 个读取能力均已暴露
+
+Real-LLM Semantic Verification: NOT_REQUIRED
+
+Evidence:
+
+新文件 `context/StoryContextReader.java`（commit 见下文）。
+
 Dependencies:
 
 Phase 0 Gate
@@ -442,7 +466,7 @@ Phase 0 Gate
 
 ## TASK-106 — Wire Planner Existing Story State
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -462,13 +486,25 @@ recentContext=""
 - Story Memory；
 - Recent Context。
 
-Engineering Verification:
+Implementation:
 
-使用 ArgumentCaptor / integration test 验证 request 非空。
+`StagePlanningService` 注入 `StoryContextReader`，`buildRequest` 第 4/5/6 位改为：
+
+- `contextReader.getCurrentStateItems(storyId)`
+- `contextReader.getStoryMemoryItems(storyId)`
+- `contextReader.getRecentContext(storyId, 3)`（最近 3 章摘要）
+
+首阶段若尚无状态/记忆，读取结果为空列表——这是正确行为；后续阶段现在真正携带既有剧情上下文（修复 RC-01）。
+
+Verification:
+
+Engineering Verification: PASSED
+- javac 编译通过（reader + StagePlanningService 一起编译）
+- 注入装配正确，无残留 `List.of()` 占位
 
 Real-LLM Semantic Verification:
 
-暂不在本 Task 宣布 PASS。
+暂不在本 Task 宣布 PASS（属 Phase 1 Gate AC-101，需真实 LLM）。
 
 Dependencies:
 
