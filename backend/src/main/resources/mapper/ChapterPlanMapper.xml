@@ -4,16 +4,22 @@
 <mapper namespace="com.example.storyai.stage.mapper.ChapterPlanMapper">
 
     <insert id="insertBatch" parameterType="java.util.List">
-        INSERT INTO chapter_plan (stage_id, chapter_order, goal, expected_progress)
+        INSERT INTO chapter_plan (stage_id, chapter_order, goal, expected_progress,
+                                  target_characters, must_advance, must_not_do,
+                                  story_beats, ending_intent)
         VALUES
         <foreach collection="list" item="p" separator=",">
-            (#{p.stageId}, #{p.chapterOrder}, #{p.goal}, #{p.expectedProgress})
+            (#{p.stageId}, #{p.chapterOrder}, #{p.goal}, #{p.expectedProgress},
+             #{p.targetCharacters}, #{p.mustAdvance}, #{p.mustNotDo},
+             #{p.storyBeats}, #{p.endingIntent})
         </foreach>
     </insert>
 
     <select id="findByStageId" parameterType="long"
             resultType="com.example.storyai.stage.model.ChapterPlan">
-        SELECT id, stage_id, chapter_order, goal, expected_progress, created_at, updated_at
+        SELECT id, stage_id, chapter_order, goal, expected_progress,
+               target_characters, must_advance, must_not_do, story_beats, ending_intent,
+               created_at, updated_at
         FROM chapter_plan
         WHERE stage_id = #{stageId}
         ORDER BY chapter_order ASC
@@ -21,7 +27,9 @@
 
     <select id="findById" parameterType="long"
             resultType="com.example.storyai.stage.model.ChapterPlan">
-        SELECT id, stage_id, chapter_order, goal, expected_progress, created_at, updated_at
+        SELECT id, stage_id, chapter_order, goal, expected_progress,
+               target_characters, must_advance, must_not_do, story_beats, ending_intent,
+               created_at, updated_at
         FROM chapter_plan
         WHERE id = #{id}
     </select>
@@ -29,6 +37,16 @@
     <update id="updateGoal">
         UPDATE chapter_plan
         SET goal = #{goal}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateSpec">
+        UPDATE chapter_plan
+        SET target_characters = #{targetCharacters},
+            must_advance = #{mustAdvance},
+            must_not_do = #{mustNotDo},
+            story_beats = #{storyBeats},
+            ending_intent = #{endingIntent}
         WHERE id = #{id}
     </update>
 

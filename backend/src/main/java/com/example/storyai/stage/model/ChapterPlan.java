@@ -12,6 +12,12 @@ public class ChapterPlan {
     private Integer chapterOrder;
     private String goal;
     private String expectedProgress;
+    // ---- TASK-114: ChapterSpec ----
+    private Integer targetCharacters;
+    private String mustAdvance;
+    private String mustNotDo;
+    private String storyBeats;
+    private String endingIntent;
     private java.time.LocalDateTime createdAt;
     private java.time.LocalDateTime updatedAt;
 
@@ -53,6 +59,46 @@ public class ChapterPlan {
 
     public void setExpectedProgress(String expectedProgress) {
         this.expectedProgress = expectedProgress;
+    }
+
+    public Integer getTargetCharacters() {
+        return targetCharacters;
+    }
+
+    public void setTargetCharacters(Integer targetCharacters) {
+        this.targetCharacters = targetCharacters;
+    }
+
+    public String getMustAdvance() {
+        return mustAdvance;
+    }
+
+    public void setMustAdvance(String mustAdvance) {
+        this.mustAdvance = mustAdvance;
+    }
+
+    public String getMustNotDo() {
+        return mustNotDo;
+    }
+
+    public void setMustNotDo(String mustNotDo) {
+        this.mustNotDo = mustNotDo;
+    }
+
+    public String getStoryBeats() {
+        return storyBeats;
+    }
+
+    public void setStoryBeats(String storyBeats) {
+        this.storyBeats = storyBeats;
+    }
+
+    public String getEndingIntent() {
+        return endingIntent;
+    }
+
+    public void setEndingIntent(String endingIntent) {
+        this.endingIntent = endingIntent;
     }
 
     public java.time.LocalDateTime getCreatedAt() {
