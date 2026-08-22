@@ -70,7 +70,8 @@ class ChapterGenerationIntegrationTest {
     private PlanStageResponse planOf(int count, String goalPrefix) {
         return new PlanStageResponse(count, IntStream.rangeClosed(1, count)
                 .mapToObj(i -> new PlanStageResponse.ChapterPlanItem(
-                        i, goalPrefix + "：第" + i + "章目标", "推进 " + i + "/" + count))
+                        i, goalPrefix + "：第" + i + "章目标", "推进 " + i + "/" + count,
+                        null, null, null, null, null))
                 .toList());
     }
 

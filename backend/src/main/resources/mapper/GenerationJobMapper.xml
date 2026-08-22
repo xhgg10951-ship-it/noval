@@ -44,16 +44,34 @@
         LIMIT 1
     </select>
 
-    <update id="update" parameterType="com.example.storyai.chapter.model.GenerationJob">
+    <!-- TASK-132 fix: the old full-row UPDATE let a stale in-memory copy clobber
+         concurrently written control signals (pause/stop were silently erased by
+         the per-chapter progress write). Writes are now narrow and disjoint:
+         progress heartbeat vs control signals vs terminal transition. -->
+
+    <update id="updateProgress">
         UPDATE generation_job
-        SET mode = #{mode},
-            current_plan_index = #{currentPlanIndex},
-            total = #{total},
-            status = #{status},
+        SET current_plan_index = #{currentPlanIndex},
+            phase = #{phase},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateControlSignals">
+        UPDATE generation_job
+        SET pause_requested = #{pauseRequested},
+            stop_requested = #{stopRequested},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateTerminal">
+        UPDATE generation_job
+        SET status = #{status},
             phase = #{phase},
             last_error = #{lastError},
-            pause_requested = #{pauseRequested},
-            stop_requested = #{stopRequested},
+            <if test="clearPause">pause_requested = 0,</if>
+            <if test="clearStop">stop_requested = 0,</if>
             updated_at = CURRENT_TIMESTAMP
         WHERE id = #{id}
     </update>

@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`Phase 3 — Generation Reliability (engineering DONE; TASK-132 regression suite pending, mvn now available)`
+`Phase 4 — Replan Remaining (Phase 3 Gate PASSED 2026-08-22; TASK-133/134/135 DONE, TASK-136 service layer done)`
 
 Current Task:
 
-`TASK-132 — Generation Reliability Regression Suite (Phase 3 Gate closure)`
+`TASK-136 — Implement Replan Remaining Service (remainder: HTTP entry + old full-replan guard + planner remaining call)`
 
 Task Status:
 
@@ -40,21 +40,23 @@ Task Status:
 
 Task Evidence:
 
-TASK-101/102 DONE — regression baseline at `.agent/EVIDENCE_v0.1_REGRESSION.md`;
-status corrections recorded in §2.1.
-TASK-103 DONE — DEBUG payload observability (commit `63781dd`).
-TASK-104 DONE — 5 root causes re-confirmed at file:line; Phase 0 Gate PASSED.
-TASK-105~111 DONE — Phase 1 context wiring + continuation (commits d03d936..af66501).
-TASK-112 DONE — AC-101 real-LLM PASS (continuation, no re-crossing).
-TASK-113~120 DONE — Phase 2 ChapterSpec chain (5528dfd..de576d2).
-TASK-121 DONE — AC-103 honest FAIL (qwen3-8b length ceiling); guard added.
-TASK-122 DONE — AC-104 real-LLM PASS (goal adherence).
-TASK-123~131 DONE — Phase 3 reliability (V9/V10; commits 454d167..966a97f):
-extraction status, resolver, safe retry, async bg execution, progress,
-pause, stop, stage completion.
-Phase 4 partial (uncommitted working tree recovered 2026-08-22, then committed):
-TASK-133/134/135 DONE + TASK-136 service layer (V11 plan versioning;
-active remaining generation queue; replanRemaining @Transactional).
+TASK-101~104 DONE — Phase 0 evidence base (Gate PASSED).
+TASK-105~112 DONE — Phase 1 wiring + continuation (AC-101 real-LLM PASS).
+TASK-113~122 DONE — Phase 2 ChapterSpec chain (AC-104 PASS; AC-103 honest model-limit FAIL).
+TASK-123~131 DONE — Phase 3 reliability engineering (V9/V10).
+TASK-132 DONE — Phase 3 regression suite; **full `mvn test` 34/34 PASSED (2026-08-22)**.
+  Fixed en route: V6..V11 migrations were MariaDB-only syntax and had NEVER been
+  applied anywhere (local DB was still at V5; corrected + applied additively,
+  legacy data intact); GenerationJob null control signals 500; pause/stop
+  silently clobbered by stale-copy full-row UPDATE in the worker (rewritten to
+  narrow disjoint updates: progress / control-signals / terminal); complete()
+  ordering now flips Stage before Job reads COMPLETED; TextLengthUtil blank=0.
+Phase 4 partial:
+- TASK-133 DONE — V11 plan_version/active/status additive migration.
+- TASK-134 DONE — markCompleted on generation; supersedeRemaining keeps history.
+- TASK-135 DONE — findActiveRemaining queue wired into ChapterGenerationService.
+- TASK-136 IN_PROGRESS — replanRemaining @Transactional service DONE;
+  pending: HTTP entry, planner remaining call, old full-replan guard.
 
 ---
 
@@ -829,7 +831,7 @@ Current Phase:
 Phase 3 → Gate closure via TASK-132 (mvn 3.9.16 + JDK17 now available in env)
 
 Current Task:
-TASK-132 — Generation Reliability Regression Suite
+TASK-136 — Replan Remaining service remainder (HTTP entry + old-replan guard)
 
 Current Task Status:
 IN_PROGRESS
@@ -844,37 +846,26 @@ Phase 2 Gate:
 AC-103 honest FAIL (model length ceiling, remediation recorded);
 AC-104 PASS; engineering complete
 
-Phase 3 progress (Generation Reliability):
-- TASK-123~126 DONE: extraction status + explicit flow + Next Safe Action
-  Resolver + safe retry (V9; commits 454d167/a335bfb)
-- TASK-127~131 DONE: async bg execution + polling progress + pause + stop
-  + stage completion (V10; commit 966a97f)
-- TASK-132 IN_PROGRESS: regression suite (writer-fail / extract-fail / retry /
-  async / pause / stop / stage-complete / duplicate prevention)
-
-Phase 4 progress (Replan Remaining):
-- TASK-133 DONE: V11 plan_version/active/status additive migration +
-  ChapterPlan entity + insertPlans wiring
-- TASK-134 DONE: markCompleted on generation; supersedeRemaining keeps history
-- TASK-135 DONE: findActiveRemaining queue wired into ChapterGenerationService
-- TASK-136 IN_PROGRESS: replanRemaining service layer DONE (@Transactional);
-  HTTP entry + planner remaining call + old full-replan guard pending
-
-Real-LLM Credential:
-RESOLVED (2026-08-22) — API_URL Aliyun MaaS OpenAI-compatible, qwen3-8b.
+Phase 3 Gate:
+PASSED (2026-08-22) — TASK-132 regression suite, full mvn test 34/34.
+Real defects found & fixed: never-applied V6..V11 migrations (MariaDB-only
+syntax; local DB was at V5 — corrected + applied, data preserved); null job
+control signals on create; pause/stop clobbered by stale-copy full-row UPDATE
+(rewritten to narrow disjoint updates); complete() ordering for AC-113;
+TextLengthUtil blank=0.
 
 Environment change note (2026-08-22):
-Maven 3.9.16 + JDK17 now available in this environment (previously absent,
-per old TASK-126 note). mvn compile verified against the recovered working
-tree. Integration tests (mvn test) are now executable — TASK-132 unblocked.
+Maven 3.9.16 + JDK17 now available in this environment (previously absent).
+mvn test fully operational against the local MySQL story_ai database.
 
 Known Blocker:
 NONE.
 
 Next Safe Action:
-TASK-132 — implement + run the Phase 3 regression suite via Maven, then close
-the Phase 3 Gate; afterwards resume TASK-136 remainder (HTTP entry + old
-replan guard), TASK-137/138/139.
+TASK-136 remainder — expose POST /stages/{id}/replan-remaining (ACTIVE/PAUSED
+only), route it through StagePlanningService with continuation context, guard/
+retire the legacy full replan endpoint for non-PLANNING stages; then
+TASK-137 (job consistency), TASK-138 (UI), TASK-139 (AC-106 real-LLM).
 ```
 
 Core principles:

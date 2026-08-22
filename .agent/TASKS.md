@@ -1505,7 +1505,7 @@ TASK-128
 
 ## TASK-132 — Generation Reliability Regression Suite
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1520,6 +1520,43 @@ Goal:
 - stage completion；
 - duplicate chapter prevention。
 
+Implementation & Evidence (2026-08-22, Maven now available in env):
+
+新增 `GenerationReliabilityRegressionTest`（5 tests，非事务 + story 级联清理 +
+异步轮询 helper）；改造 `GenerationModesIntegrationTest` 为异步轮询版；修复全部
+旧测试的 ChapterPlanItem 3参→8参 / PlanStageRequest 7参→12参编译断裂。
+
+套件暴露并修复的真实产品缺陷（均为"代码存在≠功能可用"实例）：
+
+1. **V6..V11 迁移从未在任何环境成功执行**——`ADD COLUMN IF NOT EXISTS` 是
+   MariaDB 语法，MySQL 8.4 报 1064。本地库实际停在 V5。已修正 6 个迁移文件为
+   MySQL 兼容语法并按序应用（additive，11 故事/35 章/77 plan 数据完整保留，
+   旧行落安全默认 v1/ACTIVE/COMPLETED）。
+2. **GenerationJob 创建时 pauseRequested/stopRequested 为 null** 插入 NOT NULL 列
+   直接 500（startJob 未初始化）。→ startJob 显式置 false。
+3. **Pause/Stop 在 CONTINUOUS 下被静默吞掉（核心状态机缺陷）**——worker 用长生命
+   周期内存 Job 副本做全量 UPDATE，每章进度写回时把作者并发写入的
+   pause_requested=1 覆盖为 0。诊断链：MyBatis/JdbcTemplate 双读 + txActive 检查
+   排除事务可见性后定位。→ 重构为窄更新三分离（updateProgress /
+   updateControlSignals / updateTerminal），worker 不再持久化陈旧副本，
+   可变状态一律经 MySQL 重读。
+4. **complete() 先置 Job=COMPLETED 再翻 Stage** 存在观察窗口，违反 AC-113 一致性。
+   → 先 completeStage 后置 COMPLETED，异常路径诚实 FAILED。
+5. **TextLengthUtil 对纯空白串计 6 而非 0**（实现与 TASK-119 测试语义分歧，
+   此前从未真正运行）。→ isBlank 计 0，与测试意图对齐。
+
+Engineering Verification: PASSED
+- `mvn test` 全量 34/34 通过（2026-08-22），含 5 个新回归用例：
+  - extractionFailureAfterSave...：抽取失败后章节保留；retry 同章重抽
+    （extractMemory 调用序 order=1,1,2,3；writer 仅 3 次=正文未重建）
+  - pauseStopsAtNextCheckpoint...：PAUSED 于 checkpoint、章节保留、continue 跑完
+  - stopTerminatesRun...：STOPPED、已完成章节保留
+  - jobCompletionTransitionsStageToCompleted：Job COMPLETED ⇒ Stage COMPLETED
+  - completedStageCannotGenerateDuplicateChapters：完成后重跑为 no-op，无重复章
+
+Real-LLM Semantic Verification: NOT_REQUIRED（本任务全部属 workflow/state-machine，
+Mock 边界内可证明）
+
 Dependencies:
 
 TASK-126
@@ -1533,13 +1570,18 @@ TASK-131
 ## Phase 3 Gate
 
 ```text
-[ ] AC-110 PASS
-[ ] AC-111 PASS
-[ ] AC-112 PASS
-[ ] AC-113 PASS
-[ ] Continuous 不再阻塞整次 HTTP
-[ ] Retry 不再丢失失败章节 Memory
+[x] AC-110 PASS — extraction-failure retry same chapter (regression suite, engineering)
+[x] AC-111 PASS — polling-safe progress (POST returns immediately; GET observes status/phase/index)
+[x] AC-112 PASS — pause at next checkpoint, chapters retained
+[x] AC-113 PASS — Job COMPLETED ⇒ Stage COMPLETED (observation ordering fixed)
+[x] Continuous 不再阻塞整次 HTTP — TASK-127 bg executor + async tests prove POST returns at once
+[x] Retry 不再丢失失败章节 Memory — reExtractChapter same-chapter verified by call-sequence
 ```
+
+Phase 3 Gate Result: **PASSED** (2026-08-22, after TASK-132; full `mvn test` 34/34)
+
+说明：AC-110..113 均为 workflow / state-machine 行为，属 Mock 可证明边界；
+真实 LLM 语义验收（AC-106 等）在 Phase 4+ 执行。
 
 ---
 

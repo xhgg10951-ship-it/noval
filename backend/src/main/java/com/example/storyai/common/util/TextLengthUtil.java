@@ -14,9 +14,13 @@ public final class TextLengthUtil {
     private TextLengthUtil() {
     }
 
-    /** Counts characters by code point (CJK and Latin both count as 1). */
+    /**
+     * Counts characters by code point (CJK and Latin both count as 1).
+     * Null, empty, and whitespace-only input counts as 0 — a blank chapter
+     * has no measurable prose length.
+     */
     public static int countCharacters(String text) {
-        if (text == null || text.isEmpty()) {
+        if (text == null || text.isBlank()) {
             return 0;
         }
         return text.codePointCount(0, text.length());

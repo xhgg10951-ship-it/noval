@@ -29,7 +29,12 @@ class PlanStageRequestSerializationTest {
                 List.of(),
                 List.of(),
                 "",
-                3);
+                3,
+                List.of(),
+                null,
+                List.of(),
+                List.of(),
+                null);
         String json = objectMapper.writeValueAsString(req);
         System.out.println("SPRING_OM_JSON=" + json);
         System.out.println("SPRING_OM_LEN=" + json.length());

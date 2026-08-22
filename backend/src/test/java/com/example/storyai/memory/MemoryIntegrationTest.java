@@ -67,7 +67,8 @@ class MemoryIntegrationTest {
         when(aiServiceClient.planStage(any(PlanStageRequest.class)))
                 .thenReturn(new PlanStageResponse(planCount, IntStream.rangeClosed(1, planCount)
                         .mapToObj(i -> new PlanStageResponse.ChapterPlanItem(
-                                i, "第" + i + "章目标", "推进 " + i + "/" + planCount))
+                                i, "第" + i + "章目标", "推进 " + i + "/" + planCount,
+                                null, null, null, null, null))
                         .toList()));
         MvcResult created = mockMvc.perform(post("/api/stories/{id}/stages", storyId)
                         .contentType(MediaType.APPLICATION_JSON)
