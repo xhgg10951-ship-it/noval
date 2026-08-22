@@ -859,15 +859,24 @@ Phase 2 progress (Chapter Control):
 - TASK-115/116 DONE: Planner v2 output + persist ChapterSpec (commit 4bbd35b)
 - TASK-117/118 DONE: Writer Contract v2 + Goal Lock prompt (commit 1d6ccf9)
 - TASK-119/120 DONE: Chapter length measurement + light UI (commit de576d2)
-- TASK-121 TODO: Real-LLM Chapter Length Acceptance (AC-103) — UNBLOCKED
-- TASK-122 TODO: Real-LLM Chapter Goal Acceptance (AC-104) — UNBLOCKED
+- TASK-121 DONE (eng): length contract + measurement + expand guard (39911e2/3e31460)
+  Real-LLM AC-103: FAIL — qwen3-8b 长度上限 ~1800-2000 字，无法稳定达到 2250 下限
+- TASK-122 DONE: Real-LLM AC-104 PASSED — mustAdvance 实现 / mustNotDo 无违规 / 未绕无关旧细节
 
 Real-LLM Credential:
 RESOLVED (2026-08-22) — API_URL Aliyun MaaS OpenAI-compatible, qwen3-8b,
 connectivity probe HTTP 200. using_mock_llm == False.
 
+Phase 2 Semantic Acceptance Summary (real LLM, 2026-08-22):
+- AC-101 (TASK-112): PASS — Planner 从既有状态续写，未重复穿越/初遇/找住处
+- AC-103 (TASK-121): FAIL — qwen3-8b 长度上限 ~1800-2000 字，5/5 均 < 2250
+  （工程层 expand guard 已加，但模型能力缺口无法靠指令闭环弥补；诚实记录，不伪造 PASS）
+- AC-104 (TASK-122): PASS — Writer 遵循 mustAdvance / mustNotDo，未绕无关旧细节
+
 Known Blocker:
-NONE — the prior real-LLM credential blocker (§11) is resolved.
+NONE — the prior real-LLM credential blocker (§11) is resolved. AC-103 is a
+model-fidelity limitation, not a code blocker; remediation options recorded in
+TASKS.md TASK-121 (larger model / lower target band / segmented generation).
 
 Next Safe Action:
 TASK-112 — Execute AC-101 against the real LLM: given known state

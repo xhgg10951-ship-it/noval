@@ -1076,7 +1076,7 @@ TASK-119
 
 ## TASK-121 — Real-LLM Chapter Length Acceptance
 
-Status: `IN_PROGRESS`
+Status: `DONE`
 
 Goal:
 
@@ -1099,16 +1099,26 @@ PASS:
 
 Engineering Verification: PASSED
 - ChapterSpec targetCharacters 全链路接线（TASK-117/119）；TextLengthUtil 计数规则一致
-- 新增 Writer length-expand guard (`app/services/writer.py`)：首稿低于 2250 时单次扩写
-  回填，要求"不改事实、只补细节"，且扩写后更长才采纳；无新基础设施
-- 第一轮真实 LLM 实测（无 guard / 弱指令）：5/5 均 < 2250（1171/962/992/1276/1107），
-  qwen3-8b 系统性产出 ~1000 字章节，确属真实语义缺口（章节过短根因再现）
-- 加固 ChapterSpec 长度指令 + 加入 expand guard 后重测：ch6 经扩写达 2531（入带），
-  其余章节显著上升（1843/1706/...），guard 生效（commit 39911e2）
+- 新增 Writer length-expand guard (`app/services/writer.py`)：首稿低于 2250 时最多 3 次
+  "保留事实、丰满重写"回填，且扩写后更长才采纳；无新基础设施（commits 39911e2 / 3e31460）
 
-Real-LLM Semantic Verification: REQUIRED — re-running with guard (background)
-- 历史发现（诚实记录）：qwen3-8b 单独无法稳定达到 3000 字目标；expand guard 是
-  确定性工程补救措施，直接服务冻结根因"章节过短"。最终 PASS/FAIL 以带 guard 的重测为准。
+Real-LLM Semantic Verification: FAIL (2026-08-22, honest, reproducible)
+- Model: qwen3-8b (Aliyun MaaS compatible-mode), using_mock_llm=False
+- 证据（三次独立真实运行，target=3000，5 章）：
+  - 弱/无 guard 第一轮：1171 / 962 / 992 / 1276 / 1107  → 0/5 入带
+  - guard 单次扩写：      1843 / 1706 / 2531 / 1952 / 1374 → 1/5 入带（ch6）
+  - guard 3-pass 丰满重写：1785 / 1622 / 1597 / 1360 / 1435 → 0/5 入带
+- 结论：qwen3-8b 对该叙事风格存在 ~1800–2000 字的有效输出上限，无法稳定达到
+  2250 下限（更不用说 3000 目标）。扩写 guard 能抬高均值、拦截极端短文，但无法
+  靠指令/扩写闭环弥补模型本身的长度能力缺口。
+- 这是真实 LLM 语义行为缺口（冻结根因"章节过短"再现），不是工程缺陷：
+  契约、计数、长度指令、扩写 guard、UI 均已实现并 committed。
+- 诚实处置（STATE §18：Mock≠AI 行为，DONE≠Feature works）：AC-103 记录为 FAIL，
+  不伪造 PASS。
+- 建议补救（非本任务硬阻塞，记录为后续）：
+  (1) 换用更大/更擅长长文本的生成模型；或
+  (2) 对 qwen3-8b 接受更低目标带宽（如 1200–2200）并在 UI 标明模型能力；或
+  (3) 多段拼接式长文生成（超出当前冻结范围，需 v0.1.2 评估）。
 
 Dependencies:
 
@@ -1119,7 +1129,7 @@ TASK-120
 
 ## TASK-122 — Real-LLM Chapter Goal Acceptance
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1131,7 +1141,17 @@ Goal:
 - Must Not 未违反；
 - 章节不再围绕无关前章细节打转。
 
-Real-LLM Semantic Verification: REQUIRED
+Engineering Verification: PASSED
+- Writer Goal Lock prompt（优先级 + mustNotDo 绝不可违反）已接线（TASK-118）
+
+Real-LLM Semantic Verification: PASSED (2026-08-22)
+- Model: qwen3-8b (Aliyun MaaS compatible-mode), writer.generate_chapter 实测
+- 证据：EVIDENCE_AC104_*.json
+- mustAdvance 关键词命中：入会 / 徽章 / 委托（3/3 实现）
+- mustNotDo 违规关键词（穿越 / 初遇 / 面包 / 住处 / 安顿）：NONE
+- 注入的无关旧细节（买面包）未成为本章重点 → 未围绕无关前章细节打转
+- VERDICT: PASS（注：本章长度 1121 字，受 AC-103 已记录的 qwen3-8b 长度上限影响；
+  AC-104 不考核长度，仅考核目标遵循，故 PASS 有效）
 
 Dependencies:
 
@@ -1145,15 +1165,16 @@ TASK-118
 [x] ChapterSpec 全链路不丢字段        (TASK-114/115/116 DONE, engineering)
 [x] Writer 使用 expectedProgress      (TASK-117 DONE, engineering)
 [x] Writer 使用 targetCharacters      (TASK-117/119 DONE, engineering)
-[ ] AC-103 PASS                        (TASK-121, real LLM reachable — to run)
-[ ] AC-104 PASS                        (TASK-122, real LLM reachable — to run)
+[ ] AC-103 PASS                        (TASK-121 — FAIL: qwen3-8b 长度上限 ~1800-2000 字, 见上)
+[x] AC-104 PASS                        (TASK-122 — PASSED, real LLM goal-adherence verified)
 ```
 
-Phase 2 engineering fully complete (commits 5528dfd..de576d2). Semantic
-acceptance AC-103/AC-104 were previously BLOCKED on a real LLM credential; a
-usable `API_URL` (Aliyun MaaS OpenAI-compatible, qwen3-8b) is now present in
-the environment, so TASK-121/122 are unblocked and queued to run. AC-101
-(TASK-112) is likewise unblocked.
+Phase 2 engineering fully complete (commits 5528dfd..39911e2 / 3e31460).
+Semantic acceptance AC-103/AC-104 were previously BLOCKED on a real LLM
+credential; a usable `API_URL` (Aliyun MaaS OpenAI-compatible, qwen3-8b) is
+now present, so they are unblocked and were executed. AC-101 (TASK-112) PASSED.
+AC-103 FAILED on the real model (length ceiling) — honest finding, not a code
+defect; remediation options recorded above. AC-104 pending next run.
 
 ---
 
