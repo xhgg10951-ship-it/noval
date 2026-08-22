@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`Phase 6 — Long-form Pace (Phase 5 Gate PASSED 2026-08-22)`
+`Phase 7 — Memory v2 (Phase 6 Gate PASSED 2026-08-22)`
 
 Current Task:
 
-`TASK-150 — targetChapterCount pace wiring (see TASKS.md Phase 6)`
+`TASK-157 — Memory v2 Migration (importance/scope/active + dedup support)`
 
 Task Status:
 
@@ -828,10 +828,10 @@ IN PROGRESS (Phase 3 engineering DONE; TASK-132 regression suite pending;
 Phase 4 backend partially landed)
 
 Current Phase:
-Phase 3 → Gate closure via TASK-132 (mvn 3.9.16 + JDK17 now available in env)
+Phase 7 — Memory v2 (Phase 6 Gate PASSED 2026-08-22)
 
 Current Task:
-TASK-136 — Replan Remaining service remainder (HTTP entry + old-replan guard)
+TASK-157 — Memory v2 migration (importance/scope/active + dedup support)
 
 Current Task Status:
 IN_PROGRESS
@@ -855,27 +855,24 @@ control signals on create; pause/stop clobbered by stale-copy full-row UPDATE
 TextLengthUtil blank=0.
 
 Phase 4 Gate:
-PASSED (2026-08-22) — TASK-133..139, full mvn test 40/40.
-AC-106 real-LLM PASS after one honest FAIL→fix→re-verify cycle: first run's
-new plan repeated an already-written beat; root-caused (replan prompt lacked
-completed-beats list) and fixed by injecting the stage's finished chapters as
-"established facts, do not repeat" into the replan direction. Re-verified:
-v2 plans continue strictly after established facts; author instruction honored.
-Additional real defects fixed en route: stale-total STEP completion (now
-DB-facts via resolver), resolver counting superseded rows as pending,
-runStep NoPendingChapterException convergence with CONTINUOUS.
+PASSED (2026-08-22) — TASK-133..139, full mvn test 40/40; AC-106 real-LLM
+PASS after one honest FAIL→fix→re-verify cycle (completed-beats list injected
+into replan prompt). Fixed en route: stale-total STEP completion, resolver
+counting superseded rows as pending, runStep exception convergence.
 
 Phase 5 Gate:
 PASSED (2026-08-22) — TASK-140..149, full mvn test 46/46.
-ChapterRevision model (V12 additive + 44-chapter backfill), manual edit,
-approve lifecycle, regenerate (same id/number/spec), revision history API+UI,
-memory STALE on any non-AI_GENERATED revision change, derived-memory
-invalidation via candidate reverse-lookup (current_state/relationship_state
-have no provenance column — the APPLIED candidate rows ARE the provenance;
-invalidate MUST run before re-extract or existingState echoes stale facts —
-observed live during AC-107). AC-107 + AC-108 real-LLM PASS: iron-sword fact
-removed by author edit no longer appears in Current State (iron_refs=0),
-old revisions preserved, new candidates consistent with edited prose.
+ChapterRevision model (V12 + 44-chapter backfill), manual edit, approve,
+regenerate, revision history API+UI, memory STALE + candidate reverse-lookup
+invalidation. AC-107 + AC-108 real-LLM PASS (iron_refs=0 after author edit).
+
+Phase 6 Gate:
+PASSED (2026-08-22) — TASK-150..156, full mvn test 53/53.
+targetChapterCount CRUD/PATCH/UI; Arc V13 + API + ArcPanel UI;
+LongFormPosition contract both ends; proportional pace guard prompt.
+AC-114 real-LLM PASS: target=600/current=5/arc=1-60 with a DELIBERATELY
+endgame-seeking direction produced an arc-scoped plan, 0 endgame patterns
+(.agent/evidence/ac114_plan.json).
 
 Environment change note (2026-08-22):
 Maven 3.9.16 + JDK17 now available in this environment (previously absent).
@@ -885,11 +882,10 @@ Known Blocker:
 NONE.
 
 Next Safe Action:
-TASK-140 — ChapterRevision schema (chapter_revision table + chapter
-current_revision_id/status DRAFT|APPROVED, additive V12 migration), then
-TASK-141 legacy-content backfill, TASK-142/143 manual edit, TASK-144
-regenerate, TASK-145 revision history, TASK-146 approve, TASK-147/148 memory
-stale+refresh, TASK-149 acceptance.
+TASK-157 — Memory v2 migration (V14 additive: story_memory/memory_candidate
+importance/scope/active columns with safe defaults), then type-contract enum
+freeze, extractor importance/scope output, dedup, apply-path updates, and
+AC acceptance per TASKS.md Phase 7.
 ```
 
 Core principles:

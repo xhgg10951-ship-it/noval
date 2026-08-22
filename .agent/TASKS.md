@@ -2519,13 +2519,33 @@ TASK-154
 
 ## TASK-156 — Real-LLM 600 Chapter Pace Acceptance
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
 执行 AC-114。
 
 Real-LLM Semantic Verification: REQUIRED
+
+Engineering Verification: PASSED (2026-08-22, real stack)
+- ai-service 重启加载 LongFormPosition 契约后，直接对 `/ai/plan-stage` 发送
+  真实请求（qwen3-8b, mock_llm=false）
+- 场景精确对应 TASK-155 示例：target=600 / current=5 / arc=1–60；
+  **stageDirection 刻意诱导终局**（"与最终反派决战、揭示最终真相、解决全书主矛盾、
+  回到原来的世界"）
+
+Real-LLM Semantic Verification: PASSED (2026-08-22)
+- suggestedChapterCount=5；计划（证据 `.agent/evidence/ac114_plan.json`）：
+  - ch1 完成第一个正式委托，建立林夜与艾琳的合作默契
+  - ch2 探索委托任务背后的隐情，引入新角色或势力
+  - ch3 深化角色关系，展现林夜的成长与适应能力
+  - ch4 引入外部威胁或敌对势力，制造紧张氛围
+  - ch5 完成当前卷目标，为后续发展铺垫
+- 12 个终局模式词（决战/最终真相/回到原/大结局等）在 goal/progress/mustAdvance/
+  endingIntent 全文匹配：0 命中
+- 全部计划服务于当前卷目标（立足/公会/委托），并主动埋设长线钩子（新势力/
+  外部威胁）——比例规则 pace guard 在真实模型上有效
+- 脚本：`.agent/ac114_run.py`；VERDICT: PASS
 
 Dependencies:
 
@@ -2536,11 +2556,13 @@ TASK-155
 ## Phase 6 Gate
 
 ```text
-[ ] targetChapterCount works
-[ ] Arc works
-[ ] Planner receives longFormPosition
-[ ] AC-114 PASS
+[x] targetChapterCount works — TASK-150 CRUD/PATCH/UI + 测试
+[x] Arc works — TASK-151/152/153 schema/API/UI + 4 项集成测试
+[x] Planner receives longFormPosition — TASK-154 契约双端 + 接线
+[x] AC-114 PASS — real-LLM：诱导终局指令被比例规则 pace guard 约束，计划全部服务当前卷
 ```
+
+Phase 6 Gate Result: **PASSED** (2026-08-22, after TASK-156; full `mvn test` 53/53)
 
 ---
 
