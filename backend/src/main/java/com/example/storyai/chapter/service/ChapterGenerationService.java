@@ -16,6 +16,7 @@ import com.example.storyai.ai.dto.GenerateChapterResponse;
 import com.example.storyai.chapter.model.Chapter;
 import com.example.storyai.common.exception.AiServiceException;
 import com.example.storyai.common.exception.NoPendingChapterException;
+import com.example.storyai.context.StoryContextReader;
 import com.example.storyai.memory.model.MemoryCandidate;
 import com.example.storyai.memory.service.CandidateProcessingService;
 import com.example.storyai.memory.service.MemoryExtractionService;
@@ -47,6 +48,7 @@ public class ChapterGenerationService {
     private final StoryService storyService;
     private final StageService stageService;
     private final ChapterService chapterService;
+    private final StoryContextReader contextReader;
     private final AiServiceClient aiServiceClient;
     private final MemoryExtractionService extractionService;
     private final CandidateProcessingService processingService;
@@ -54,12 +56,14 @@ public class ChapterGenerationService {
     public ChapterGenerationService(StoryService storyService,
                                     StageService stageService,
                                     ChapterService chapterService,
+                                    StoryContextReader contextReader,
                                     AiServiceClient aiServiceClient,
                                     MemoryExtractionService extractionService,
                                     CandidateProcessingService processingService) {
         this.storyService = storyService;
         this.stageService = stageService;
         this.chapterService = chapterService;
+        this.contextReader = contextReader;
         this.aiServiceClient = aiServiceClient;
         this.extractionService = extractionService;
         this.processingService = processingService;
@@ -129,15 +133,21 @@ public class ChapterGenerationService {
         List<GenerateChapterRequest.ConstraintItem> constraintItems = constraints.stream()
                 .map(c -> new GenerateChapterRequest.ConstraintItem(c.getType(), c.getContent()))
                 .toList();
+        // TASK-110: wire existing story context instead of empty placeholders.
+        // For the very first chapter these may legitimately be empty; afterwards
+        // they carry the real Current State / Story Memory / Relationships so the
+        // Writer actually uses them (fixes RC-02). recentContext upgrade to
+        // multi-summary + ending is TASK-111.
+        Long storyId = story.getId();
         return new GenerateChapterRequest(
                 story.getCoreIdea(),
                 constraintItems,
                 stage.getDirection(),
                 plan.getGoal(),
                 plan.getChapterOrder(),
-                List.of(),
-                List.of(),
-                List.of(),
+                contextReader.getWriterStateItems(storyId),
+                contextReader.getWriterMemoryItems(storyId),
+                contextReader.getRelationshipItems(storyId),
                 prevSummary == null ? "" : prevSummary
         );
     }

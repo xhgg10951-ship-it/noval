@@ -32,7 +32,7 @@ Current Phase:
 
 Current Task:
 
-`TASK-107 — Add Planner Continuation Context v2 Contract`
+`TASK-111 — Upgrade Recent Writer Context`
 
 Task Status:
 
@@ -46,6 +46,7 @@ TASK-103 DONE — DEBUG payload observability (commit `63781dd`).
 TASK-104 DONE — 5 root causes re-confirmed at file:line; Phase 0 Gate PASSED.
 TASK-105 DONE — `StoryContextReader` built + compiled.
 TASK-106 DONE — Planner wired to real context (currentState / storyMemories / recentContext).
+TASK-110 DONE — Writer wired to real context (currentState / storyMemories / relationshipState).
 
 Engineering Verification:
 NOT_RUN — Phase 1 continuation contract next

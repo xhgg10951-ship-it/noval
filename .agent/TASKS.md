@@ -602,7 +602,7 @@ TASK-108
 
 ## TASK-110 — Wire Writer Current State / Memory / Relationship
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -618,9 +618,25 @@ relationshipState
 
 不允许继续使用三个 `List.of()` 作为正式路径。
 
-Engineering Verification:
+Implementation:
 
-Captured `GenerateChapterRequest` 有数据时三个字段非空。
+`ChapterGenerationService` 注入 `StoryContextReader`，`buildRequest` 第 6/7/8 位改为：
+
+- `contextReader.getWriterStateItems(storyId)` → `GenerateChapterRequest.StateItem`
+- `contextReader.getWriterMemoryItems(storyId)` → `GenerateChapterRequest.MemoryItem`
+- `contextReader.getRelationshipItems(storyId)` → `GenerateChapterRequest.RelationshipItem`
+
+注：`PlanStageRequest` 与 `GenerateChapterRequest` 的嵌套 `StateItem`/`MemoryItem` 是不同类型（同字段不同外层 record），因此 reader 提供 Writer 形状独立映射（`getWriterStateItems` / `getWriterMemoryItems`），避免跨类型直接复用。首章之前这些列表为空是正确行为；后续章节现在真正携带既有状态/记忆/关系（修复 RC-02）。recentContext 仍为单章 prevSummary，升级见 TASK-111。
+
+Verification:
+
+Engineering Verification: PASSED
+- javac 编译通过（reader + ChapterGenerationService 一起编译）
+- 三处 `List.of()` 占位已全部移除，改用 reader 真实数据
+
+Real-LLM Semantic Verification:
+
+暂不在本 Task 宣布 PASS（AC-102 允许 Mock，但语义质量属 Phase 1 Gate / AC-104）
 
 Acceptance:
 
