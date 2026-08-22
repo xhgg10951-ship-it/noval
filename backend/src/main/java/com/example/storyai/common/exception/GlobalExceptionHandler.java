@@ -62,6 +62,13 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("STATE_CONFLICT", ex.getMessage()));
     }
 
+    /** v0.1.1 Phase 6: argument validation (e.g. targetChapterCount out of range). */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequest(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("BAD_REQUEST", ex.getMessage()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
         Map<String, String> fields = new LinkedHashMap<>();

@@ -18,6 +18,8 @@ const form = reactive({
   coreIdea: '',
   initialStageDirection: '',
   defaultTargetCharacters: 3000 as number | null,
+  targetChapterCount: null as number | null,
+  writingStyle: '',
 })
 
 const constraints = reactive<ConstraintRow[]>([
@@ -67,6 +69,8 @@ async function handleSubmit(): Promise<void> {
       coreIdea: form.coreIdea.trim(),
       initialStageDirection: form.initialStageDirection.trim() || undefined,
       defaultTargetCharacters: form.defaultTargetCharacters ?? undefined,
+      targetChapterCount: form.targetChapterCount ?? undefined,
+      writingStyle: form.writingStyle.trim() || undefined,
       constraints: filledConstraints.length > 0 ? filledConstraints : undefined,
     })
     successMsg.value = `故事创建成功！(ID: ${created.id})`
@@ -75,6 +79,8 @@ async function handleSubmit(): Promise<void> {
     form.coreIdea = ''
     form.initialStageDirection = ''
     form.defaultTargetCharacters = 3000
+    form.targetChapterCount = null
+    form.writingStyle = ''
     constraints.splice(0, constraints.length, { id: Date.now(), type: '', content: '' })
     // Navigate to story list after a brief delay so the user sees success.
     setTimeout(() => router.push('/stories'), 800)
@@ -139,6 +145,32 @@ async function handleSubmit(): Promise<void> {
           placeholder="默认 3000"
         />
         <p class="form__sub">生成章节时以此为目标长度；留空则使用默认值 3000。</p>
+      </div>
+
+      <div class="form__field">
+        <label class="form__label" for="target-chapters">长篇目标章节数（可选）</label>
+        <input
+          id="target-chapters"
+          v-model.number="form.targetChapterCount"
+          class="form__input"
+          type="number"
+          min="1"
+          max="5000"
+          step="1"
+          placeholder="例：600"
+        />
+        <p class="form__sub">长篇节奏锚点：规划时会告知 AI 本书的目标总章数与当前位置，避免过早推进终局。短篇可留空。</p>
+      </div>
+
+      <div class="form__field">
+        <label class="form__label" for="writing-style">写作风格提示（可选）</label>
+        <input
+          id="writing-style"
+          v-model="form.writingStyle"
+          class="form__input"
+          type="text"
+          placeholder="例：冷峻克制，少用形容词"
+        />
       </div>
 
       <div class="form__field">

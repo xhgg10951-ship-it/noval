@@ -52,6 +52,8 @@ public class StoryController {
         story.setCoreIdea(request.getCoreIdea());
         story.setInitialStageDirection(request.getInitialStageDirection());
         story.setDefaultTargetCharacters(request.getDefaultTargetCharacters());
+        story.setWritingStyle(request.getWritingStyle());
+        story.setTargetChapterCount(request.getTargetChapterCount());
         List<StoryConstraint> constraints = toConstraints(request.getConstraints());
 
         Story created = storyService.createStory(story, constraints);
@@ -60,6 +62,22 @@ public class StoryController {
         Story persisted = storyService.getStory(created.getId());
         List<StoryConstraint> saved = storyService.getConstraints(created.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(persisted, saved));
+    }
+
+    /**
+     * v0.1.1 Phase 6 (TASK-150): partial update of writing settings.
+     * NULL request fields mean "leave unchanged".
+     */
+    @org.springframework.web.bind.annotation.PatchMapping("/{id}/writing-settings")
+    public StoryResponse updateWritingSettings(@PathVariable Long id,
+            @org.springframework.web.bind.annotation.RequestBody
+            java.util.Map<String, Object> body) {
+        Integer targetChars = (Integer) body.get("defaultTargetCharacters");
+        String style = (String) body.get("writingStyle");
+        Integer targetChapters = (Integer) body.get("targetChapterCount");
+        Story updated = storyService.updateWritingSettings(id, targetChars, style, targetChapters);
+        List<StoryConstraint> constraints = storyService.getConstraints(id);
+        return toResponse(updated, constraints);
     }
 
     @GetMapping("/{id}")
@@ -98,6 +116,8 @@ public class StoryController {
         response.setCoreIdea(story.getCoreIdea());
         response.setInitialStageDirection(story.getInitialStageDirection());
         response.setDefaultTargetCharacters(story.getDefaultTargetCharacters());
+        response.setWritingStyle(story.getWritingStyle());
+        response.setTargetChapterCount(story.getTargetChapterCount());
         response.setStatus(story.getStatus());
         response.setConstraints(constraints.stream()
                 .map(ConstraintResponse::new)

@@ -13,6 +13,8 @@ export interface CreateStoryRequest {
   coreIdea: string
   initialStageDirection?: string
   defaultTargetCharacters?: number
+  targetChapterCount?: number
+  writingStyle?: string
   constraints?: ConstraintInput[]
 }
 
@@ -29,6 +31,8 @@ export interface StoryResponse {
   coreIdea: string
   initialStageDirection: string | null
   defaultTargetCharacters: number | null
+  targetChapterCount: number | null
+  writingStyle: string | null
   status: string
   constraints: ConstraintResponse[]
   createdAt: string
@@ -57,6 +61,21 @@ export async function createStory(req: CreateStoryRequest): Promise<StoryRespons
 
 export async function getStory(id: number): Promise<StoryResponse> {
   const { data } = await api.get<StoryResponse>(`/stories/${id}`)
+  return data
+}
+
+// v0.1.1 Phase 6 (TASK-150): partial writing-settings update; null = unchanged.
+export interface WritingSettingsUpdate {
+  defaultTargetCharacters?: number
+  writingStyle?: string
+  targetChapterCount?: number
+}
+
+export async function updateWritingSettings(
+  id: number,
+  settings: WritingSettingsUpdate,
+): Promise<StoryResponse> {
+  const { data } = await api.patch<StoryResponse>(`/stories/${id}/writing-settings`, settings)
   return data
 }
 

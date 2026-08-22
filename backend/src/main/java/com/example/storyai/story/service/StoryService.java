@@ -60,4 +60,21 @@ public class StoryService {
     public List<Story> listStories() {
         return storyMapper.findAll();
     }
+
+    /**
+     * TASK-150 — partial update of the author's writing settings.
+     * NULL request fields mean "leave unchanged"; the target chapter count is
+     * the long-form pace anchor consumed by Phase 6 (Planner position).
+     */
+    @Transactional
+    public Story updateWritingSettings(Long storyId, Integer defaultTargetCharacters,
+                                       String writingStyle, Integer targetChapterCount) {
+        getStory(storyId); // 404 guard
+        if (targetChapterCount != null && (targetChapterCount < 1 || targetChapterCount > 5000)) {
+            throw new IllegalArgumentException("目标章节数需在 1–5000 之间");
+        }
+        storyMapper.updateWritingSettings(storyId, defaultTargetCharacters,
+                writingStyle, targetChapterCount);
+        return getStory(storyId);
+    }
 }

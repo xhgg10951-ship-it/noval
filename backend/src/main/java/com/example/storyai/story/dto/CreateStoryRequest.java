@@ -22,6 +22,12 @@ public class CreateStoryRequest {
     // TASK-120: story default target chapter length (nullable; DB default 3000).
     private Integer defaultTargetCharacters;
 
+    // v0.1.1 Phase 6 (TASK-150): long-form target chapter count (nullable).
+    private Integer targetChapterCount;
+
+    // TASK-113: free-text writing style hint (Phase 8 will surface it to the Writer).
+    private String writingStyle;
+
     @Valid
     private List<ConstraintInput> constraints;
 
@@ -55,6 +61,22 @@ public class CreateStoryRequest {
 
     public void setDefaultTargetCharacters(Integer defaultTargetCharacters) {
         this.defaultTargetCharacters = defaultTargetCharacters;
+    }
+
+    public Integer getTargetChapterCount() {
+        return targetChapterCount;
+    }
+
+    public void setTargetChapterCount(Integer targetChapterCount) {
+        this.targetChapterCount = targetChapterCount;
+    }
+
+    public String getWritingStyle() {
+        return writingStyle;
+    }
+
+    public void setWritingStyle(String writingStyle) {
+        this.writingStyle = writingStyle;
     }
 
     public List<ConstraintInput> getConstraints() {

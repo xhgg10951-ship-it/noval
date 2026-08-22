@@ -12,6 +12,8 @@ public class StoryResponse {
     private String coreIdea;
     private String initialStageDirection;
     private Integer defaultTargetCharacters;
+    private Integer targetChapterCount; // v0.1.1 Phase 6 (TASK-150), nullable
+    private String writingStyle;
     private String status;
     private List<ConstraintResponse> constraints;
     private java.time.LocalDateTime createdAt;
@@ -55,6 +57,22 @@ public class StoryResponse {
 
     public void setDefaultTargetCharacters(Integer defaultTargetCharacters) {
         this.defaultTargetCharacters = defaultTargetCharacters;
+    }
+
+    public Integer getTargetChapterCount() {
+        return targetChapterCount;
+    }
+
+    public void setTargetChapterCount(Integer targetChapterCount) {
+        this.targetChapterCount = targetChapterCount;
+    }
+
+    public String getWritingStyle() {
+        return writingStyle;
+    }
+
+    public void setWritingStyle(String writingStyle) {
+        this.writingStyle = writingStyle;
     }
 
     public String getStatus() {

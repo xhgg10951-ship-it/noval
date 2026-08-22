@@ -2296,7 +2296,7 @@ Phase 5 Gate Result: **PASSED** (2026-08-22, after TASK-149; full `mvn test` 46/
 
 ## TASK-150 — Enable Story Target Chapter Count
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -2309,6 +2309,23 @@ targetChapterCount
 CRUD / UI 基础设置。
 
 旧 Story 允许 NULL。
+
+Implementation:
+
+- 列已在 V6（TASK-113 预建）；本任务打通全链路：
+  - `StoryMapper.updateWritingSettings`（COALESCE 部分更新：null=不变）
+  - `StoryService.updateWritingSettings`（404 守卫 + 1..5000 校验）
+  - `PATCH /api/stories/{id}/writing-settings`
+  - CreateStoryRequest/StoryResponse 补 targetChapterCount/writingStyle
+  - IllegalArgumentException → 400 BAD_REQUEST 映射
+- 前端：CreateStoryView 新增长篇目标章节数 + 写作风格输入；stories.ts
+  updateWritingSettings + 类型扩展
+
+Engineering Verification: PASSED — StoryWritingSettingsTest 3/3
+（create 回显 / legacy NULL→PATCH 设置 / partial 保留未指定字段 + 越界 400）；
+npm run build ✓
+
+Real-LLM Semantic Verification: NOT_REQUIRED
 
 Dependencies:
 

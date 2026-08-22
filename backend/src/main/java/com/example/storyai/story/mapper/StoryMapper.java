@@ -19,4 +19,10 @@ public interface StoryMapper {
     Story findById(Long id);
 
     List<Story> findAll();
+
+    /** TASK-150: partial writing-settings update; NULL fields are left unchanged. */
+    int updateWritingSettings(@org.apache.ibatis.annotations.Param("id") Long id,
+                              @org.apache.ibatis.annotations.Param("defaultTargetCharacters") Integer defaultTargetCharacters,
+                              @org.apache.ibatis.annotations.Param("writingStyle") String writingStyle,
+                              @org.apache.ibatis.annotations.Param("targetChapterCount") Integer targetChapterCount);
 }
