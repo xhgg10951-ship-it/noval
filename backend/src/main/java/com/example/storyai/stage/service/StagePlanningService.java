@@ -99,6 +99,10 @@ public class StagePlanningService {
         // For a brand-new first stage these may legitimately be empty; for later
         // stages they now carry the real Current State / Story Memory / recent
         // chapter summaries so the Planner continues the existing story (RC-01).
+        // TASK-107/108: add Planner continuation context v2 — relationships,
+        // current chapter number, completed-stage summaries, recent chapter
+        // summaries and a structured continuation anchor — so the Planner knows
+        // it is continuing an existing story (fixes RC-01 continuation loop).
         Long storyId = story.getId();
         return new PlanStageRequest(
                 story.getCoreIdea(),
@@ -107,7 +111,12 @@ public class StagePlanningService {
                 contextReader.getCurrentStateItems(storyId),
                 contextReader.getStoryMemoryItems(storyId),
                 contextReader.getRecentContext(storyId, 3),
-                targetChapterCount
+                targetChapterCount,
+                contextReader.getPlannerRelationshipItems(storyId),
+                contextReader.getCurrentChapterNumber(storyId),
+                contextReader.getCompletedStageSummaries(storyId),
+                contextReader.getRecentChapterSummaries(storyId, 3),
+                contextReader.buildContinuationAnchor(storyId, 800)
         );
     }
 

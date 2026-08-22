@@ -15,6 +15,8 @@ import com.example.storyai.memory.model.CurrentState;
 import com.example.storyai.memory.model.RelationshipState;
 import com.example.storyai.memory.model.StoryMemory;
 import com.example.storyai.memory.service.MemoryService;
+import com.example.storyai.stage.model.Stage;
+import com.example.storyai.stage.service.StageService;
 import com.example.storyai.story.model.StoryConstraint;
 import com.example.storyai.story.service.StoryService;
 
@@ -37,13 +39,16 @@ public class StoryContextReader {
     private final StoryService storyService;
     private final MemoryService memoryService;
     private final ChapterService chapterService;
+    private final StageService stageService;
 
     public StoryContextReader(StoryService storyService,
                               MemoryService memoryService,
-                              ChapterService chapterService) {
+                              ChapterService chapterService,
+                              StageService stageService) {
         this.storyService = storyService;
         this.memoryService = memoryService;
         this.chapterService = chapterService;
+        this.stageService = stageService;
     }
 
     // ---- constraints ----
@@ -172,5 +177,135 @@ public class StoryContextReader {
         }
         String result = sb.toString().trim();
         return result.isEmpty() ? "" : result;
+    }
+
+    // ---- TASK-107: Planner continuation context v2 ----
+
+    /**
+     * Relationships mapped to the Planner request shape. {@link PlanStageRequest}
+     * and {@link GenerateChapterRequest} use distinct nested {@code RelationshipItem}
+     * types (same shape, different enclosing class), so the Planner needs its own
+     * mapper.
+     */
+    public List<PlanStageRequest.RelationshipItem> getPlannerRelationshipItems(Long storyId) {
+        List<RelationshipState> rels = memoryService.getRelationships(storyId);
+        if (rels == null) return List.of();
+        return rels.stream()
+                .map(r -> new PlanStageRequest.RelationshipItem(r.getSubjectA(), r.getSubjectB(), r.getDescription()))
+                .toList();
+    }
+
+    /**
+     * Current (latest) chapter number of the story, or {@code null} when the
+     * story has no chapters yet. Derived from {@code ChapterService.nextChapterNumber}
+     * which returns {@code max + 1} (minimum 1), so the latest is {@code max}.
+     */
+    public Integer getCurrentChapterNumber(Long storyId) {
+        int next = chapterService.nextChapterNumber(storyId); // max + 1 (min 1)
+        int current = next - 1;
+        return current < 1 ? null : current;
+    }
+
+    /**
+     * Recent chapter summaries as a list (most recent last), capped at
+     * {@code maxChapters}. Empty list when the story has no chapters.
+     */
+    public List<String> getRecentChapterSummaries(Long storyId, int maxChapters) {
+        List<Chapter> chapters = chapterService.listByStory(storyId);
+        if (chapters == null || chapters.isEmpty()) return List.of();
+        return chapters.stream()
+                .sorted(Comparator.comparing(Chapter::getChapterNumber))
+                .skip(Math.max(0, chapters.size() - maxChapters))
+                .map(Chapter::getSummary)
+                .filter(s -> s != null && !s.isBlank())
+                .toList();
+    }
+
+    /**
+     * One-line summaries of already-completed stages ("第 N 阶段：<direction>"),
+     * ordered by stage creation. Completed stages are those with status
+     * {@code COMPLETED}; this is a lightweight stage-level continuity signal
+     * (no dedicated stage-summary column exists in v0.1 — see frozen plan).
+     */
+    public List<String> getCompletedStageSummaries(Long storyId) {
+        List<Stage> stages = stageService.listStages(storyId);
+        if (stages == null || stages.isEmpty()) return List.of();
+        return stages.stream()
+                .filter(s -> "COMPLETED".equals(s.getStatus()))
+                .sorted(Comparator.comparing(
+                        s -> s.getCreatedAt() == null ? java.time.LocalDateTime.MAX : s.getCreatedAt()))
+                .map(s -> "第 " + s.getId() + " 阶段：" + (s.getDirection() == null ? "" : s.getDirection()))
+                .toList();
+    }
+
+    // ---- TASK-108: Continuation Anchor Assembly ----
+
+    /**
+     * Builds the structured continuation anchor used by the Planner to avoid
+     * restarting the story. Carries the latest chapter number, current location,
+     * active characters, the immediate goal, the last chapter summary and a tail
+     * excerpt of the last chapter's content.
+     *
+     * <p>{@code location} / {@code activeCharacters} / {@code immediateGoal} are
+     * derived from the most recent structured CurrentState + StoryMemory rows
+     * (best-effort, non-LLM); they are left null/empty when no such signal
+     * exists. {@code lastChapterSummary} / {@code lastChapterEnding} are taken
+     * directly from the latest chapter.</p>
+     */
+    public PlanStageRequest.ContinuationAnchor buildContinuationAnchor(Long storyId,
+                                                                       int endingExcerptChars) {
+        List<Chapter> chapters = chapterService.listByStory(storyId);
+        Integer lastChapterNumber = getCurrentChapterNumber(storyId);
+        String lastSummary = null;
+        String lastEnding = null;
+        if (chapters != null && !chapters.isEmpty()) {
+            Chapter last = chapters.stream()
+                    .max(Comparator.comparing(Chapter::getChapterNumber))
+                    .orElse(null);
+            if (last != null) {
+                lastSummary = last.getSummary();
+                String content = last.getContent();
+                if (content != null && !content.isEmpty() && endingExcerptChars > 0) {
+                    lastEnding = content.length() <= endingExcerptChars
+                            ? content
+                            : content.substring(content.length() - endingExcerptChars);
+                }
+            }
+        }
+
+        // Derive location / characters / immediate goal from structured memory.
+        String location = null;
+        List<String> activeCharacters = List.of();
+        String immediateGoal = null;
+        List<CurrentState> states = memoryService.getCurrentState(storyId);
+        if (states != null) {
+            for (CurrentState s : states) {
+                if (s == null || s.getCategory() == null) continue;
+                if (location == null && "LOCATION".equalsIgnoreCase(s.getCategory())) {
+                    location = s.getValue();
+                }
+                if (immediateGoal == null && "GOAL".equalsIgnoreCase(s.getCategory())) {
+                    immediateGoal = s.getValue();
+                }
+            }
+        }
+        List<StoryMemory> memories = memoryService.getStoryMemories(storyId);
+        if (memories != null) {
+            List<String> chars = memories.stream()
+                    .filter(m -> m != null && m.getSubject() != null && !m.getSubject().isBlank())
+                    .map(StoryMemory::getSubject)
+                    .distinct()
+                    .toList();
+            if (!chars.isEmpty()) activeCharacters = chars;
+        }
+
+        return new PlanStageRequest.ContinuationAnchor(
+                lastChapterNumber,
+                location,
+                activeCharacters,
+                immediateGoal,
+                lastSummary,
+                lastEnding
+        );
     }
 }

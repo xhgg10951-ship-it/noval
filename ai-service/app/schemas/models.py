@@ -41,6 +41,15 @@ class RelationshipItem(BaseModel):
     description: str
 
 
+class ContinuationAnchor(BaseModel):
+    lastChapterNumber: Optional[int] = None
+    currentLocation: Optional[str] = None
+    activeCharacters: List[str] = Field(default_factory=list)
+    currentImmediateGoal: Optional[str] = None
+    lastChapterSummary: Optional[str] = None
+    lastChapterEnding: Optional[str] = None
+
+
 # --------------------------------------------------------------------------
 # Plan Stage
 # --------------------------------------------------------------------------
@@ -52,6 +61,12 @@ class PlanStageRequest(BaseModel):
     storyMemories: List[MemoryItem] = Field(default_factory=list)
     recentContext: str = ""
     targetChapterCount: Optional[int] = None
+    # ---- TASK-107: Planner continuation context v2 ----
+    relationshipState: List[RelationshipItem] = Field(default_factory=list)
+    currentChapterNumber: Optional[int] = None
+    completedStageSummaries: List[str] = Field(default_factory=list)
+    recentChapterSummaries: List[str] = Field(default_factory=list)
+    continuationAnchor: Optional[ContinuationAnchor] = None
 
 
 class ChapterPlanItem(BaseModel):

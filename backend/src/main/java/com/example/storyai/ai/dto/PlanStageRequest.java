@@ -21,7 +21,13 @@ public record PlanStageRequest(
         List<StateItem> currentState,
         List<MemoryItem> storyMemories,
         String recentContext,
-        Integer targetChapterCount
+        Integer targetChapterCount,
+        // ---- TASK-107: Planner continuation context v2 ----
+        List<RelationshipItem> relationshipState,
+        Integer currentChapterNumber,
+        List<String> completedStageSummaries,
+        List<String> recentChapterSummaries,
+        ContinuationAnchor continuationAnchor
 ) {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -34,5 +40,26 @@ public record PlanStageRequest(
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record MemoryItem(String type, String subject, String description) {
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record RelationshipItem(String subjectA, String subjectB, String description) {
+    }
+
+    /**
+     * TASK-108 — structured continuation anchor. {@code lastChapterNumber},
+     * {@code lastChapterSummary} and {@code lastChapterEnding} are populated by
+     * the context reader; {@code currentLocation} / {@code activeCharacters} /
+     * {@code currentImmediateGoal} are derived (see StoryContextReader).
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record ContinuationAnchor(
+            Integer lastChapterNumber,
+            String currentLocation,
+            List<String> activeCharacters,
+            String currentImmediateGoal,
+            String lastChapterSummary,
+            String lastChapterEnding
+    ) {
     }
 }
