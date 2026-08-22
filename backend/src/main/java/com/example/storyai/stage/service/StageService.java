@@ -112,6 +112,13 @@ public class StageService {
             p.setChapterOrder(item.order());
             p.setGoal(item.goal());
             p.setExpectedProgress(item.expectedProgress());
+            // TASK-116: persist the full ChapterSpec returned by the Planner so
+            // no planner-provided field is silently dropped before MySQL.
+            p.setTargetCharacters(item.targetCharacters());
+            p.setMustAdvance(item.mustAdvance());
+            p.setMustNotDo(item.mustNotDo());
+            p.setStoryBeats(item.storyBeats());
+            p.setEndingIntent(item.endingIntent());
             return p;
         }).toList();
         if (!rows.isEmpty()) {

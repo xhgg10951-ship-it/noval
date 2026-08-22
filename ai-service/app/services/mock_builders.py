@@ -28,11 +28,19 @@ def mock_plan(req) -> PlanStageResponse:
         "在已建立的环境中出现关键转折或新人物，推动主线。",
         "完成本阶段核心事件，并为下一阶段留下明确接口。",
     ]
+    # TASK-115: emit full ChapterSpec so the Mock pipeline exercises the new
+    # contract (targetCharacters / mustAdvance / mustNotDo / storyBeats / endingIntent).
+    target_chars = 3000
     plans = [
         ChapterPlanItem(
             order=i + 1,
             goal=goals[i % len(goals)],
             expectedProgress=f"完成第 {i + 1}/{count} 章的目标，推进阶段方向。",
+            targetCharacters=target_chars,
+            mustAdvance=[goals[i % len(goals)], "推进主线，避免原地踏步"],
+            mustNotDo=["重复已完成阶段", "重复开场/穿越"],
+            storyBeats=["建立处境", "出现转折", "留下接口"],
+            endingIntent="为下一章埋下明确接口。",
         )
         for i in range(count)
     ]

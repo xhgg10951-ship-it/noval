@@ -23,7 +23,13 @@ public record PlanStageResponse(
             int order,
             String goal,
             @com.fasterxml.jackson.annotation.JsonProperty("expectedProgress")
-            String expectedProgress
+            String expectedProgress,
+            // ---- TASK-115: ChapterSpec output ----
+            Integer targetCharacters,
+            String mustAdvance,
+            String mustNotDo,
+            String storyBeats,
+            String endingIntent
     ) {
     }
 }

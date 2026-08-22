@@ -80,7 +80,9 @@ def _fmt_relationships(items) -> str:
 
 PLAN_OUTPUT_HINT = (
     '{"suggestedChapterCount": int, '
-    '"chapterPlans": [{"order": int, "goal": str, "expectedProgress": str}]}'
+    '"chapterPlans": [{"order": int, "goal": str, "expectedProgress": str, '
+    '"targetCharacters": int, "mustAdvance": [str], "mustNotDo": [str], '
+    '"storyBeats": [str], "endingIntent": str}]}'
 )
 
 
@@ -122,6 +124,13 @@ def build_plan_prompt(req: PlanStageRequest) -> Tuple[str, str]:
 {_fmt_lines(req.recentChapterSummaries)}
 
 目标章节数：{req.targetChapterCount or '由你决定'}
+
+每一章计划都必须包含完整的 ChapterSpec：
+- targetCharacters：本章目标字数（建议 2500–3500，长篇请接近上限）
+- mustAdvance：本章必须推进的要点列表
+- mustNotDo：本章禁止做的事列表（例如不得重复已完成阶段、不得重复开场）
+- storyBeats：本章关键剧情节拍列表
+- endingIntent：本章结尾意图（为下一章留接口）
 
 请只输出 JSON。"""
     return system, user

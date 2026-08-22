@@ -73,6 +73,12 @@ class ChapterPlanItem(BaseModel):
     order: int
     goal: str
     expectedProgress: str
+    # ---- TASK-115: ChapterSpec output ----
+    targetCharacters: Optional[int] = None
+    mustAdvance: List[str] = Field(default_factory=list)
+    mustNotDo: List[str] = Field(default_factory=list)
+    storyBeats: List[str] = Field(default_factory=list)
+    endingIntent: Optional[str] = None
 
 
 class PlanStageResponse(BaseModel):
