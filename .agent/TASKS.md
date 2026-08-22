@@ -201,7 +201,17 @@ Phase Gate 未通过：
 
 ## TASK-101 — Snapshot v0.1 Regression Evidence
 
-Status: `TODO`
+Status: `DONE`
+
+Evidence:
+
+`.agent/EVIDENCE_v0.1_REGRESSION.md` — code-level regression baseline.
+
+Engineering Verification:
+PASSED — evidence saved and reviewable
+
+Real-LLM Semantic Verification:
+NOT_REQUIRED
 
 Goal:
 

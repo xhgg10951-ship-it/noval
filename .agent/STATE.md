@@ -36,7 +36,19 @@ Current Task:
 
 Task Status:
 
-`TODO`
+`DONE`
+
+Task Evidence:
+
+`.agent/EVIDENCE_v0.1_REGRESSION.md` (code-level regression baseline captured;
+Planner/Writer empty-context wiring proven at file:line; prompts quoted
+verbatim; Mock repetitive artifact recorded)
+
+Engineering Verification:
+PASSED — regression evidence saved and reviewable
+
+Real-LLM Semantic Verification:
+NOT_REQUIRED — TASK-101 is evidence capture, not an AI-behavior change
 
 ---
 
@@ -775,7 +787,7 @@ Current Phase:
 Phase 0 — Correct Evidence Base
 
 Current Task:
-TASK-101
+TASK-102 — Correct v0.1 Status Claims
 
 Current Task Status:
 TODO
@@ -784,7 +796,13 @@ Known Blocker:
 NONE
 
 Next Safe Action:
-Capture v0.1 regression evidence before modifying code.
+Correct inaccurate Agent/README status claims (TASK-102); do not modify generation logic until evidence reviewed.
+
+Engineering Verification:
+PASSED
+
+Real-LLM Semantic Verification:
+NOT_REQUIRED
 ```
 
 Core principles:
