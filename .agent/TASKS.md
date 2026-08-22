@@ -650,7 +650,7 @@ TASK-105
 
 ## TASK-111 — Upgrade Recent Writer Context
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -669,6 +669,23 @@ last chapter ending excerpt
 ```
 
 避免单个 Summary 成为唯一连续性锚点。
+
+Implementation:
+
+`StoryContextReader` 新增 `getRecentContextWithEnding(storyId, maxChapters, endingExcerptChars)`：取最近 `maxChapters` 章摘要（标注【第 N 章 摘要】）并追加最新章内容末尾有限文本（标注【上一章结尾】，最多 `endingExcerptChars` 字）。`ChapterGenerationService.generateNextChapter` 不再使用单章 `prevSummary`，改为 `contextReader.getRecentContextWithEnding(story.getId(), 3, 800)`；`buildRequest` 形参 `prevSummary` 重命名为 `recentContext`。
+
+Verification:
+
+Engineering Verification: PASSED
+- javac 编译通过（`StoryContextReader` + `ChapterGenerationService` 一起编译，exit 0）
+- 旧单章 `prevSummary` 路径已移除，改用多摘要 + 结尾摘录
+
+Real-LLM Semantic Verification:
+NOT_REQUIRED（语义质量属 Phase 1 Gate / AC-104）
+
+Evidence:
+
+Commit `af66501` — 2 文件变更（+49 / -10）。
 
 Dependencies:
 

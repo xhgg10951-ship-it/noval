@@ -32,7 +32,7 @@ Current Phase:
 
 Current Task:
 
-`TASK-111 — Upgrade Recent Writer Context`
+`TASK-107 — Add Planner Continuation Context v2 Contract`
 
 Task Status:
 
@@ -47,9 +47,10 @@ TASK-104 DONE — 5 root causes re-confirmed at file:line; Phase 0 Gate PASSED.
 TASK-105 DONE — `StoryContextReader` built + compiled.
 TASK-106 DONE — Planner wired to real context (currentState / storyMemories / recentContext).
 TASK-110 DONE — Writer wired to real context (currentState / storyMemories / relationshipState).
+TASK-111 DONE — Writer recent context upgraded to last 3 summaries + ending excerpt (commit `af66501`, javac PASSED).
 
 Engineering Verification:
-NOT_RUN — Phase 1 continuation contract next
+PASSED — TASK-111 compiled clean; Phase 1 Planner continuation contract next
 
 Real-LLM Semantic Verification:
 NOT_REQUIRED
@@ -614,8 +615,8 @@ TASK-179
 Current:
 
 ```text
-Phase 0
-TASK-101
+Phase 1
+TASK-107
 ```
 
 Do not resume old v0.1 TASK-001 ~ TASK-056 as active work.
@@ -812,7 +813,7 @@ Current Phase:
 Phase 1 — Context Wiring + Continuation
 
 Current Task:
-TASK-105 — Build Shared Story Context Reader
+TASK-107 — Add Planner Continuation Context v2 Contract
 
 Current Task Status:
 TODO
@@ -824,16 +825,25 @@ PASSED (2026-08-21, after commit 63781dd)
 - TASK-103 DONE: DEBUG payload observability
 - TASK-104 DONE: 5 root causes re-confirmed at file:line
 
+Phase 1 progress (Context Wiring + Continuation):
+- TASK-105 DONE: StoryContextReader built + compiled
+- TASK-106 DONE: Planner wired to real context
+- TASK-110 DONE: Writer wired to real state/memory/relationship
+- TASK-111 DONE: Writer recent context = last 3 summaries + ending excerpt (commit af66501)
+- TASK-107/108/109 TODO: Planner Continuation Context v2 + Anchor + Prompt
+- TASK-112 TODO: Real-LLM Continuation Acceptance (AC-101, needs real LLM)
+
 Known Blocker:
 NONE
 
 Next Safe Action:
-TASK-105 — Build a reusable Story Context Reader in Spring Boot that assembles
-Constraints + CurrentState + Relationships + StoryMemories + recent Chapters,
-before wiring it into StagePlanningService (TASK-106) and ChapterGenerationService (TASK-110).
+TASK-107 — Add Planner Continuation Context v2 Contract
+(relationshipState, currentChapterNumber, completedStageSummaries,
+recentChapterSummaries, continuationAnchor) to PlanStageRequest + assembly.
+TASK-108 assembles the continuation anchor; TASK-109 updates the Planner prompt.
 
 Engineering Verification:
-NOT_RUN
+PASSED — TASK-111 compiled clean
 
 Real-LLM Semantic Verification:
 NOT_REQUIRED
