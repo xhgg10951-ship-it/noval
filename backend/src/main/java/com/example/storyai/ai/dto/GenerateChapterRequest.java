@@ -21,7 +21,13 @@ public record GenerateChapterRequest(
         List<StateItem> currentState,
         List<MemoryItem> storyMemories,
         List<RelationshipItem> relationshipState,
-        String recentContext
+        String recentContext,
+        // ---- TASK-117: full ChapterSpec ----
+        Integer targetCharacters,
+        String mustAdvance,
+        String mustNotDo,
+        String storyBeats,
+        String endingIntent
 ) {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

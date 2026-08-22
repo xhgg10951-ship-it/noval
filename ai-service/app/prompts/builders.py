@@ -182,11 +182,15 @@ def build_generate_prompt(req: GenerateChapterRequest) -> Tuple[str, str]:
         "你是一名小说章节写作 AI。根据阶段导演指令、本章目标与上下文，写出一章连贯的叙事正文，"
         "并附标题与摘要。必须只返回严格 JSON，格式为：\n" + GENERATE_OUTPUT_HINT
     )
+    # TASK-118: Goal Lock — enforce priority order and Must-Not compliance.
+    spec_block = _fmt_writer_spec(req)
     user = f"""核心创意：
 {req.coreIdea}
 
 阶段导演指令：
 {req.stageDirection}
+
+{spec_block}
 
 本章目标（第 {req.chapterOrder} 章）：
 {req.chapterGoal}
@@ -206,8 +210,34 @@ def build_generate_prompt(req: GenerateChapterRequest) -> Tuple[str, str]:
 近期上下文：
 {req.recentContext or '(无)'}
 
+【执行优先级，必须自上而下遵守】
+1. 硬性约束（约束列表）高于一切；
+2. 本章目标（ChapterSpec）是本章必须执行的主线；
+3. 必须推进（mustAdvance）必须发生；禁止事项（mustNotDo）绝不可违反；
+4. 故事记忆用于丰富细节，不得用它替换本章主线；
+5. 与本章无关的旧细节不要重复铺陈；
+6. 本章结尾意图（endingIntent）应被满足，为下一章留接口。
+
 请只输出 JSON。"""
     return system, user
+
+
+def _fmt_writer_spec(req: GenerateChapterRequest) -> str:
+    """TASK-117/118: render the full ChapterSpec the Writer must execute."""
+    lines = ["本章执行规格（ChapterSpec）："]
+    if req.targetCharacters is not None:
+        lines.append(f"- 目标字数：约 {req.targetCharacters} 字（请尽量接近，不要严重偏短）")
+    if req.mustAdvance:
+        lines.append(f"- 必须推进：{req.mustAdvance}")
+    if req.mustNotDo:
+        lines.append(f"- 禁止事项：{req.mustNotDo}（绝不可违反）")
+    if req.storyBeats:
+        lines.append(f"- 剧情节拍：{req.storyBeats}")
+    if req.endingIntent:
+        lines.append(f"- 结尾意图：{req.endingIntent}")
+    if len(lines) == 1:
+        lines.append("- （无显式规格，按本章目标自由发挥）")
+    return "\n".join(lines)
 
 
 EXTRACT_OUTPUT_HINT = (

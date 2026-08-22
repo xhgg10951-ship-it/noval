@@ -137,6 +137,9 @@ public class ChapterGenerationService {
         // Writer actually uses them (fixes RC-02).
         // TASK-111: recentContext is now last 2-3 chapter summaries + latest
         // chapter ending excerpt (see generateNextChapter).
+        // TASK-117: pass the FULL ChapterSpec from the plan (targetCharacters /
+        // mustAdvance / mustNotDo / storyBeats / endingIntent) so the Writer
+        // executes the plan, not just the goal (fixes RC-04 plan->writer drift).
         Long storyId = story.getId();
         return new GenerateChapterRequest(
                 story.getCoreIdea(),
@@ -147,7 +150,12 @@ public class ChapterGenerationService {
                 contextReader.getWriterStateItems(storyId),
                 contextReader.getWriterMemoryItems(storyId),
                 contextReader.getRelationshipItems(storyId),
-                recentContext == null ? "" : recentContext
+                recentContext == null ? "" : recentContext,
+                plan.getTargetCharacters(),
+                plan.getMustAdvance(),
+                plan.getMustNotDo(),
+                plan.getStoryBeats(),
+                plan.getEndingIntent()
         );
     }
 

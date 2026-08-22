@@ -99,6 +99,12 @@ class GenerateChapterRequest(BaseModel):
     storyMemories: List[MemoryItem] = Field(default_factory=list)
     relationshipState: List[RelationshipItem] = Field(default_factory=list)
     recentContext: str = ""
+    # ---- TASK-117: full ChapterSpec ----
+    targetCharacters: Optional[int] = None
+    mustAdvance: Optional[str] = None
+    mustNotDo: Optional[str] = None
+    storyBeats: Optional[str] = None
+    endingIntent: Optional[str] = None
 
 
 class GenerateChapterResponse(BaseModel):
