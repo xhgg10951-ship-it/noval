@@ -29,7 +29,8 @@ public class GenerationJob {
         RUNNING,
         PAUSED,
         COMPLETED,
-        FAILED
+        FAILED,
+        STOPPED
     }
 
     /** Current processing phase (telemetry for the progress UI). */
@@ -48,6 +49,9 @@ public class GenerationJob {
     private String status;
     private String phase;
     private String lastError;
+    // TASK-129/130: runtime control signals (set by author via API, read by loop).
+    private Boolean pauseRequested;
+    private Boolean stopRequested;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -57,6 +61,22 @@ public class GenerationJob {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Boolean getPauseRequested() {
+        return pauseRequested;
+    }
+
+    public void setPauseRequested(Boolean pauseRequested) {
+        this.pauseRequested = pauseRequested;
+    }
+
+    public Boolean getStopRequested() {
+        return stopRequested;
+    }
+
+    public void setStopRequested(Boolean stopRequested) {
+        this.stopRequested = stopRequested;
     }
 
     public Long getStageId() {

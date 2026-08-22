@@ -56,6 +56,16 @@ public class GenerationController {
         return new GenerationJobResponse(orchestrationService.retryJob(jobId));
     }
 
+    @PostMapping("/generation-jobs/{jobId}/pause")
+    public GenerationJobResponse pause(@PathVariable Long jobId) {
+        return new GenerationJobResponse(orchestrationService.requestPause(jobId));
+    }
+
+    @PostMapping("/generation-jobs/{jobId}/stop")
+    public GenerationJobResponse stop(@PathVariable Long jobId) {
+        return new GenerationJobResponse(orchestrationService.requestStop(jobId));
+    }
+
     @GetMapping("/generation-jobs/{jobId}")
     public GenerationJobResponse get(@PathVariable Long jobId) {
         return new GenerationJobResponse(jobService.get(jobId));

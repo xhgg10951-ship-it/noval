@@ -1,5 +1,8 @@
 package com.example.storyai.chapter.service;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -42,6 +45,10 @@ public class GenerationOrchestrationService {
     private final GenerationJobService jobService;
     private final NextSafeActionResolver safeActionResolver;
     private final ChapterMapper chapterMapper;
+    // TASK-127: application-managed background executor. Continuous generation no
+    // longer blocks the HTTP request — POST /generate returns the Job immediately
+    // and the chapters run on this pool. No MQ / Redis / new microservice.
+    private final ExecutorService executor = Executors.newCachedThreadPool();
 
     public GenerationOrchestrationService(ChapterGenerationService generationService,
                                           StageService stageService,
@@ -68,15 +75,10 @@ public class GenerationOrchestrationService {
         job.setLastError(null);
         GenerationJob saved = jobService.create(job);
 
-        try {
-            markRunning(saved);
-            if (mode == GenerationJob.Mode.CONTINUOUS) {
-                return runContinuous(saved);
-            }
-            return runStep(saved);
-        } catch (RuntimeException ex) {
-            return fail(saved, ex);
-        }
+        // TASK-127: run off the HTTP thread. The caller gets the job row back
+        // immediately (PENDING -> RUNNING) and polls GET /generation-jobs/{id}.
+        submitRun(saved.getId());
+        return jobService.get(saved.getId());
     }
 
     /** Resumes a PAUSED job (author clicked Continue). STEP runs one more chapter;
@@ -87,15 +89,8 @@ public class GenerationOrchestrationService {
                 || GenerationJob.Status.FAILED.name().equals(job.getStatus())) {
             return job;
         }
-        try {
-            markRunning(job);
-            if (GenerationJob.Mode.CONTINUOUS.name().equals(job.getMode())) {
-                return runContinuous(job);
-            }
-            return runStep(job);
-        } catch (RuntimeException ex) {
-            return fail(job, ex);
-        }
+        submitRun(jobId);
+        return jobService.get(jobId);
     }
 
     /** Retries a FAILED job from its current index (the failing plan was never saved). */
@@ -105,19 +100,62 @@ public class GenerationOrchestrationService {
             return job;
         }
         job.setLastError(null);
-        GenerationJob saved = jobService.update(job);
-        try {
-            markRunning(saved);
-            if (GenerationJob.Mode.CONTINUOUS.name().equals(saved.getMode())) {
-                return runContinuous(saved);
+        jobService.update(job);
+        submitRun(jobId);
+        return jobService.get(jobId);
+    }
+
+    /**
+     * TASK-127 — dispatches the run to the background executor. The runnable reloads
+     * the job by id inside the worker thread so the HTTP thread never blocks on the
+     * (possibly long) CONTINUOUS loop. All status transitions are persisted, so a
+     * crashed worker leaves an inspectable FAILED row.
+     */
+    private void submitRun(Long jobId) {
+        GenerationJob.Mode mode = GenerationJob.Mode.valueOf(jobService.get(jobId).getMode());
+        executor.submit(() -> {
+            GenerationJob job = jobService.get(jobId);
+            try {
+                markRunning(job);
+                if (mode == GenerationJob.Mode.CONTINUOUS) {
+                    runContinuous(job);
+                } else {
+                    runStep(job);
+                }
+            } catch (RuntimeException ex) {
+                fail(job, ex);
             }
-            return runStep(saved);
-        } catch (RuntimeException ex) {
-            return fail(saved, ex);
-        }
+        });
+    }
+
+    /** TASK-129 — author requests PAUSE; loop stops at the next checkpoint. */
+    public GenerationJob requestPause(Long jobId) {
+        GenerationJob job = jobService.get(jobId);
+        job.setPauseRequested(true);
+        job.setStopRequested(false);
+        return jobService.update(job);
+    }
+
+    /** TASK-130 — author requests STOP; loop terminates, chapters retained. */
+    public GenerationJob requestStop(Long jobId) {
+        GenerationJob job = jobService.get(jobId);
+        job.setStopRequested(true);
+        job.setPauseRequested(false);
+        return jobService.update(job);
     }
 
     // ---- internal step engine ----
+
+    /** Reads the freshest control signals for a job (reloaded from DB). */
+    private boolean isStopRequested(Long jobId) {
+        Boolean v = jobService.get(jobId).getStopRequested();
+        return Boolean.TRUE.equals(v);
+    }
+
+    private boolean isPauseRequested(Long jobId) {
+        Boolean v = jobService.get(jobId).getPauseRequested();
+        return Boolean.TRUE.equals(v);
+    }
 
     /** STEP: exactly one chapter, then PAUSED (or COMPLETED if that was the last plan). */
     private GenerationJob runStep(GenerationJob job) {
@@ -130,9 +168,15 @@ public class GenerationOrchestrationService {
         return jobService.update(job);
     }
 
-    /** CONTINUOUS: loop until the stage has no pending plan, or failure. */
+    /** CONTINUOUS: loop until the stage has no pending plan, or a stop/pause/failure. */
     private GenerationJob runContinuous(GenerationJob job) {
         while (true) {
+            if (isStopRequested(job.getId())) {
+                return stop(job);
+            }
+            if (isPauseRequested(job.getId())) {
+                return pause(job);
+            }
             try {
                 generateOneStep(job); // throws NoPendingChapterException when done
             } catch (NoPendingChapterException ex) {
@@ -141,6 +185,8 @@ public class GenerationOrchestrationService {
             // loop continues immediately (no checkpoint wait)
         }
     }
+
+    // ---- internal step engine ----
 
     /** The single reusable generation step shared by both modes. */
     private void generateOneStep(GenerationJob job) {
@@ -185,6 +231,30 @@ public class GenerationOrchestrationService {
     private GenerationJob complete(GenerationJob job) {
         job.setStatus(GenerationJob.Status.COMPLETED.name());
         job.setPhase(GenerationJob.Phase.CHECKPOINT.name());
+        job.setLastError(null);
+        job.setPauseRequested(false);
+        job.setStopRequested(false);
+        GenerationJob saved = jobService.update(job);
+        // TASK-131: transition the Stage to COMPLETED only once all chapters have a
+        // stable memory extraction state. completeStage is idempotent and guarded,
+        // so re-running completion cannot leave the Stage lifecycle inconsistent.
+        stageService.completeStage(job.getStageId());
+        return saved;
+    }
+
+    /** TASK-129 — loop reached a checkpoint with a pending pause request. */
+    private GenerationJob pause(GenerationJob job) {
+        job.setStatus(GenerationJob.Status.PAUSED.name());
+        job.setPhase(GenerationJob.Phase.CHECKPOINT.name());
+        job.setPauseRequested(false);
+        return jobService.update(job);
+    }
+
+    /** TASK-130 — loop reached a checkpoint with a stop request; chapters retained. */
+    private GenerationJob stop(GenerationJob job) {
+        job.setStatus(GenerationJob.Status.STOPPED.name());
+        job.setPhase(GenerationJob.Phase.CHECKPOINT.name());
+        job.setStopRequested(false);
         job.setLastError(null);
         return jobService.update(job);
     }

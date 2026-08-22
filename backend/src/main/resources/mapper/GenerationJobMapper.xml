@@ -12,6 +12,8 @@
         <result column="status" property="status"/>
         <result column="phase" property="phase"/>
         <result column="last_error" property="lastError"/>
+        <result column="pause_requested" property="pauseRequested"/>
+        <result column="stop_requested" property="stopRequested"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
     </resultMap>
@@ -19,21 +21,23 @@
     <insert id="insert" parameterType="com.example.storyai.chapter.model.GenerationJob"
             useGeneratedKeys="true" keyProperty="id">
         INSERT INTO generation_job
-            (stage_id, mode, current_plan_index, total, status, phase, last_error)
+            (stage_id, mode, current_plan_index, total, status, phase, last_error,
+             pause_requested, stop_requested)
         VALUES
-            (#{stageId}, #{mode}, #{currentPlanIndex}, #{total}, #{status}, #{phase}, #{lastError})
+            (#{stageId}, #{mode}, #{currentPlanIndex}, #{total}, #{status}, #{phase}, #{lastError},
+             #{pauseRequested}, #{stopRequested})
     </insert>
 
     <select id="findById" resultMap="GenerationJobResult">
         SELECT id, stage_id, mode, current_plan_index, total, status, phase,
-               last_error, created_at, updated_at
+               last_error, pause_requested, stop_requested, created_at, updated_at
         FROM generation_job
         WHERE id = #{id}
     </select>
 
     <select id="findLatestByStage" resultMap="GenerationJobResult">
         SELECT id, stage_id, mode, current_plan_index, total, status, phase,
-               last_error, created_at, updated_at
+               last_error, pause_requested, stop_requested, created_at, updated_at
         FROM generation_job
         WHERE stage_id = #{stageId}
         ORDER BY id DESC
@@ -48,6 +52,8 @@
             status = #{status},
             phase = #{phase},
             last_error = #{lastError},
+            pause_requested = #{pauseRequested},
+            stop_requested = #{stopRequested},
             updated_at = CURRENT_TIMESTAMP
         WHERE id = #{id}
     </update>

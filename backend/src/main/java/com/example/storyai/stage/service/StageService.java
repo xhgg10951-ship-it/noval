@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.storyai.ai.dto.PlanStageResponse;
+import com.example.storyai.chapter.mapper.ChapterMapper;
 import com.example.storyai.common.exception.ResourceNotFoundException;
 import com.example.storyai.stage.mapper.ChapterPlanMapper;
 import com.example.storyai.stage.mapper.StageMapper;
@@ -23,10 +24,13 @@ public class StageService {
 
     private final StageMapper stageMapper;
     private final ChapterPlanMapper chapterPlanMapper;
+    private final ChapterMapper chapterMapper;
 
-    public StageService(StageMapper stageMapper, ChapterPlanMapper chapterPlanMapper) {
+    public StageService(StageMapper stageMapper, ChapterPlanMapper chapterPlanMapper,
+                        ChapterMapper chapterMapper) {
         this.stageMapper = stageMapper;
         this.chapterPlanMapper = chapterPlanMapper;
+        this.chapterMapper = chapterMapper;
     }
 
     /**
@@ -80,6 +84,30 @@ public class StageService {
         }
         chapterPlanMapper.updateGoal(planId, goal);
         return chapterPlanMapper.findById(planId);
+    }
+
+    /**
+     * TASK-131 — Stage completion lifecycle. Transitions an ACTIVE stage to
+     * COMPLETED once all its plans are generated AND every generated chapter's
+     * memory extraction has reached a stable state (COMPLETED; FAILED/STALE are
+     * left for the author to reconcile rather than silently completing). The
+     * caller (orchestration) only invokes this from the job COMPLETED path, so a
+     * Job cannot become COMPLETED while the Stage lifecycle is inconsistent.
+     */
+    @Transactional
+    public Stage completeStage(Long stageId) {
+        Stage stage = requireStage(stageId);
+        if (!"ACTIVE".equals(stage.getStatus())) {
+            return stage; // idempotent: only ACTIVE -> COMPLETED
+        }
+        boolean allExtracted = chapterMapper.findByStageId(stageId).stream()
+                .allMatch(c -> com.example.storyai.chapter.model.MemoryExtractionStatus.COMPLETED
+                        .equals(c.getMemoryExtractionStatus()));
+        if (!allExtracted) {
+            return stage; // do not flip to COMPLETED while a chapter memory is unstable
+        }
+        stageMapper.updateStatus(stageId, "COMPLETED");
+        return stageMapper.findById(stageId);
     }
 
     public Stage getStage(Long stageId) {

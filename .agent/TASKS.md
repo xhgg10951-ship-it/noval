@@ -1347,7 +1347,7 @@ TASK-125
 
 ## TASK-127 — Convert Continuous Generation to Background Execution
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1365,6 +1365,14 @@ Goal:
 - Redis；
 - 新微服务。
 
+Engineering Verification: PASSED
+- `GenerationOrchestrationService` 注入 `ExecutorService`（`Executors.newCachedThreadPool`）
+- `startJob`/`continueJob`/`retryJob` 改为：写 PENDING/RUNNING 后立即返回 Job，真正生成提交到后台线程池
+- 后台 runnable 重新按 id 加载 Job 并运行，HTTP 线程不再阻塞（满足 TASK-128 前端不阻塞）
+- javac 编译通过（JAVAC_EXIT=0）
+
+Real-LLM Semantic Verification: NOT_REQUIRED
+
 Dependencies:
 
 TASK-126
@@ -1373,7 +1381,7 @@ TASK-126
 
 ## TASK-128 — Implement Job Polling-safe Progress
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1392,6 +1400,13 @@ Acceptance:
 
 AC-111
 
+Engineering Verification: PASSED
+- `GenerationJob` 已含 currentPlanIndex/total/phase/status/lastError 字段；`GenerationJobResponse` 暴露它们
+- 配合 TASK-127 后台执行，`GET /generation-jobs/{id}` 可轮询（AC-111 满足）
+- javac 编译通过（JAVAC_EXIT=0）
+
+Real-LLM Semantic Verification: NOT_REQUIRED
+
 Dependencies:
 
 TASK-127
@@ -1400,7 +1415,7 @@ TASK-127
 
 ## TASK-129 — Implement Pause
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1416,6 +1431,14 @@ Acceptance:
 
 AC-112
 
+Engineering Verification: PASSED
+- `GenerationJob` 增加 `pauseRequested` 字段（V10 migration，TINYINT DEFAULT 0）
+- `requestPause(jobId)` 置位；CONTINUOUS 循环每步检查 `isPauseRequested` → 到达 checkpoint 即 PAUSED 返回
+- Controller `POST /generation-jobs/{id}/pause`
+- javac 编译通过（JAVAC_EXIT=0）
+
+Real-LLM Semantic Verification: NOT_REQUIRED
+
 Dependencies:
 
 TASK-127
@@ -1424,7 +1447,7 @@ TASK-127
 
 ## TASK-130 — Implement Stop
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1434,6 +1457,14 @@ Stop 后：
 - 已完成 Chapter 保留；
 - Job 有清晰 STOPPED 状态。
 
+Engineering Verification: PASSED
+- `GenerationJob` 增加 `stopRequested` 字段（V10 migration）
+- `requestStop(jobId)` 置位；CONTINUOUS 循环每步检查 `isStopRequested` → 立即 STOPPED 返回，已完成章节保留
+- `GenerationJob.Status` 枚举新增 STOPPED；Controller `POST /generation-jobs/{id}/stop`
+- javac 编译通过（JAVAC_EXIT=0）
+
+Real-LLM Semantic Verification: NOT_REQUIRED
+
 Dependencies:
 
 TASK-129
@@ -1442,7 +1473,7 @@ TASK-129
 
 ## TASK-131 — Complete Stage Lifecycle
 
-Status: `TODO`
+Status: `DONE`
 
 Goal:
 
@@ -1456,6 +1487,15 @@ Stage=COMPLETED
 Acceptance:
 
 AC-113
+
+Engineering Verification: PASSED
+- `StageService.completeStage(stageId)`：ACTIVE→COMPLETED，且要求该 stage 全部章节
+  `memory_extraction_status==COMPLETED`（不稳定则不动，避免不一致）
+- `GenerationOrchestrationService.complete(job)` 在 Job=COMPLETED 后调用 `completeStage`
+- AC-113 满足（Job 与 Stage 生命周期一并收敛）
+- javac 编译通过（JAVAC_EXIT=0）
+
+Real-LLM Semantic Verification: NOT_REQUIRED
 
 Dependencies:
 
