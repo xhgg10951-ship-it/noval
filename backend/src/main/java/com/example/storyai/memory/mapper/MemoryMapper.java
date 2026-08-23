@@ -30,6 +30,9 @@ public interface MemoryMapper {
     /** TASK-148: the chapter's APPLIED candidates (slot reverse-lookup source). */
     List<MemoryCandidate> findAppliedCandidatesBySource(@Param("chapterId") Long chapterId);
 
+    /** Revision invalidation applies to every candidate from the obsolete extraction. */
+    int supersedeCandidatesBySource(@Param("chapterId") Long chapterId);
+
     // ---- current_state ----
     void upsertCurrentState(CurrentState s);
 

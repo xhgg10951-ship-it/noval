@@ -137,6 +137,38 @@ class MemoryProvenanceIntegrationTest {
         assertRelationship(storyId, "开始信任");
     }
 
+    @Test
+    void revisionSupersedesPendingCandidateSoDeletedFactCannotBeAppliedLater() throws Exception {
+        long storyId = createStory("pending candidate invalidation");
+        long stageId = createStage(storyId, 1);
+        when(aiServiceClient.generateChapter(any(GenerateChapterRequest.class)))
+                .thenReturn(new GenerateChapterResponse(
+                        "旧线索", "林夜发现旧线索刻在墙上。", "林夜发现旧线索。"));
+        when(aiServiceClient.extractMemory(any(ExtractMemoryRequest.class)))
+                .thenAnswer(invocation -> {
+                    String content = invocation.getArgument(0, ExtractMemoryRequest.class)
+                            .chapterContent();
+                    if (content.contains("旧线索")) {
+                        return extracted(new ExtractMemoryResponse.MemoryCandidate(
+                                "PLOT_FACT", "旧线索", null, "墙上刻有旧线索",
+                                "REVIEW", "旧线索刻在墙上", 4, "STORY"));
+                    }
+                    return extracted();
+                });
+        stubSummaryRefresh();
+
+        long chapterId = generateChapter(stageId);
+        var oldCandidate = memoryService.listPending(storyId).get(0);
+
+        editChapter(chapterId, "林夜检查空墙后离开。");
+
+        assertThat(memoryService.getCandidate(oldCandidate.getId()).getProcessingStatus())
+                .isEqualTo("SUPERSEDED");
+        assertThat(memoryService.listPending(storyId)).isEmpty();
+        mockMvc.perform(post("/api/memory/candidates/{id}/apply", oldCandidate.getId()))
+                .andExpect(status().isConflict());
+    }
+
     private long createStory(String name) throws Exception {
         MvcResult result = mockMvc.perform(post("/api/stories")
                         .contentType(MediaType.APPLICATION_JSON)

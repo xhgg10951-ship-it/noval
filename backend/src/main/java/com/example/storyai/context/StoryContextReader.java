@@ -532,6 +532,7 @@ public class StoryContextReader {
         for (MemoryCandidate candidate : candidates) {
             if (candidate == null
                     || !Objects.equals(chapterId, candidate.getSourceChapterId())
+                    || "SUPERSEDED".equals(candidate.getProcessingStatus())
                     || !MemoryTypes.TRANSIENT_DETAIL.equals(candidate.getType())
                     || candidate.getImportance() > 2
                     || !("IGNORE".equals(candidate.getSuggestedAction())

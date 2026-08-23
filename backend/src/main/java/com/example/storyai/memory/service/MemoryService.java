@@ -52,6 +52,11 @@ public class MemoryService {
         return memoryMapper.findAppliedCandidatesBySource(chapterId);
     }
 
+    @Transactional
+    public int supersedeCandidatesBySource(Long chapterId) {
+        return memoryMapper.supersedeCandidatesBySource(chapterId);
+    }
+
     /** TASK-148: removes one exact current-state slot. */
     @Transactional
     public int deleteCurrentStateSlot(Long storyId, String category, String subject, String field) {

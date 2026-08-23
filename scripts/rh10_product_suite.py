@@ -252,6 +252,11 @@ class ProductSuite:
         self.finish_step_job(stage1["id"], 2)
         first_two = self.api("GET", f"/api/stages/{stage1['id']}/chapters")
         chapter2 = sorted(first_two, key=lambda c: c["chapterNumber"])[-1]
+        memory_before_edit = self.api("GET", f"/api/stories/{story_id}/memory")
+        old_candidate_ids = {
+            c["id"] for c in memory_before_edit["candidates"]
+            if c.get("sourceChapterId") == chapter2["id"]
+        }
 
         bread_sentence = "早餐时，林夜吃掉一块普通面包，只是填饱肚子，随后不再关注它。"
         clean_chapter2 = remove_preexisting_bread(chapter2["content"])
@@ -333,13 +338,27 @@ class ProductSuite:
             and c.get("importance") == 1
             and c.get("scope") == "CHAPTER"
             and c.get("suggestedAction") == "IGNORE"
+            and c.get("processingStatus") == "IGNORED"
         )]
+        old_candidates = [
+            c for c in memory_after_bread["candidates"]
+            if c["id"] in old_candidate_ids
+        ]
+        old_candidates_superseded = (
+            len(old_candidates) == len(old_candidate_ids) and all(
+            c.get("processingStatus") == "SUPERSEDED" and not c.get("applied")
+            for c in old_candidates
+            )
+        )
         later_bread_mentions = [c["content"].count("面包") for c in later_three]
         self.record_result(
             "AC-105", bool(exact_bread_candidates)
+            and old_candidates_superseded
             and sum(later_bread_mentions) == 0,
             breadCandidates=bread_candidates,
             exactClassificationCount=len(exact_bread_candidates),
+            oldCandidateCount=len(old_candidates),
+            oldCandidatesSuperseded=old_candidates_superseded,
             laterBreadMentions=later_bread_mentions,
         )
 

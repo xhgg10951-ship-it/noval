@@ -268,10 +268,13 @@ public class CandidateProcessingService {
                 removed += memoryService.deleteRelationshipSlotIfSource(
                         c.getStoryId(), a, b, c.getId());
             }
-            // audit trail: never re-apply an invalidated candidate
-            memoryService.updateCandidateStatus(c.getId(), "SUPERSEDED", false);
         }
-        log.info("Invalidated {} live-memory slot(s) derived from chapter {}", removed, chapterId);
+        // The revision invalidates the whole extraction, not just AUTO/APPLIED
+        // rows. Pending review candidates must also become non-actionable or an
+        // author could resurrect a fact already deleted from the current body.
+        int superseded = memoryService.supersedeCandidatesBySource(chapterId);
+        log.info("Invalidated {} live-memory slot(s) and superseded {} candidate(s) derived from chapter {}",
+                removed, superseded, chapterId);
         return removed;
     }
 }

@@ -1,0 +1,28 @@
+{
+  "runId": "rh10_qwen3.7-plus_a00279d_20260824_product",
+  "model": "qwen3.7-plus",
+  "mockLlm": false,
+  "productWired": true,
+  "backendBaseUrl": "http://127.0.0.1:8080",
+  "productCommit": "a00279d",
+  "promptVersion": "ai-service/app/prompts/builders.py@a00279d",
+  "storyIds": [
+    1729,
+    1730
+  ],
+  "targetCharacters": 3000,
+  "requiredLengthBand": [
+    2250,
+    3750
+  ],
+  "requiredAcceptances": [
+    "AC-101",
+    "AC-103",
+    "AC-104",
+    "AC-105",
+    "AC-106",
+    "AC-109",
+    "AC-114"
+  ],
+  "traceCount": 400
+}

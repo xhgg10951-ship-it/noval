@@ -73,6 +73,14 @@
         ORDER BY id ASC
     </select>
 
+    <update id="supersedeCandidatesBySource">
+        UPDATE memory_candidate
+        SET processing_status = 'SUPERSEDED', applied = 0,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE source_chapter_id = #{chapterId}
+          AND processing_status != 'SUPERSEDED'
+    </update>
+
     <!-- ============ current_state (upsert by slot) ============ -->
     <resultMap id="CurrentStateResult" type="com.example.storyai.memory.model.CurrentState">
         <id column="id" property="id"/>

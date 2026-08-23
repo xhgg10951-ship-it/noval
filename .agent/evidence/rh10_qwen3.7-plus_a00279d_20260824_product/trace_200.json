@@ -1,0 +1,19 @@
+{
+  "method": "POST",
+  "path": "/api/stages/1164/generate?mode=STEP",
+  "request": null,
+  "status": 200,
+  "durationSeconds": 0.031,
+  "response": {
+    "id": 512,
+    "stageId": 1164,
+    "mode": "STEP",
+    "currentPlanIndex": 0,
+    "total": 9,
+    "status": "PENDING",
+    "phase": "PLANNING",
+    "lastError": null,
+    "createdAt": "2026-08-24T00:48:59",
+    "updatedAt": "2026-08-24T00:48:59"
+  }
+}
