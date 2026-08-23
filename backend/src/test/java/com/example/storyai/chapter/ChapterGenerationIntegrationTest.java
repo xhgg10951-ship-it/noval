@@ -28,6 +28,8 @@ import com.example.storyai.ai.dto.GenerateChapterRequest;
 import com.example.storyai.ai.dto.GenerateChapterResponse;
 import com.example.storyai.ai.dto.PlanStageRequest;
 import com.example.storyai.ai.dto.PlanStageResponse;
+import com.example.storyai.memory.model.StoryMemory;
+import com.example.storyai.memory.service.MemoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -51,6 +53,9 @@ class ChapterGenerationIntegrationTest {
 
     @MockitoBean
     private AiServiceClient aiServiceClient;
+
+    @Autowired
+    private MemoryService memoryService;
 
     // ---- helpers ----
 
@@ -93,6 +98,20 @@ class ChapterGenerationIntegrationTest {
                 new com.example.storyai.ai.dto.ExtractMemoryResponse(java.util.List.of()));
     }
 
+    private void saveMemory(long storyId, String type, String subject,
+                            String description, int importance, String scope) {
+        StoryMemory memory = new StoryMemory();
+        memory.setStoryId(storyId);
+        memory.setType(type);
+        memory.setSubject(subject);
+        memory.setDescription(description);
+        memory.setEvidence(description);
+        memory.setImportance(importance);
+        memory.setScope(scope);
+        memory.setActive(true);
+        memoryService.saveStoryMemory(memory);
+    }
+
     // ---- AT-C01: generate next chapter persists and advances the plan goal ----
 
     @Test
@@ -132,6 +151,71 @@ class ChapterGenerationIntegrationTest {
         assertThat(sent.constraints()).hasSize(1);
         assertThat(sent.chapterGoal()).contains("第1章目标");
         assertThat(sent.chapterOrder()).isEqualTo(1);
+    }
+
+    // ---- RH-05 / HH-001: Writer memory is relevant to Arc + Stage + ChapterSpec ----
+
+    @Test
+    void writerMemorySelectionUsesArcStageAndChapterSpecBeforeHardCap() throws Exception {
+        Long storyId = createStory();
+        PlanStageResponse richPlan = new PlanStageResponse(1, java.util.List.of(
+                new PlanStageResponse.ChapterPlanItem(
+                        1,
+                        "艾琳在北境遗迹检查玉佩",
+                        "确认玉佩与月蚀教团的关联",
+                        3200,
+                        java.util.List.of("艾琳必须找到玉佩上的月蚀印记"),
+                        java.util.List.of("不得离开北境遗迹"),
+                        java.util.List.of("艾琳进入遗迹", "取出玉佩", "辨认月蚀印记"),
+                        "发现月蚀教团留下的新线索")));
+        when(aiServiceClient.planStage(any(PlanStageRequest.class))).thenReturn(richPlan);
+        stubWriter();
+        stubExtractor();
+
+        mockMvc.perform(post("/api/stories/{id}/arcs", storyId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"title":"月蚀卷","goal":"追查月蚀教团",\
+                                 "targetStartChapter":1,"targetEndChapter":20,"status":"ACTIVE"}
+                                """))
+                .andExpect(status().isCreated());
+
+        MvcResult created = mockMvc.perform(post("/api/stories/{id}/stages", storyId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"direction\":\"前往北境遗迹追踪月蚀教团\"}"))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long stageId = objectMapper.readTree(created.getResponse().getContentAsString())
+                .get("id").asLong();
+        mockMvc.perform(post("/api/stages/{id}/confirm", stageId)).andExpect(status().isOk());
+
+        saveMemory(storyId, "PLOT_FACT", "世界核心", "世界曾被两轮月亮照耀", 5, "STORY");
+        saveMemory(storyId, "PLOT_THREAD", "失踪信使", "信使仍未找到", 4, "ARC");
+        for (int i = 0; i < 22; i++) {
+            saveMemory(storyId, "PLOT_FACT", "无关人物" + i,
+                    "无关旧闻" + i, 3, "STORY");
+        }
+        // These arrive after more than twenty eligible rows. The old
+        // importance-only selector drops all of them before the Writer call.
+        saveMemory(storyId, "PLOT_FACT", "艾琳", "艾琳能辨认玉佩上的古代文字", 3, "STAGE");
+        saveMemory(storyId, "WORLD_RULE", "北境遗迹", "遗迹入口只在月光下开启", 3, "STAGE");
+        saveMemory(storyId, "FORESHADOWING", "月蚀教团", "教团在玉佩上留下月蚀印记", 3, "ARC");
+
+        mockMvc.perform(post("/api/stages/{id}/chapters", stageId))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<GenerateChapterRequest> captor =
+                ArgumentCaptor.forClass(GenerateChapterRequest.class);
+        verify(aiServiceClient).generateChapter(captor.capture());
+        var selected = captor.getValue().storyMemories();
+        assertThat(selected).hasSizeLessThanOrEqualTo(20);
+        assertThat(selected).extracting(GenerateChapterRequest.MemoryItem::description)
+                .contains(
+                        "世界曾被两轮月亮照耀",
+                        "信使仍未找到",
+                        "艾琳能辨认玉佩上的古代文字",
+                        "遗迹入口只在月光下开启",
+                        "教团在玉佩上留下月蚀印记");
     }
 
     // ---- next chapter picks the next pending plan (order 2) ----

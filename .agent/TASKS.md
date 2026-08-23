@@ -3296,19 +3296,19 @@ Frozen Requirement:
 
 Current Phase:
 
-`Release Hardening — RH-04 COMPLETE`
+`Release Hardening — RH-05 COMPLETE`
 
 Current Task:
 
-`RH-05 — Context Hardening (NEXT)`
+`RH-06 — Length + Job Safety (NEXT)`
 
 Task Status:
 
-`TODO`
+`IN_PROGRESS`
 
 Next Safe Action:
 
-> 从 RH-05 开始检查 Writer/Planner memory selection 与 Continuation Anchor 的真实 context wiring，先补 regression test。
+> 从 RH-06 开始检查 dynamic length floor、单 Stage active job guard 与 executor ownership，先补 regression test。
 
 ---
 
@@ -3500,15 +3500,43 @@ Real-LLM Semantic Verification: `NOT_REQUIRED`
 
 ## RH-05 — Context Hardening
 
-Status: `TODO`
+Status: `DONE`
 
 Scope: HH-001 / HH-002 / HH-003
 
 Dependencies: RH-04
 
+Implementation:
+
+- Writer selector now receives Current Stage and ChapterSpec, resolves Current
+  Arc for the next story chapter, then deterministically prioritizes importance
+  5, active PLOT_THREAD/FORESHADOWING, direct structured-text relevance, and
+  source-backed current scope before the unchanged cap of 20.
+- Planner excludes inactive, TRANSIENT_DETAIL and importance <= 2 memories,
+  orders by importance and caps the request at 30.
+- Continuation Anchor reads `CURRENT_GOAL`; `activeCharacters` comes only from
+  relationship endpoints, and remains empty when no reliable character source
+  exists.
+
+Regression Evidence:
+
+- Before fix, Writer dropped three Arc/Stage/ChapterSpec-relevant facts after
+  the first 20 eligible rows.
+- Before fix, Planner received 39 memories including inactive, transient and
+  low-importance noise.
+- Before fix, `currentImmediateGoal` was null and StoryMemory subjects such as
+  玉佩/魔力/冒险者公会 were treated as people.
+
+Engineering Verification: `PASSED`
+
+- Focused `ChapterGenerationIntegrationTest` + `MemoryV2IntegrationTest`: 12/12
+- Expanded context/memory/planner/assistance integration suite: 21/21
+
+Real-LLM Semantic Verification: `NOT_REQUIRED` (final qwen3.7-plus suite is RH-10)
+
 ## RH-06 — Length + Job Safety
 
-Status: `TODO`
+Status: `IN_PROGRESS`
 
 Scope: HH-004 / HH-005 / HH-006 / AC-H07 / AC-H08
 

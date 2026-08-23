@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`RELEASE HARDENING — RH-04 COMPLETE`
+`RELEASE HARDENING — RH-05 COMPLETE`
 
 Current Task:
 
-`RH-05 — Context Hardening (NEXT)`
+`RH-06 — Length + Job Safety (NEXT)`
 
 Task Status:
 
@@ -70,6 +70,16 @@ Task Evidence:
 - AC-H04/H05/H06 Engineering Verification: PASSED — frontend Vitest 5/5,
   production build PASSED, backend Pause/Stop checkpoint regressions 2/2.
 - AC-H04/H05/H06 Real-LLM Semantic Verification: NOT_REQUIRED.
+- RH-05 DONE (2026-08-23) — Writer selection now ranks the existing eligible
+  memories with Current Arc, Current Stage, full ChapterSpec, active narrative
+  threads and source-backed current scope before the unchanged hard cap of 20;
+  Planner memory is filtered and capped at 30; Continuation Anchor reads
+  CURRENT_GOAL and derives characters only from relationship state.
+- RH-05 Engineering Verification: PASSED — the three regressions failed before
+  the fix, then the focused suites passed 12/12 and the expanded context/memory/
+  planning/assistance suites passed 21/21.
+- RH-05 Real-LLM Semantic Verification: NOT_REQUIRED here (deterministic context
+  selection/wiring; final semantic behavior is re-run at RH-10).
 - Historical TASK-101~179 remain implementation history only and do not override
   the Release Hardening gate.
 
@@ -932,7 +942,7 @@ repository is currently:
 
 Release verdict:
 
-`NOT ACCEPTED — RH-05 through RH-10 remain; RH-11 is gated`
+`NOT ACCEPTED — RH-06 through RH-10 remain; RH-11 is gated`
 
 Hardening progress:
 
@@ -941,13 +951,13 @@ RH-01 DONE — AC-H01 PASSED (engineering)
 RH-02 DONE — AC-H02 PASSED (engineering)
 RH-03 DONE — AC-H03 PASSED (engineering)
 RH-04 DONE — AC-H04/H05/H06 PASSED (engineering)
-RH-05 NEXT
-RH-06 TODO
+RH-05 DONE — HH-001/HH-002/HH-003 PASSED (engineering)
+RH-06 NEXT
 RH-07 TODO
 RH-08 TODO
 RH-09 TODO
 RH-10 TODO — final qwen3.7-plus semantic suite
-RH-11 BLOCKED BY RH-05~RH-10
+RH-11 BLOCKED BY RH-06~RH-10
 ```
 
 RH-01 verification details:
@@ -1019,6 +1029,26 @@ PASSED
 
 Real-LLM Semantic Verification:
 NOT_REQUIRED
+```
+
+RH-05 verification details:
+
+```text
+Regression before fix:
+- Writer relevant Arc/Stage/ChapterSpec memories were dropped behind the first
+  20 eligible rows.
+- Planner received 39 rows including inactive/transient/low-importance noise.
+- Continuation Anchor returned null CURRENT_GOAL and treated StoryMemory
+  subjects as characters.
+
+Engineering Verification:
+PASSED
+- Focused ChapterGenerationIntegrationTest + MemoryV2IntegrationTest: 12/12
+- Expanded assistance/chapter/memory/planner suite: 21/21
+- Writer hard cap remains 20; Planner cap is 30
+
+Real-LLM Semantic Verification:
+NOT_REQUIRED (final qwen3.7-plus semantic rerun is RH-10)
 ```
 
 Core principles:

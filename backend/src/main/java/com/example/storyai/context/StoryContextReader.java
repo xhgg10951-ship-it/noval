@@ -1,21 +1,28 @@
 package com.example.storyai.context;
 
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import com.example.storyai.ai.dto.GenerateChapterRequest;
 import com.example.storyai.ai.dto.PlanStageRequest;
+import com.example.storyai.arc.model.Arc;
 import com.example.storyai.arc.service.ArcService;
 import com.example.storyai.chapter.model.Chapter;
 import com.example.storyai.chapter.service.ChapterService;
 import com.example.storyai.memory.model.CurrentState;
+import com.example.storyai.memory.model.MemoryTypes;
 import com.example.storyai.memory.model.RelationshipState;
 import com.example.storyai.memory.model.StoryMemory;
 import com.example.storyai.memory.service.MemoryService;
+import com.example.storyai.stage.model.ChapterPlan;
 import com.example.storyai.stage.model.Stage;
 import com.example.storyai.stage.service.StageService;
 import com.example.storyai.story.model.StoryConstraint;
@@ -96,9 +103,19 @@ public class StoryContextReader {
         List<StoryMemory> memories = memoryService.getStoryMemories(storyId);
         if (memories == null) return List.of();
         return memories.stream()
+                .filter(m -> m != null && m.isActive())
+                .filter(m -> !MemoryTypes.TRANSIENT_DETAIL.equals(m.getType()))
+                .filter(m -> m.getImportance() > 2)
+                .sorted(Comparator
+                        .comparingInt(StoryMemory::getImportance).reversed()
+                        .thenComparing(m -> m.getId() == null ? Long.MAX_VALUE : m.getId()))
+                .limit(PLANNER_MEMORY_CAP)
                 .map(m -> new PlanStageRequest.MemoryItem(m.getType(), m.getSubject(), m.getDescription()))
                 .toList();
     }
+
+    /** RH-05 / HH-002: Planner context stays useful and predictably bounded. */
+    private static final int PLANNER_MEMORY_CAP = 30;
 
     /**
      * Story memories mapped to the Writer request shape (see
@@ -116,15 +133,35 @@ public class StoryContextReader {
      * No RAG / embeddings: structured selection only.
      */
     public List<GenerateChapterRequest.MemoryItem> getWriterMemoryItems(Long storyId) {
+        return getWriterMemoryItems(storyId, null, null);
+    }
+
+    /**
+     * RH-05 / HH-001 — deterministic structured relevance selection.
+     * Uses only Arc, Stage, ChapterSpec and the existing relational memory
+     * metadata; no embeddings or RAG are involved.
+     */
+    public List<GenerateChapterRequest.MemoryItem> getWriterMemoryItems(
+            Long storyId, Stage stage, ChapterPlan plan) {
         List<StoryMemory> memories = memoryService.getStoryMemories(storyId);
         if (memories == null) return List.of();
 
+        int nextChapterNumber = chapterService.nextChapterNumber(storyId);
+        Arc arc = arcService.findCurrent(storyId, nextChapterNumber);
+        String selectionContext = writerSelectionContext(arc, stage, plan);
+        List<Chapter> chapters = chapterService.listByStory(storyId);
+        Map<Long, Chapter> sourceChapters = chapters == null ? Map.of() : chapters.stream()
+                .filter(c -> c.getId() != null)
+                .collect(Collectors.toMap(Chapter::getId, c -> c));
+        int currentChapterNumber = Math.max(0, nextChapterNumber - 1);
+
         List<StoryMemory> selected = memories.stream()
                 .filter(m -> m != null && m.isActive())
-                .filter(m -> !com.example.storyai.memory.model.MemoryTypes.TRANSIENT_DETAIL
-                        .equals(m.getType()))
+                .filter(m -> !MemoryTypes.TRANSIENT_DETAIL.equals(m.getType()))
                 .filter(m -> m.getImportance() > 2)
-                .sorted(Comparator.comparingInt(StoryMemory::getImportance).reversed())
+                .sorted((left, right) -> compareWriterMemories(
+                        left, right, selectionContext, stage, arc,
+                        sourceChapters, currentChapterNumber))
                 .limit(WRITER_MEMORY_CAP)
                 .toList();
         return selected.stream()
@@ -134,6 +171,109 @@ public class StoryContextReader {
 
     /** TASK-164: hard bound on how many memories reach the Writer. */
     private static final int WRITER_MEMORY_CAP = 20;
+
+    private int compareWriterMemories(StoryMemory left,
+                                      StoryMemory right,
+                                      String selectionContext,
+                                      Stage stage,
+                                      Arc arc,
+                                      Map<Long, Chapter> sourceChapters,
+                                      int currentChapterNumber) {
+        int compared = Boolean.compare(right.getImportance() == 5, left.getImportance() == 5);
+        if (compared != 0) return compared;
+        compared = Boolean.compare(isActiveNarrativeThread(right), isActiveNarrativeThread(left));
+        if (compared != 0) return compared;
+        compared = Integer.compare(
+                relevanceScore(right, selectionContext),
+                relevanceScore(left, selectionContext));
+        if (compared != 0) return compared;
+        compared = Integer.compare(
+                currentScopeScore(right, stage, arc, sourceChapters, currentChapterNumber),
+                currentScopeScore(left, stage, arc, sourceChapters, currentChapterNumber));
+        if (compared != 0) return compared;
+        compared = Integer.compare(right.getImportance(), left.getImportance());
+        if (compared != 0) return compared;
+        long leftId = left.getId() == null ? Long.MAX_VALUE : left.getId();
+        long rightId = right.getId() == null ? Long.MAX_VALUE : right.getId();
+        return Long.compare(leftId, rightId);
+    }
+
+    private boolean isActiveNarrativeThread(StoryMemory memory) {
+        return MemoryTypes.PLOT_THREAD.equals(memory.getType())
+                || MemoryTypes.FORESHADOWING.equals(memory.getType());
+    }
+
+    private int relevanceScore(StoryMemory memory, String selectionContext) {
+        if (selectionContext.isEmpty()) return 0;
+        int score = 0;
+        String subject = normalizeSelectionText(memory.getSubject());
+        if (subject.length() >= 2 && selectionContext.contains(subject)) {
+            score += 4;
+        }
+        String description = memory.getDescription();
+        if (description != null) {
+            for (String phrase : description.split("[\\s，。；、,:：！？]+")) {
+                String normalized = normalizeSelectionText(phrase);
+                if (normalized.length() >= 2 && selectionContext.contains(normalized)) {
+                    score += 1;
+                    break;
+                }
+            }
+        }
+        return score;
+    }
+
+    private int currentScopeScore(StoryMemory memory,
+                                  Stage stage,
+                                  Arc arc,
+                                  Map<Long, Chapter> sourceChapters,
+                                  int currentChapterNumber) {
+        if ("STORY".equalsIgnoreCase(memory.getScope())) return 1;
+        Chapter source = memory.getSourceChapterId() == null
+                ? null : sourceChapters.get(memory.getSourceChapterId());
+        if (source == null) return 0;
+        if ("CHAPTER".equalsIgnoreCase(memory.getScope())
+                && source.getChapterNumber() == currentChapterNumber) {
+            return 4;
+        }
+        if ("STAGE".equalsIgnoreCase(memory.getScope())
+                && stage != null && Objects.equals(source.getStageId(), stage.getId())) {
+            return 3;
+        }
+        if ("ARC".equalsIgnoreCase(memory.getScope()) && arc != null
+                && source.getChapterNumber() >= arc.getTargetStartChapter()
+                && source.getChapterNumber() <= arc.getTargetEndChapter()) {
+            return 2;
+        }
+        return 0;
+    }
+
+    private String writerSelectionContext(Arc arc, Stage stage, ChapterPlan plan) {
+        StringBuilder context = new StringBuilder();
+        if (arc != null) {
+            appendSelectionText(context, arc.getTitle());
+            appendSelectionText(context, arc.getGoal());
+        }
+        if (stage != null) appendSelectionText(context, stage.getDirection());
+        if (plan != null) {
+            appendSelectionText(context, plan.getGoal());
+            appendSelectionText(context, plan.getExpectedProgress());
+            appendSelectionText(context, plan.getMustAdvance());
+            appendSelectionText(context, plan.getMustNotDo());
+            appendSelectionText(context, plan.getStoryBeats());
+            appendSelectionText(context, plan.getEndingIntent());
+        }
+        return normalizeSelectionText(context.toString());
+    }
+
+    private void appendSelectionText(StringBuilder target, String value) {
+        if (value != null && !value.isBlank()) target.append(' ').append(value);
+    }
+
+    private String normalizeSelectionText(String value) {
+        return value == null ? "" : value.toLowerCase(Locale.ROOT)
+                .replaceAll("[\\s\\p{Punct}，。；、：！？]+", "");
+    }
 
     // ---- relationships ----
 
@@ -312,19 +452,20 @@ public class StoryContextReader {
                 if (location == null && "LOCATION".equalsIgnoreCase(s.getCategory())) {
                     location = s.getValue();
                 }
-                if (immediateGoal == null && "GOAL".equalsIgnoreCase(s.getCategory())) {
+                if (immediateGoal == null && "CURRENT_GOAL".equalsIgnoreCase(s.getCategory())) {
                     immediateGoal = s.getValue();
                 }
             }
         }
-        List<StoryMemory> memories = memoryService.getStoryMemories(storyId);
-        if (memories != null) {
-            List<String> chars = memories.stream()
-                    .filter(m -> m != null && m.getSubject() != null && !m.getSubject().isBlank())
-                    .map(StoryMemory::getSubject)
-                    .distinct()
-                    .toList();
-            if (!chars.isEmpty()) activeCharacters = chars;
+        List<RelationshipState> relationships = memoryService.getRelationships(storyId);
+        if (relationships != null) {
+            Set<String> characters = new LinkedHashSet<>();
+            for (RelationshipState relationship : relationships) {
+                if (relationship == null) continue;
+                addReliableCharacter(characters, relationship.getSubjectA());
+                addReliableCharacter(characters, relationship.getSubjectB());
+            }
+            activeCharacters = List.copyOf(characters);
         }
 
         return new PlanStageRequest.ContinuationAnchor(
@@ -335,6 +476,12 @@ public class StoryContextReader {
                 lastSummary,
                 lastEnding
         );
+    }
+
+    private void addReliableCharacter(Set<String> characters, String subject) {
+        if (subject != null && !subject.isBlank() && !"(story)".equalsIgnoreCase(subject)) {
+            characters.add(subject);
+        }
     }
 
     /**

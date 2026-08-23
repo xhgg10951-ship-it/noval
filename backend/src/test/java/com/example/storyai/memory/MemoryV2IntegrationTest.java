@@ -18,6 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.storyai.ai.AiServiceClient;
 import com.example.storyai.chapter.model.MemoryExtractionStatus;
 import com.example.storyai.memory.model.MemoryCandidate;
+import com.example.storyai.memory.model.CurrentState;
+import com.example.storyai.memory.model.RelationshipState;
+import com.example.storyai.memory.model.StoryMemory;
 import com.example.storyai.memory.service.CandidateProcessingService;
 import com.example.storyai.memory.service.MemoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -197,6 +200,75 @@ class MemoryV2IntegrationTest {
 
         long breadMentions = countBreadInWriterRequest(storyId);
         assertThat(breadMentions).isZero(); // the writer literally never sees "bread"
+    }
+
+    // ---- RH-05 / HH-002: Planner receives a filtered, bounded memory set ----
+
+    @Test
+    void plannerSelectionFiltersNoiseAndHasABoundedCap() throws Exception {
+        long storyId = createStory();
+        for (int i = 0; i < 35; i++) {
+            saveStoryMemory(storyId, "PLOT_FACT", "人物" + i,
+                    "可用事实" + i, 3, "STORY", true);
+        }
+        saveStoryMemory(storyId, "PLOT_FACT", "核心", "必须保留的核心事实", 5, "STORY", true);
+        saveStoryMemory(storyId, "PLOT_FACT", "旧闻", "已经失效的事实", 5, "STORY", false);
+        saveStoryMemory(storyId, "TRANSIENT_DETAIL", "早餐", "普通面包", 5, "CHAPTER", true);
+        saveStoryMemory(storyId, "WORLD_RULE", "噪声", "低重要度事实", 2, "STORY", true);
+
+        var selected = contextReader.getStoryMemoryItems(storyId);
+        assertThat(selected).hasSizeLessThanOrEqualTo(30);
+        assertThat(selected).extracting(
+                        com.example.storyai.ai.dto.PlanStageRequest.MemoryItem::description)
+                .contains("必须保留的核心事实")
+                .doesNotContain("已经失效的事实", "普通面包", "低重要度事实");
+    }
+
+    // ---- RH-05 / HH-003: continuation anchor uses semantic state categories ----
+
+    @Test
+    void continuationAnchorReadsCurrentGoalAndOnlyReliableCharacters() throws Exception {
+        long storyId = createStory();
+
+        CurrentState goal = new CurrentState();
+        goal.setStoryId(storyId);
+        goal.setCategory("CURRENT_GOAL");
+        goal.setSubject("林夜");
+        goal.setField("goal");
+        goal.setValue("救出被困的艾琳");
+        memoryService.upsertCurrentState(goal);
+
+        RelationshipState relationship = new RelationshipState();
+        relationship.setStoryId(storyId);
+        relationship.setSubjectA("林夜");
+        relationship.setSubjectB("艾琳");
+        relationship.setDescription("并肩调查失踪案");
+        memoryService.upsertRelationship(relationship);
+
+        saveStoryMemory(storyId, "PLOT_FACT", "玉佩", "玉佩刻有月蚀印记", 4, "ARC", true);
+        saveStoryMemory(storyId, "WORLD_RULE", "魔力", "魔力会随潮汐变化", 4, "STORY", true);
+        saveStoryMemory(storyId, "PLOT_FACT", "冒险者公会", "公会位于城北", 4, "STAGE", true);
+
+        var anchor = contextReader.buildContinuationAnchor(storyId, 800);
+        assertThat(anchor.currentImmediateGoal()).isEqualTo("救出被困的艾琳");
+        assertThat(anchor.activeCharacters()).containsExactlyInAnyOrder("林夜", "艾琳");
+        assertThat(anchor.activeCharacters())
+                .doesNotContain("玉佩", "魔力", "冒险者公会");
+    }
+
+    private void saveStoryMemory(long storyId, String type, String subject,
+                                 String description, int importance, String scope,
+                                 boolean active) {
+        StoryMemory memory = new StoryMemory();
+        memory.setStoryId(storyId);
+        memory.setType(type);
+        memory.setSubject(subject);
+        memory.setDescription(description);
+        memory.setEvidence(description);
+        memory.setImportance(importance);
+        memory.setScope(scope);
+        memory.setActive(active);
+        memoryService.saveStoryMemory(memory);
     }
 
     private long countBreadInWriterRequest(long storyId) {

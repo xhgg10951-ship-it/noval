@@ -356,7 +356,7 @@ public class ChapterGenerationService {
                 plan.getGoal(),
                 plan.getChapterOrder(),
                 contextReader.getWriterStateItems(storyId),
-                contextReader.getWriterMemoryItems(storyId),
+                contextReader.getWriterMemoryItems(storyId, stage, plan),
                 contextReader.getRelationshipItems(storyId),
                 recentContext == null ? "" : recentContext,
                 plan.getTargetCharacters(),
