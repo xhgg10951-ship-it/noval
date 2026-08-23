@@ -248,7 +248,8 @@ class ReplanRemainingIntegrationTest {
         assertThat(superseded).isEqualTo(2);  // old remaining — superseded, NOT deleted
         assertThat(activeV2).isEqualTo(2);    // new remainder — version 2
 
-        // new-version plans continue AFTER the highest existing order (no overlap)
+        // new-version plans continue after the latest COMPLETED chapter; overlap
+        // with superseded historical orders is intentionally separated by version.
         for (JsonNode p : plans) {
             if (p.get("planVersion").asInt() == 2) {
                 assertThat(p.get("chapterOrder").asInt()).isGreaterThan(maxOldOrder);
@@ -296,6 +297,83 @@ class ReplanRemainingIntegrationTest {
         assertThat(c3).contains("新方向");
         assertThat(c4).contains("新方向");
         org.junit.jupiter.api.Assertions.assertNotNull(stageBefore);
+    }
+
+    // ---- RH-03 / AC-H03: plan order is the real next chapter number ----
+
+    @Test
+    void replanRemainingUsesNextRealChapterNumberAcrossVersionHistory() throws Exception {
+        Long storyId = createStory();
+        long stageId = createActiveStage(storyId, 9);
+
+        // Complete real Chapters 1..3 while V1 plans 4..9 remain active.
+        long jobId = startStep(stageId);
+        JsonNode afterOne = awaitTerminal(jobId);
+        mockMvc.perform(post("/api/generation-jobs/{id}/continue", jobId))
+                .andExpect(status().isOk());
+        JsonNode afterTwo = awaitChangedTerminal(jobId, afterOne);
+        mockMvc.perform(post("/api/generation-jobs/{id}/continue", jobId))
+                .andExpect(status().isOk());
+        JsonNode afterThree = awaitChangedTerminal(jobId, afterTwo);
+        assertThat(afterThree.get("status").asText()).isEqualTo("PAUSED");
+
+        when(aiServiceClient.replanStage(any(PlanStageRequest.class)))
+                .thenReturn(remainingPlanOf(3, "V2新方向"));
+        mockMvc.perform(post("/api/stages/{id}/replan-remaining", stageId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"remainingChapterCount\":3}"))
+                .andExpect(status().isOk());
+
+        JsonNode replanned = getStageJson(stageId);
+        List<Integer> activeV2Orders = new java.util.ArrayList<>();
+        int completedV1 = 0;
+        int supersededV1 = 0;
+        for (JsonNode plan : replanned.get("plans")) {
+            int version = plan.get("planVersion").asInt();
+            String planStatus = plan.get("status").asText();
+            if (version == 1 && "COMPLETED".equals(planStatus)) {
+                completedV1++;
+            } else if (version == 1 && "SUPERSEDED".equals(planStatus)) {
+                supersededV1++;
+            } else if (version == 2 && "ACTIVE".equals(planStatus)) {
+                activeV2Orders.add(plan.get("chapterOrder").asInt());
+            }
+        }
+        assertThat(completedV1).isEqualTo(3);
+        assertThat(supersededV1).isEqualTo(6);
+        assertThat(activeV2Orders).containsExactly(4, 5, 6);
+
+        // Resume the same STEP job. The queue is DB-driven, so the new V2 plans
+        // produce the real Chapters 4..6 and then converge to COMPLETED.
+        mockMvc.perform(post("/api/generation-jobs/{id}/continue", jobId))
+                .andExpect(status().isOk());
+        JsonNode afterFour = awaitChangedTerminal(jobId, afterThree);
+        mockMvc.perform(post("/api/generation-jobs/{id}/continue", jobId))
+                .andExpect(status().isOk());
+        JsonNode afterFive = awaitChangedTerminal(jobId, afterFour);
+        mockMvc.perform(post("/api/generation-jobs/{id}/continue", jobId))
+                .andExpect(status().isOk());
+        JsonNode afterSix = awaitChangedTerminal(jobId, afterFive);
+        assertThat(afterSix.get("status").asText()).isEqualTo("COMPLETED");
+
+        JsonNode chapters = objectMapper.readTree(mockMvc.perform(
+                        get("/api/stages/{id}/chapters", stageId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse()
+                .getContentAsString(java.nio.charset.StandardCharsets.UTF_8));
+        List<Integer> chapterNumbers = new java.util.ArrayList<>();
+        for (JsonNode chapter : chapters) {
+            chapterNumbers.add(chapter.get("chapterNumber").asInt());
+        }
+        assertThat(chapterNumbers).containsExactly(1, 2, 3, 4, 5, 6);
+
+        org.mockito.ArgumentCaptor<GenerateChapterRequest> writerRequests =
+                org.mockito.ArgumentCaptor.forClass(GenerateChapterRequest.class);
+        org.mockito.Mockito.verify(aiServiceClient, org.mockito.Mockito.times(6))
+                .generateChapter(writerRequests.capture());
+        assertThat(writerRequests.getAllValues().stream()
+                .map(GenerateChapterRequest::chapterOrder)
+                .toList()).containsExactly(1, 2, 3, 4, 5, 6);
     }
 
     // ---- TASK-134 guard: wholesale replan is refused once generation started ----

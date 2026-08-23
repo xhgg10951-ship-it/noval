@@ -100,7 +100,7 @@ public class StagePlanningService {
      * completed plans preserved
      * old remaining → SUPERSEDED
      * current Story State + continuation context → Planner
-     * new-version remaining plans appended after the last existing order
+     * new-version remaining plans start at the next real story chapter number
      * </pre>
      *
      * @param stageId               target stage (must be ACTIVE or PAUSED)
@@ -161,11 +161,13 @@ public class StagePlanningService {
         }
         PlanStageResponse plan = callPlanner(request, true);
 
-        // Append the new remainder AFTER all existing orders and bump the version,
-        // so history keeps its original order and the active queue stays monotonic.
+        // RH-03: planVersion separates historical rows, so logical chapter order
+        // must not be shifted behind superseded history. Start the new remainder
+        // at the next real story chapter number (4 after Chapters 1..3), while V1
+        // superseded orders remain queryable as history.
         List<ChapterPlan> existing = stageService.getPlans(stageId);
-        int baseOrder = existing.stream()
-                .mapToInt(ChapterPlan::getChapterOrder).max().orElse(0);
+        Integer currentChapterNumber = contextReader.getCurrentChapterNumber(story.getId());
+        int baseOrder = currentChapterNumber == null ? 0 : currentChapterNumber;
         int newVersion = existing.stream()
                 .mapToInt(p -> p.getPlanVersion() == null ? 1 : p.getPlanVersion())
                 .max().orElse(1) + 1;
@@ -174,7 +176,7 @@ public class StagePlanningService {
         return stageService.replanRemaining(stageId, remainingChapterCount, shifted, newVersion);
     }
 
-    /** Re-numbers planner items to start after {@code baseOrder} (order preserved relatively). */
+    /** Re-numbers relative Planner items after the latest real chapter number. */
     private PlanStageResponse shiftOrders(PlanStageResponse plan, int baseOrder) {
         List<PlanStageResponse.ChapterPlanItem> shifted = new java.util.ArrayList<>();
         for (PlanStageResponse.ChapterPlanItem item : plan.chapterPlans()) {

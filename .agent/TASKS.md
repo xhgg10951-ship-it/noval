@@ -3296,11 +3296,11 @@ Frozen Requirement:
 
 Current Phase:
 
-`Release Hardening — RH-02 COMPLETE`
+`Release Hardening — RH-03 COMPLETE`
 
 Current Task:
 
-`RH-03 — Replan Logical Order (NEXT)`
+`RH-04 — Generation UI Completion (NEXT)`
 
 Task Status:
 
@@ -3308,7 +3308,7 @@ Task Status:
 
 Next Safe Action:
 
-> 从 RH-03 开始检查真实 Replan Remaining logical chapter order，先补 regression test。
+> 从 RH-04 开始检查 GenerationPanel polling / pause / stop 的真实前端实现，先补 regression test。
 
 ---
 
@@ -3437,11 +3437,32 @@ Real-LLM Semantic Verification: `NOT_REQUIRED`
 
 ## RH-03 — Replan Logical Order
 
-Status: `TODO`
+Status: `DONE`
 
 Scope: HB-003 / AC-H03
 
 Dependencies: RH-02
+
+Implementation:
+
+- Replan Remaining no longer appends fresh V2 orders after the maximum V1
+  historical order.
+- Fresh relative Planner items are shifted from the current real story chapter
+  number; planVersion/status/active preserve overlapping superseded history.
+
+Regression Evidence:
+
+- Initial V1 has orders 1..9; Chapters 1..3 are generated; V1 orders 4..9 become
+  SUPERSEDED; the three V2 active plans are exactly 4,5,6.
+- Continuing the same STEP job generates Chapters 4,5,6 and captured Writer
+  requests receive chapterOrder 4,5,6.
+- Before fix the regression saw V2 orders 10,11,12.
+
+Engineering Verification: `PASSED`
+
+- Backend `ReplanRemainingIntegrationTest`: 7/7 PASSED
+
+Real-LLM Semantic Verification: `NOT_REQUIRED` (AC-106 runs again at RH-10)
 
 ## RH-04 — Generation UI Completion
 

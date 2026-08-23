@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`RELEASE HARDENING — RH-02 COMPLETE`
+`RELEASE HARDENING — RH-03 COMPLETE`
 
 Current Task:
 
-`RH-03 — Replan Logical Order (NEXT)`
+`RH-04 — Generation UI Completion (NEXT)`
 
 Task Status:
 
@@ -56,6 +56,14 @@ Task Evidence:
   Revision integration tests passed 16/16.
 - AC-H02 Real-LLM Semantic Verification: NOT_REQUIRED (deterministic persistence
   and invalidation behavior).
+- RH-03 DONE (2026-08-23) — Replan Remaining now offsets fresh relative Planner
+  items from the latest real story chapter, not the maximum superseded plan
+  order; planVersion remains the history separator.
+- AC-H03 Engineering Verification: PASSED — the new 9-plan regression failed
+  with V2 orders 10/11/12 before the fix and passed with active orders 4/5/6,
+  generated chapter numbers 4/5/6, and Writer chapterOrder 4/5/6 after it.
+- AC-H03 Real-LLM Semantic Verification: NOT_REQUIRED here; final AC-106 semantic
+  behavior is re-run with qwen3.7-plus at RH-10.
 - Historical TASK-101~179 remain implementation history only and do not override
   the Release Hardening gate.
 
@@ -918,22 +926,22 @@ repository is currently:
 
 Release verdict:
 
-`NOT ACCEPTED — RH-03 through RH-10 remain; RH-11 is gated`
+`NOT ACCEPTED — RH-04 through RH-10 remain; RH-11 is gated`
 
 Hardening progress:
 
 ```text
 RH-01 DONE — AC-H01 PASSED (engineering)
 RH-02 DONE — AC-H02 PASSED (engineering)
-RH-03 NEXT
-RH-04 TODO
+RH-03 DONE — AC-H03 PASSED (engineering)
+RH-04 NEXT
 RH-05 TODO
 RH-06 TODO
 RH-07 TODO
 RH-08 TODO
 RH-09 TODO
 RH-10 TODO — final qwen3.7-plus semantic suite
-RH-11 BLOCKED BY RH-03~RH-10
+RH-11 BLOCKED BY RH-04~RH-10
 ```
 
 RH-01 verification details:
@@ -969,6 +977,23 @@ PASSED
 
 Real-LLM Semantic Verification:
 NOT_REQUIRED
+```
+
+RH-03 verification details:
+
+```text
+Regression before fix:
+ReplanRemainingIntegrationTest — 1 failure
+expected V2 orders [4,5,6], actual [10,11,12]
+
+Engineering Verification:
+PASSED
+- ReplanRemainingIntegrationTest: 7/7
+- AC-H03 generated Chapters 1..6 and captured Writer chapterOrder 1..6
+- V1 orders 4..9 remain queryable as SUPERSEDED history
+
+Real-LLM Semantic Verification:
+NOT_REQUIRED (AC-106 final semantic rerun is RH-10)
 ```
 
 Core principles:
