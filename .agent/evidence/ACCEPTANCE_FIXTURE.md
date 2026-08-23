@@ -9,7 +9,7 @@ Required model:     qwen3.7-plus (mock_llm=false)
 Prompt/code commit: recorded immediately before RH-10
 Branch:             v0.1.1-dev
 Database:           MySQL story_ai, migrations V1..V15
-Engineering suite:  must pass at RH-09 before this fixture runs
+Engineering suite:  PASSED at RH-09 (backend 70 · Python 14 · frontend 6/build)
 Release verdict:    NOT ACCEPTED until the complete RH-10 suite passes
 ```
 

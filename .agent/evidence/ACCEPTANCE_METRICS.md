@@ -4,7 +4,7 @@
 
 ```text
 Required final model: qwen3.7-plus
-Engineering suite:    PENDING RH-09
+Engineering suite:    PASSED RH-09 (backend 70 · Python 14 · frontend 6/build)
 Real-LLM suite:       NOT_RUN — PENDING RH-10
 Release verdict:      NOT ACCEPTED
 ```

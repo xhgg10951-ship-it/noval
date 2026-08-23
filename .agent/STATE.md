@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`RELEASE HARDENING — RH-08 COMPLETE`
+`RELEASE HARDENING — RH-09 COMPLETE`
 
 Current Task:
 
-`RH-09 — Full Engineering Verification (NEXT)`
+`RH-10 — Final qwen3.7-plus Semantic Suite (NEXT)`
 
 Task Status:
 
@@ -107,6 +107,14 @@ Task Evidence:
   failed at 0.1.0 before the fix then passed; Python mock suite passed 14/14
   even with fake ambient keys; frontend passed 6/6 and production build passed.
 - RH-08 Real-LLM Semantic Verification: NOT_REQUIRED (release hygiene only).
+- RH-09 DONE (2026-08-23) — the full deterministic engineering gate passed:
+  backend 70/70, Python 14/14 with ambient-key isolation, frontend 6/6 after
+  `npm ci`, and the production build. A disposable MySQL 8.4 instance accepted
+  V1..V15 in numeric order and produced 12 tables plus both provenance columns.
+- CI verification: all three workflow job command paths passed locally and the
+  workflow parsed with backend/frontend/python jobs. A hosted Actions run was
+  NOT_RUN because the local branch was not pushed; no remote-green claim is made.
+- RH-09 Real-LLM Semantic Verification: NOT_REQUIRED.
 - Historical TASK-101~179 remain implementation history only and do not override
   the Release Hardening gate.
 
@@ -972,7 +980,7 @@ repository is currently:
 
 Release verdict:
 
-`NOT ACCEPTED — RH-09 and RH-10 remain; RH-11 is gated`
+`NOT ACCEPTED — RH-10 remains; RH-11 is gated`
 
 Hardening progress:
 
@@ -985,8 +993,8 @@ RH-05 DONE — HH-001/HH-002/HH-003 PASSED (engineering)
 RH-06 DONE — AC-H07/H08 PASSED (engineering)
 RH-07 DONE — AC-H09 PASSED (engineering)
 RH-08 DONE — HR-001/HR-002/HR-003/HR-004 PASSED (engineering)
-RH-09 NEXT
-RH-10 TODO — final qwen3.7-plus semantic suite
+RH-09 DONE — full engineering gate PASSED
+RH-10 NEXT — final qwen3.7-plus semantic suite
 RH-11 BLOCKED BY RH-08~RH-10
 ```
 

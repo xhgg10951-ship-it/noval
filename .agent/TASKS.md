@@ -3302,11 +3302,11 @@ Frozen Requirement:
 
 Current Phase:
 
-`Release Hardening — RH-08 COMPLETE`
+`Release Hardening — RH-09 COMPLETE`
 
 Current Task:
 
-`RH-09 — Full Engineering Verification (NEXT)`
+`RH-10 — Final qwen3.7-plus Semantic Suite (NEXT)`
 
 Task Status:
 
@@ -3314,7 +3314,7 @@ Task Status:
 
 Next Safe Action:
 
-> 运行 RH-09 全量后端、Python、前端与迁移验证；通过前不得进入 RH-10。
+> 按冻结 fixture 在 qwen3.7-plus 上运行完整 RH-10 Real-LLM Gate，并保存原始证据。
 
 ---
 
@@ -3645,13 +3645,28 @@ Real-LLM Semantic Verification: `NOT_REQUIRED`
 
 ## RH-09 — Full Engineering Verification
 
-Status: `IN_PROGRESS`
+Status: `DONE`
 
 Dependencies: RH-08
 
+Engineering Verification: `PASSED`
+
+- Backend full Maven suite: 70/70 PASSED
+- Python full pytest suite: 14/14 PASSED; fake ambient credentials were
+  deliberately present and the suite remained deterministic/mock
+- Frontend: `npm ci` PASSED, Vitest 6/6 PASSED, production build PASSED
+- Clean migration: disposable MySQL 8.4.9 accepted V1..V15 in numeric order;
+  result was 12 tables, two `source_candidate_id` columns, and zero backfilled
+  revision rows on the empty schema; the instance was shut down and removed
+- CI: workflow parsed with backend/frontend/python jobs and every job's command
+  path passed locally. Hosted Actions was NOT_RUN because the branch was not
+  pushed; this record does not claim a remote run.
+
+Real-LLM Semantic Verification: `NOT_REQUIRED`
+
 ## RH-10 — Final qwen3.7-plus Semantic Suite
 
-Status: `TODO`
+Status: `IN_PROGRESS`
 
 Dependencies: RH-09
 
