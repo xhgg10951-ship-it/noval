@@ -10,20 +10,21 @@ assistance, and polish.
 
 ```text
 Requirements:             FROZEN
-Implementation:           Feature Complete
-Release Hardening:        RH-01..RH-11 complete
-Engineering Verification: PASSED (backend 70 · Python 14 · frontend 6/build)
+Implementation:           Feature Complete, release repairs in progress
+Release Hardening:        RH-01..RH-07 complete; RH-08 active
+Engineering Verification: PARTIAL — per-RH suites green; RH-09 pending
 Required Final Model:     qwen3.7-plus
-Final Real-LLM Suite:     PASSED 7/7 (RH-10)
-Hosted CI:                PASSED (run 32643065616)
-v0.1.1 Verdict:           ACCEPTED
+Current Real-LLM Gate:    NOT RUN after reopened repairs; RH-10 pending
+Hosted CI:                NOT RUN for the current candidate; RH-09 pending
+Current Release Verdict:  NOT ACCEPTED
 ```
 
-RH-01 through RH-10 passed, including the full qwen3.7-plus semantic suite;
-RH-11 froze the verified release. The old TASK-179 verdict remains superseded
-by `V0.1.1_RELEASE_HARDENING.md`.
+The earlier RH-11 verdict was withdrawn after the functional re-audit at
+`36ac510`. The current `v0.1.1-dev` candidate must complete RH-08/RH-09, then
+pass a fresh product-wired qwen3.7-plus RH-10 run before RH-11 can accept it.
 
-Historical qwen3-8b results are retained as evidence only:
+Earlier qwen3-8b results and the pre-reopen qwen3.7-plus run are retained as
+historical evidence only:
 
 > **HISTORICAL / SUPERSEDED FOR FINAL RELEASE VERDICT**
 

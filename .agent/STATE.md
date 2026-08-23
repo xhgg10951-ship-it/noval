@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`RELEASE HARDENING REOPENED — RH-07 COMPLETE`
+`RELEASE HARDENING REOPENED — RH-08 COMPLETE`
 
 Current Task:
 
-`RH-08 — Release Hygiene Revalidation`
+`RH-09 — Full Engineering Verification`
 
 Task Status:
 
@@ -106,6 +106,17 @@ Task Evidence:
 - RH-07 Engineering Verification: PASSED — new/strengthened regressions 3/3;
   related backend Memory/Revision suites 21/21; frontend 8/8 and production
   build PASSED.
+- RH-08 COMPLETE (2026-08-23, reopened gate) — version/model metadata remains
+  v0.1.1/qwen3.7-plus and CI remains minimal. A new document regression first
+  failed because README and acceptance evidence still presented the withdrawn
+  pre-reopen RH-11 verdict as current. README, STATE, TASKS, metrics and fixture
+  now distinguish historical evidence from the current NOT ACCEPTED candidate;
+  current RH-10 run/commit/metrics are explicitly pending. RUN.md and CI apply
+  the additive V1..V16 chain.
+- RH-08 Engineering Verification: PASSED — hygiene regressions 2/2; backend
+  health/version 1/1; Python full deterministic suite 17/17; frontend 8/8 and
+  production build PASSED; CI YAML parsed with backend/frontend/python jobs.
+  Hosted CI is intentionally NOT_RUN until RH-09.
 
 - RH-01 DONE (2026-08-23) — regression first reproduced stale summary after
   Manual Edit; fixed Manual Edit summary refresh + automatic re-extract,
@@ -190,10 +201,12 @@ Task Evidence:
   2896/2828/3155/2874/2843 characters (5/5 in band) with zero exact duplicate
   long sentences; AC-105 produced exact transient classification and 0/3 later
   bread repetitions; all other frozen semantic gates passed.
-- RH-11 DONE (2026-08-23) — GitHub Actions run 32643065616 passed Python,
+- HISTORICAL PRE-REOPEN RH-11 (withdrawn 2026-08-23) — GitHub Actions run
+  32643065616 passed Python,
   frontend and backend jobs against RH-10 evidence commit 95908cc. RH-01~RH-10
   were audited in strict order, the evidence verifier passed 7/7, and the
-  release verdict is now ACCEPTED. Release source is identified by tag v0.1.1.
+  release verdict was ACCEPTED for that earlier candidate. The functional
+  re-audit withdrew that verdict; it does not apply to current `v0.1.1-dev`.
 - Historical TASK-101~179 remain implementation history only and do not override
   the Release Hardening gate.
 
@@ -1059,22 +1072,22 @@ repository is currently:
 
 Release verdict:
 
-`ACCEPTED — RH-01 through RH-11 complete`
+`NOT ACCEPTED — RH-08 active; RH-09/RH-10/RH-11 pending`
 
 Hardening progress:
 
 ```text
-RH-01 DONE — AC-H01 PASSED (engineering)
-RH-02 DONE — AC-H02 PASSED (engineering)
-RH-03 DONE — AC-H03 PASSED (engineering)
-RH-04 DONE — AC-H04/H05/H06 PASSED (engineering)
-RH-05 DONE — HH-001/HH-002/HH-003 PASSED (engineering)
-RH-06 DONE — AC-H07/H08 PASSED (engineering)
-RH-07 DONE — AC-H09 PASSED (engineering)
-RH-08 DONE — HR-001/HR-002/HR-003/HR-004 PASSED (engineering)
-RH-09 DONE — full engineering gate PASSED
-RH-10 DONE — qwen3.7-plus 7/7 PASSED
-RH-11 DONE — hosted CI PASSED; release frozen as ACCEPTED
+RH-01 REVALIDATED — AC-H01 PASSED (engineering)
+RH-02 REVALIDATED — AC-H02 PASSED (engineering)
+RH-03 REOPENED/DONE — logical Planner orders repaired
+RH-04 REOPENED/DONE — terminal UI refresh/STOPPED restart repaired
+RH-05 REOPENED/DONE — frozen Writer context repaired
+RH-06 REOPENED/DONE — length hierarchy and Job safety repaired
+RH-07 REOPENED/DONE — Memory review/invalidation guard repaired
+RH-08 ACTIVE — release documents and CI candidate reconciliation
+RH-09 PENDING — full engineering and clean-migration gate
+RH-10 PENDING — fresh qwen3.7-plus product-wired suite
+RH-11 PENDING — release verdict; ACCEPTED is forbidden before RH-10 passes
 ```
 
 RH-01 verification details:

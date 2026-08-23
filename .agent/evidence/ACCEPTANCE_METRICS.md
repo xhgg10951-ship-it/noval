@@ -4,11 +4,15 @@
 
 ```text
 Required final model: qwen3.7-plus
-Engineering suite:    PASSED RH-09 (backend 70 · Python 14 · frontend 6/build)
-Real-LLM suite:       PASSED RH-10 — 7/7 on qwen3.7-plus
-Hosted CI:            PASSED — run 32643065616 at evidence commit 95908cc
-Release verdict:      ACCEPTED — RH-11
+Engineering suite:    NOT RUN for current candidate — RH-09 pending
+Current RH-10 status:      NOT RUN after reopened functional repairs
+Hosted CI:            NOT RUN for current candidate
+Current release verdict:  NOT ACCEPTED
 ```
+
+The metrics below belong to the pre-reopen run at product commit `c5e53cc`.
+They are retained as historical comparison evidence and do not accept the
+current candidate.
 
 Run ID: `rh10_qwen3.7-plus_c5e53cc_20260823`
 
@@ -36,11 +40,12 @@ Raw evidence: `.agent/evidence/rh10_qwen3.7-plus_c5e53cc_20260823/`
 | Memory extraction failures | 0 |
 | Average AC-103 chapter generation latency | 34.63 seconds/chapter |
 
-## Historical qwen3-8b Record
+## Historical Records
 
 > **HISTORICAL / SUPERSEDED FOR FINAL RELEASE VERDICT**
 
-The 2026-08-22 qwen3-8b run is retained only for diagnosis. It recorded an
+The pre-reopen qwen3.7-plus run above and the 2026-08-22 qwen3-8b run are
+retained only for diagnosis. The qwen3-8b run recorded an
 AC-103 length pass rate of 0/5 at the frozen 2250-character lower bound, while
 the other exercised semantic checks passed. This evidence neither passes nor
 fails the required qwen3.7-plus RH-10 suite.

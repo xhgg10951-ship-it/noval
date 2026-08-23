@@ -3290,7 +3290,7 @@ AI Detection Bypass
 
 ---
 
-# 15. Current Starting Point
+# 15. Historical Pre-hardening Starting Point (Superseded)
 
 Current Version:
 
@@ -3302,15 +3302,15 @@ Frozen Requirement:
 
 Current Phase:
 
-`Release Hardening — RH-11 COMPLETE`
+`HISTORICAL — Release Hardening RH-11 COMPLETE before functional re-audit`
 
 Current Task:
 
-`NONE — v0.1.1 release frozen`
+`SUPERSEDED — see Post-release Functional Re-audit below`
 
 Task Status:
 
-`ACCEPTED`
+`HISTORICAL ACCEPTED — WITHDRAWN`
 
 Next Safe Action:
 
@@ -3681,7 +3681,7 @@ Real-LLM Semantic Verification: `PASSED`
 - AC-103: 5/5 in the 2250–3750 band; deterministic repetition review passed
 - Raw evidence and metrics saved in the run-specific evidence directory
 
-## RH-11 — Freeze v0.1.1 Release
+## Historical RH-11 — Freeze v0.1.1 Release (Withdrawn)
 
 Status: `DONE`
 
@@ -3697,7 +3697,8 @@ Engineering Verification: `PASSED`
 
 Real-LLM Semantic Verification: `PASSED` (RH-10 qwen3.7-plus 7/7)
 
-Release Verdict: `ACCEPTED`
+Historical Release Verdict: `ACCEPTED` (withdrawn by the functional re-audit
+below; not current)
 
 Release rule:
 
@@ -3930,6 +3931,43 @@ Real-LLM Semantic Verification: `NOT_REQUIRED` (review metadata and mutation
 guards are deterministic business behavior).
 
 Next active task: `RH-08 — Release Hygiene Revalidation`
+
+## RH-08 Reopened — Release Hygiene
+
+Status: `DONE`
+
+Observed regression before fix:
+
+- README and the active acceptance fixture/metrics still advertised the
+  withdrawn pre-reopen RH-11 `ACCEPTED` and 7/7 result as the current candidate,
+  even though RH-03 through RH-07 changed product code and require a fresh
+  engineering and qwen3.7-plus gate.
+- V16 was already added during RH-06; RUN.md and CI had to remain synchronized
+  with that additive migration chain.
+
+Fix:
+
+- README, STATE, TASKS, acceptance fixture and metrics now state the current
+  candidate is `NOT ACCEPTED`, RH-09/RH-10/RH-11 remain pending, and current
+  run ID/product commit/metrics may only be filled by the new RH-10 run.
+- Pre-reopen qwen3.7-plus and qwen3-8b evidence is preserved but explicitly
+  marked historical/withdrawn rather than deleted or reused.
+- RUN.md and minimal CI both apply V1 through V16; backend/frontend/Python
+  version and release-model metadata remain v0.1.1/qwen3.7-plus.
+
+Engineering Verification: `PASSED`
+
+- New release-document regression failed before reconciliation, then the two
+  hygiene checks passed 2/2.
+- Backend health/version: 1/1 PASSED.
+- Python deterministic suite: 17/17 PASSED.
+- Frontend Vitest: 8/8 PASSED; production build PASSED.
+- GitHub Actions YAML parsed with backend/frontend/python jobs. Hosted CI is
+  NOT_RUN here; it belongs to RH-09 for the current commit.
+
+Real-LLM Semantic Verification: `NOT_REQUIRED` (RH-10 remains pending).
+
+Next active task: `RH-09 — Full Engineering Verification`
 
 
 

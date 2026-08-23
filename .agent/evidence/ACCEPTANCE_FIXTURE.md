@@ -6,13 +6,14 @@
 
 ```text
 Required model:     qwen3.7-plus (mock_llm=false)
-Prompt/code commit: c5e53cc
+Prompt/code commit: PENDING RH-10
 Branch:             v0.1.1-dev
-Database:           MySQL story_ai, migrations V1..V15
-Engineering suite:  PASSED at RH-09 (backend 70 · Python 14 · frontend 6/build)
-Run ID:             rh10_qwen3.7-plus_c5e53cc_20260823
-Hosted CI:          PASSED, run 32643065616, evidence commit 95908cc
-Release verdict:    ACCEPTED at RH-11
+Database:           MySQL story_ai
+Migrations:         V1..V16
+Engineering suite:  PENDING RH-09
+Run ID:             PENDING RH-10
+Hosted CI:          PENDING current candidate
+Release verdict:    NOT ACCEPTED
 ```
 
 ## Fixed Story Settings
@@ -39,12 +40,13 @@ Stage direction:         第二天前往冒险者公会入会并接取委托：�
 - AC-114 600-chapter pace guard
 - release-hardening semantic cases required by `V0.1.1_RELEASE_HARDENING.md`
 
-Every result came from the same qwen3.7-plus release configuration and was
-recorded in `ACCEPTANCE_METRICS.md` before the RH-11 release verdict.
+The next RH-10 must execute every result from one fixed qwen3.7-plus release
+configuration and record it in `ACCEPTANCE_METRICS.md` before RH-11.
 
 ## Historical Fixture Notice
 
 > **HISTORICAL / SUPERSEDED FOR FINAL RELEASE VERDICT**
 
-The earlier qwen3-8b fixture and its partial runs remain in Git history and raw
-evidence files for diagnosis only; they are not the final release fixture.
+The earlier qwen3-8b fixture and pre-reopen qwen3.7-plus run remain in Git
+history and raw evidence files for diagnosis only; neither is the final release
+fixture for the current repaired candidate.
