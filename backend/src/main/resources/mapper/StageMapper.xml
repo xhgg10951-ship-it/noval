@@ -5,13 +5,15 @@
 
     <insert id="insert" parameterType="com.example.storyai.stage.model.Stage"
             useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO stage (story_id, direction, status, suggested_chapter_count, target_chapter_count)
+        INSERT INTO stage (story_id, direction, status, suggested_chapter_count,
+                           target_chapter_count, target_characters)
         VALUES (#{storyId}, #{direction}, COALESCE(#{status}, 'PLANNING'),
-                #{suggestedChapterCount}, #{targetChapterCount})
+                #{suggestedChapterCount}, #{targetChapterCount}, #{targetCharacters})
     </insert>
 
     <select id="findById" parameterType="long" resultType="com.example.storyai.stage.model.Stage">
         SELECT id, story_id, direction, status, suggested_chapter_count, target_chapter_count,
+               target_characters,
                created_at, updated_at
         FROM stage
         WHERE id = #{id}
@@ -19,6 +21,7 @@
 
     <select id="findByStoryId" parameterType="long" resultType="com.example.storyai.stage.model.Stage">
         SELECT id, story_id, direction, status, suggested_chapter_count, target_chapter_count,
+               target_characters,
                created_at, updated_at
         FROM stage
         WHERE story_id = #{storyId}

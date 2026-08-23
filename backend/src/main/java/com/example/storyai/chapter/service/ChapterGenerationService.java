@@ -136,7 +136,9 @@ public class ChapterGenerationService {
         // excerpt, so a single summary is no longer the only continuity anchor.
         String recentContext = contextReader.getRecentContextWithEnding(story.getId(), 3, 800);
 
-        GenerateChapterRequest request = buildRequest(story, constraints, stage, nextPlan, recentContext);
+        Integer targetCharacters = resolveTargetCharacters(story, stage, nextPlan);
+        GenerateChapterRequest request = buildRequest(
+                story, constraints, stage, nextPlan, recentContext, targetCharacters);
 
         GenerateChapterResponse ai = aiServiceClient.generateChapter(request); // OUTSIDE tx
         validate(ai);
@@ -151,7 +153,7 @@ public class ChapterGenerationService {
         chapter.setSummary(ai.summary());
         chapter.setGenerationStatus("GENERATED");
         // TASK-119: record target (from ChapterSpec) + actual length (CJK count).
-        chapter.setTargetCharacters(nextPlan.getTargetCharacters());
+        chapter.setTargetCharacters(targetCharacters);
         chapter.setActualCharacterCount(
                 com.example.storyai.common.util.TextLengthUtil.countCharacters(ai.content()));
         // TASK-124: the chapter is persisted with extraction PENDING; only set to
@@ -235,7 +237,9 @@ public class ChapterGenerationService {
             recentContext = "作者对本次重写的指示：" + authorInstruction.trim() + "\n\n" + recentContext;
         }
 
-        GenerateChapterRequest request = buildRequest(story, constraints, stage, plan, recentContext);
+        GenerateChapterRequest request = buildRequest(
+                story, constraints, stage, plan, recentContext,
+                resolveTargetCharacters(story, stage, plan));
         GenerateChapterResponse ai = aiServiceClient.generateChapter(request); // OUTSIDE tx
         validate(ai);
 
@@ -335,7 +339,8 @@ public class ChapterGenerationService {
                                                 List<StoryConstraint> constraints,
                                                 Stage stage,
                                                 ChapterPlan plan,
-                                                String recentContext) {
+                                                String recentContext,
+                                                Integer targetCharacters) {
         List<GenerateChapterRequest.ConstraintItem> constraintItems = constraints.stream()
                 .map(c -> new GenerateChapterRequest.ConstraintItem(c.getType(), c.getContent()))
                 .toList();
@@ -362,7 +367,7 @@ public class ChapterGenerationService {
                 contextReader.getWriterMemoryItems(storyId, stage, plan),
                 contextReader.getRelationshipItems(storyId),
                 recentContext == null ? "" : recentContext,
-                plan.getTargetCharacters(),
+                targetCharacters,
                 plan.getMustAdvance(),
                 plan.getMustNotDo(),
                 plan.getStoryBeats(),
@@ -370,6 +375,17 @@ public class ChapterGenerationService {
                 // TASK-166: the author's natural-language style hint reaches the Writer
                 story.getWritingStyle()
         );
+    }
+
+    /** Frozen length hierarchy: ChapterSpec override > Stage override > Story default. */
+    private Integer resolveTargetCharacters(Story story, Stage stage, ChapterPlan plan) {
+        if (plan.getTargetCharacters() != null) {
+            return plan.getTargetCharacters();
+        }
+        if (stage.getTargetCharacters() != null) {
+            return stage.getTargetCharacters();
+        }
+        return story.getDefaultTargetCharacters();
     }
 
     /** Structured-response validation: title/content/summary must all be present. */

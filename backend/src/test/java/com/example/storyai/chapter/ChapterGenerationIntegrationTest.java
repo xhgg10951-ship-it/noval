@@ -4,10 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import org.mockito.ArgumentCaptor;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -30,6 +32,7 @@ import com.example.storyai.ai.dto.PlanStageRequest;
 import com.example.storyai.ai.dto.PlanStageResponse;
 import com.example.storyai.memory.model.StoryMemory;
 import com.example.storyai.memory.service.MemoryService;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -234,6 +237,72 @@ class ChapterGenerationIntegrationTest {
                 .isEqualTo("生存融入卷");
         assertThat(request.path("currentArc").path("goal").asText())
                 .isEqualTo("在王都站稳脚跟");
+    }
+
+    @Test
+    void lengthTargetUsesChapterThenStageThenStoryPrecedence() throws Exception {
+        Long storyId = objectMapper.readTree(mockMvc.perform(post("/api/stories")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name":"长度优先级","coreIdea":"逐步成长",
+                                 "defaultTargetCharacters":3200}
+                                """))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString())
+                .get("id").asLong();
+        PlanStageResponse plan = new PlanStageResponse(2, java.util.List.of(
+                new PlanStageResponse.ChapterPlanItem(
+                        1, "第一章", "推进一", null, null, null, null, null),
+                new PlanStageResponse.ChapterPlanItem(
+                        2, "第二章", "推进二", null, null, null, null, null)));
+        when(aiServiceClient.planStage(any(PlanStageRequest.class))).thenReturn(plan);
+        stubWriter();
+        stubExtractor();
+
+        JsonNode createdStage = objectMapper.readTree(mockMvc.perform(
+                        post("/api/stories/{id}/stages", storyId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {"direction":"长度控制","targetCharacters":4000}
+                                        """))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString());
+        long stageId = createdStage.get("id").asLong();
+        long firstPlanId = createdStage.path("plans").get(0).get("id").asLong();
+
+        // Author's Chapter override is the highest priority.
+        mockMvc.perform(put("/api/stages/plans/{planId}", firstPlanId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"goal":"第一章","targetCharacters":4500}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.targetCharacters").value(4500));
+
+        mockMvc.perform(post("/api/stages/{id}/chapters", stageId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.targetCharacters").value(4500));
+        mockMvc.perform(post("/api/stages/{id}/chapters", stageId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.targetCharacters").value(4000));
+
+        ArgumentCaptor<GenerateChapterRequest> captor =
+                ArgumentCaptor.forClass(GenerateChapterRequest.class);
+        verify(aiServiceClient, times(2)).generateChapter(captor.capture());
+        assertThat(captor.getAllValues())
+                .extracting(GenerateChapterRequest::targetCharacters)
+                .containsExactly(4500, 4000);
+
+        // A Stage without an override falls back to the Story default.
+        when(aiServiceClient.planStage(any(PlanStageRequest.class)))
+                .thenReturn(planOf(1, "默认长度"));
+        long defaultStageId = objectMapper.readTree(mockMvc.perform(
+                        post("/api/stories/{id}/stages", storyId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"direction\":\"使用故事默认\"}"))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString())
+                .get("id").asLong();
+        mockMvc.perform(post("/api/stages/{id}/chapters", defaultStageId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.targetCharacters").value(3200));
     }
 
     // ---- RH-05 / HH-001: Writer memory is relevant to Arc + Stage + ChapterSpec ----

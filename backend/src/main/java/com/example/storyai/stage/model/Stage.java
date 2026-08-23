@@ -12,6 +12,7 @@ public class Stage {
     private String status;
     private Integer suggestedChapterCount;
     private Integer targetChapterCount;
+    private Integer targetCharacters;
     private java.time.LocalDateTime createdAt;
     private java.time.LocalDateTime updatedAt;
 
@@ -61,6 +62,14 @@ public class Stage {
 
     public void setTargetChapterCount(Integer targetChapterCount) {
         this.targetChapterCount = targetChapterCount;
+    }
+
+    public Integer getTargetCharacters() {
+        return targetCharacters;
+    }
+
+    public void setTargetCharacters(Integer targetCharacters) {
+        this.targetCharacters = targetCharacters;
     }
 
     public java.time.LocalDateTime getCreatedAt() {

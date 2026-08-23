@@ -59,13 +59,15 @@ public class StagePlanningService {
     }
 
     /** Creates a new stage for the story and generates its initial plan (AT-B01). */
-    public Stage createStagePlan(Long storyId, String direction, Integer targetChapterCount) {
+    public Stage createStagePlan(Long storyId, String direction, Integer targetChapterCount,
+                                 Integer targetCharacters) {
         Story story = storyService.getStory(storyId);
         List<StoryConstraint> constraints = storyService.getConstraints(storyId);
 
         PlanStageRequest request = buildRequest(story, constraints, direction, targetChapterCount);
         PlanStageResponse plan = callPlanner(request, false, currentChapterNumber(storyId));
-        return stageService.saveNewStage(storyId, direction, targetChapterCount, plan);
+        return stageService.saveNewStage(
+                storyId, direction, targetChapterCount, targetCharacters, plan);
     }
 
     /**
@@ -206,8 +208,8 @@ public class StagePlanningService {
         return stageService.confirmPlan(stageId);
     }
 
-    public ChapterPlan updatePlanGoal(Long planId, String goal) {
-        return stageService.updatePlanGoal(planId, goal);
+    public ChapterPlan updatePlanGoal(Long planId, String goal, Integer targetCharacters) {
+        return stageService.updatePlanGoal(planId, goal, targetCharacters);
     }
 
     // ---- helpers ----

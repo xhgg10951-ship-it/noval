@@ -72,6 +72,11 @@ public class GenerationOrchestrationService {
 
     /** Starts a generation job for a stage in the given mode (STEP or CONTINUOUS). */
     public synchronized GenerationJob startJob(Long stageId, GenerationJob.Mode mode) {
+        String stageStatus = stageService.getStage(stageId).getStatus();
+        if (!"ACTIVE".equals(stageStatus) && !"COMPLETED".equals(stageStatus)) {
+            throw new IllegalStateException(String.format(
+                    "阶段 %d 尚未确认，当前状态 %s，不能开始生成", stageId, stageStatus));
+        }
         // RH-06 / HH-005: serialize the single-JVM check+insert boundary so two
         // simultaneous HTTP starts cannot both observe an empty slot. PAUSED is
         // active by product definition; callers must continue/stop that job.
@@ -105,23 +110,32 @@ public class GenerationOrchestrationService {
     }
 
     /** Resumes a PAUSED job (author clicked Continue). STEP runs one more chapter;
-     *  CONTINUOUS runs to completion. COMPLETED/FAILED jobs are returned unchanged. */
-    public GenerationJob continueJob(Long jobId) {
+     *  CONTINUOUS runs to completion. No terminal/running state may spawn another worker. */
+    public synchronized GenerationJob continueJob(Long jobId) {
         GenerationJob job = jobService.get(jobId);
-        if (GenerationJob.Status.COMPLETED.name().equals(job.getStatus())
-                || GenerationJob.Status.FAILED.name().equals(job.getStatus())) {
-            return job;
+        if (!GenerationJob.Status.PAUSED.name().equals(job.getStatus())) {
+            throw new IllegalStateException(String.format(
+                    "只有 PAUSED 任务可以继续，任务 %d 当前状态为 %s",
+                    jobId, job.getStatus()));
         }
+        // Claim synchronously before dispatch. Otherwise two HTTP requests can
+        // both observe PAUSED while the first runnable is still queued.
+        markRunning(jobId);
         submitRun(jobId);
         return jobService.get(jobId);
     }
 
     /** Retries a FAILED job from its current index (the failing plan was never saved). */
-    public GenerationJob retryJob(Long jobId) {
+    public synchronized GenerationJob retryJob(Long jobId) {
         GenerationJob job = jobService.get(jobId);
         if (!GenerationJob.Status.FAILED.name().equals(job.getStatus())) {
-            return job;
+            throw new IllegalStateException(String.format(
+                    "只有 FAILED 任务可以重试，任务 %d 当前状态为 %s",
+                    jobId, job.getStatus()));
         }
+        // Same single-JVM atomic claim as Continue; FAILED stops reserving the
+        // Stage slot, so duplicate retry workers must be prevented here.
+        markRunning(jobId);
         submitRun(jobId); // markRunning clears lastError when the worker picks it up
         return jobService.get(jobId);
     }
@@ -177,6 +191,15 @@ public class GenerationOrchestrationService {
             // same convergence as CONTINUOUS: an empty active queue means DONE
             // (e.g. a Replan Remaining shrank the remainder mid-job — TASK-137).
             return complete(jobId);
+        }
+        // STEP uses the same safe-checkpoint semantics as CONTINUOUS. A control
+        // request received during the Writer/Memory unit must win before the
+        // default PAUSED or final COMPLETED transition.
+        if (isStopRequested(jobId)) {
+            return stop(jobId);
+        }
+        if (isPauseRequested(jobId)) {
+            return pause(jobId);
         }
         // TASK-137 fix: completion is decided from DB FACTS (no active plan left),
         // never from a stale in-flight `total`. A Replan Remaining mid-job changes

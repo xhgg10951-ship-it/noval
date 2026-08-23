@@ -14,6 +14,7 @@ public class ChapterPlanResponse {
     private Integer chapterOrder;
     private String goal;
     private String expectedProgress;
+    private Integer targetCharacters;
     // ---- TASK-133/136: plan versioning surfaced to the UI ----
     private Integer planVersion;
     private Boolean active;
@@ -30,6 +31,7 @@ public class ChapterPlanResponse {
         this.chapterOrder = plan.getChapterOrder();
         this.goal = plan.getGoal();
         this.expectedProgress = plan.getExpectedProgress();
+        this.targetCharacters = plan.getTargetCharacters();
         this.planVersion = plan.getPlanVersion();
         this.active = plan.getActive();
         this.status = plan.getStatus();
@@ -75,6 +77,14 @@ public class ChapterPlanResponse {
 
     public void setExpectedProgress(String expectedProgress) {
         this.expectedProgress = expectedProgress;
+    }
+
+    public Integer getTargetCharacters() {
+        return targetCharacters;
+    }
+
+    public void setTargetCharacters(Integer targetCharacters) {
+        this.targetCharacters = targetCharacters;
     }
 
     public Integer getPlanVersion() {

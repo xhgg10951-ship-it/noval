@@ -13,14 +13,14 @@ GRANT ALL PRIVILEGES ON story_ai.* TO 'story_dev'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
-v0.1.1 uses the additive migrations `V1` through `V15`. The project does not
+v0.1.1 uses the additive migrations `V1` through `V16`. The project does not
 embed Flyway/Liquibase, so apply each migration exactly once in numeric order.
 Existing v0.1 data must be preserved.
 
 PowerShell:
 
 ```powershell
-1..15 | ForEach-Object {
+1..16 | ForEach-Object {
   $migration = Get-ChildItem "backend/src/main/resources/db/V$($_)__*.sql"
   Get-Content -Raw -LiteralPath $migration.FullName |
     mysql.exe -h 127.0.0.1 -u story_dev -pstorypass story_ai
@@ -30,7 +30,7 @@ PowerShell:
 Bash:
 
 ```bash
-for version in $(seq 1 15); do
+for version in $(seq 1 16); do
   migration=$(find backend/src/main/resources/db -name "V${version}__*.sql" -print -quit)
   mysql -h 127.0.0.1 -u story_dev -pstorypass story_ai < "$migration"
 done
@@ -89,7 +89,7 @@ Open `http://localhost:5173`; Vite proxies `/api` to the backend.
 ## 6. Tests
 
 ```powershell
-# Backend (requires MySQL with V1..V15)
+# Backend (requires MySQL with V1..V16)
 cd backend
 $env:DB_USERNAME = "story_dev"
 $env:DB_PASSWORD = "storypass"

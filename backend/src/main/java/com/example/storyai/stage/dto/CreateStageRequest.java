@@ -15,6 +15,9 @@ public class CreateStageRequest {
     @Min(value = 1, message = "目标章节数至少为 1")
     private Integer targetChapterCount;
 
+    @Min(value = 300, message = "阶段目标字数至少为 300")
+    private Integer targetCharacters;
+
     public String getDirection() {
         return direction;
     }
@@ -29,5 +32,13 @@ public class CreateStageRequest {
 
     public void setTargetChapterCount(Integer targetChapterCount) {
         this.targetChapterCount = targetChapterCount;
+    }
+
+    public Integer getTargetCharacters() {
+        return targetCharacters;
+    }
+
+    public void setTargetCharacters(Integer targetCharacters) {
+        this.targetCharacters = targetCharacters;
     }
 }

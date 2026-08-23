@@ -18,6 +18,7 @@ public class StageResponse {
     private String status;
     private Integer suggestedChapterCount;
     private Integer targetChapterCount;
+    private Integer targetCharacters;
     private List<ChapterPlanResponse> plans;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -32,6 +33,7 @@ public class StageResponse {
         this.status = stage.getStatus();
         this.suggestedChapterCount = stage.getSuggestedChapterCount();
         this.targetChapterCount = stage.getTargetChapterCount();
+        this.targetCharacters = stage.getTargetCharacters();
         this.plans = plans.stream().map(ChapterPlanResponse::new).collect(Collectors.toList());
         this.createdAt = stage.getCreatedAt();
         this.updatedAt = stage.getUpdatedAt();
@@ -83,6 +85,14 @@ public class StageResponse {
 
     public void setTargetChapterCount(Integer targetChapterCount) {
         this.targetChapterCount = targetChapterCount;
+    }
+
+    public Integer getTargetCharacters() {
+        return targetCharacters;
+    }
+
+    public void setTargetCharacters(Integer targetCharacters) {
+        this.targetCharacters = targetCharacters;
     }
 
     public List<ChapterPlanResponse> getPlans() {

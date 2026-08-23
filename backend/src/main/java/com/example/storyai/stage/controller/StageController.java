@@ -51,7 +51,8 @@ public class StageController {
     public ResponseEntity<StageResponse> createStage(@PathVariable Long storyId,
                                                      @Valid @RequestBody CreateStageRequest request) {
         var stage = planningService.createStagePlan(
-                storyId, request.getDirection(), request.getTargetChapterCount());
+                storyId, request.getDirection(), request.getTargetChapterCount(),
+                request.getTargetCharacters());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(toResponse(stage, stageService.getPlans(stage.getId())));
     }
@@ -97,7 +98,8 @@ public class StageController {
     @PutMapping("/api/stages/plans/{planId}")
     public ChapterPlanResponse updatePlanGoal(@PathVariable Long planId,
                                               @Valid @RequestBody UpdatePlanGoalRequest request) {
-        return new ChapterPlanResponse(planningService.updatePlanGoal(planId, request.getGoal()));
+        return new ChapterPlanResponse(planningService.updatePlanGoal(
+                planId, request.getGoal(), request.getTargetCharacters()));
     }
 
     // ---- mapping helper ----

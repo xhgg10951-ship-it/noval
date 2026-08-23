@@ -14,6 +14,7 @@ public class StageSummary {
     private String status;
     private Integer suggestedChapterCount;
     private Integer targetChapterCount;
+    private Integer targetCharacters;
     private LocalDateTime createdAt;
 
     public StageSummary() {
@@ -25,6 +26,7 @@ public class StageSummary {
         this.status = stage.getStatus();
         this.suggestedChapterCount = stage.getSuggestedChapterCount();
         this.targetChapterCount = stage.getTargetChapterCount();
+        this.targetCharacters = stage.getTargetCharacters();
         this.createdAt = stage.getCreatedAt();
     }
 
@@ -66,6 +68,14 @@ public class StageSummary {
 
     public void setTargetChapterCount(Integer targetChapterCount) {
         this.targetChapterCount = targetChapterCount;
+    }
+
+    public Integer getTargetCharacters() {
+        return targetCharacters;
+    }
+
+    public void setTargetCharacters(Integer targetCharacters) {
+        this.targetCharacters = targetCharacters;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -75,20 +75,27 @@ public class NextSafeActionResolver {
             }
         }
 
+        // Every persisted chapter is part of the release checkpoint, not only
+        // the newest row. An author may revise an earlier chapter while a later
+        // Writer call is in flight; that earlier STALE/FAILED/PENDING memory must
+        // be reconciled before another plan or Stage completion.
+        Chapter unfinished = chapters.stream()
+                .filter(c -> !MemoryExtractionStatus.COMPLETED.equals(
+                        c.getMemoryExtractionStatus()))
+                .max(java.util.Comparator.comparing(Chapter::getChapterNumber)
+                        .thenComparing(Chapter::getId))
+                .orElse(null);
+        if (unfinished != null) {
+            log.info("Stage {}: chapter {} extraction status={} -> EXTRACT_MEMORY",
+                    stageId, unfinished.getId(), unfinished.getMemoryExtractionStatus());
+            return SafeAction.EXTRACT_MEMORY;
+        }
+
         // Active plans not yet started at all -> generate the next one.
         boolean hasPendingPlan = activePlans.stream()
                 .anyMatch(p -> !startedPlanIds.contains(p.getId()));
         if (lastChapter == null) {
             return hasPendingPlan ? SafeAction.GENERATE : SafeAction.COMPLETE;
-        }
-
-        // A started chapter whose extraction is NOT COMPLETED must be reconciled
-        // before we advance. This is the core recovery guarantee.
-        String status = lastChapter.getMemoryExtractionStatus();
-        if (!MemoryExtractionStatus.COMPLETED.equals(status)) {
-            log.info("Stage {}: last chapter {} extraction status={} -> EXTRACT_MEMORY",
-                    stageId, lastChapter.getId(), status);
-            return SafeAction.EXTRACT_MEMORY;
         }
 
         // Last chapter fully done: either advance to next plan or finish.

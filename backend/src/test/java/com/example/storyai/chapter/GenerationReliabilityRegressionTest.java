@@ -150,6 +150,12 @@ class GenerationReliabilityRegressionTest {
     }
 
     private long createActiveStage(Long storyId, int planCount) throws Exception {
+        long stageId = createPlanningStage(storyId, planCount);
+        mockMvc.perform(post("/api/stages/{id}/confirm", stageId)).andExpect(status().isOk());
+        return stageId;
+    }
+
+    private long createPlanningStage(Long storyId, int planCount) throws Exception {
         when(aiServiceClient.planStage(any(PlanStageRequest.class))).thenReturn(planOf(planCount));
         stubWriter();
         stubExtractor();
@@ -160,7 +166,6 @@ class GenerationReliabilityRegressionTest {
                 .andReturn();
         long stageId = objectMapper.readTree(created.getResponse().getContentAsString())
                 .get("id").asLong();
-        mockMvc.perform(post("/api/stages/{id}/confirm", stageId)).andExpect(status().isOk());
         return stageId;
     }
 
@@ -455,5 +460,126 @@ class GenerationReliabilityRegressionTest {
                 .isBetween(1, 1000);
         assertThat(ReflectionTestUtils.getField(orchestrationService, "executor"))
                 .isSameAs(executor);
+    }
+
+    // ---- Reopened RH-06: lifecycle commands must not create illegal workers ----
+
+    @Test
+    void generationCannotStartBeforeStagePlanIsConfirmed() throws Exception {
+        Long storyId = createStory();
+        long stageId = createPlanningStage(storyId, 1);
+
+        MvcResult result = mockMvc.perform(post("/api/stages/{id}/generate", stageId)
+                        .param("mode", "CONTINUOUS"))
+                .andReturn();
+        if (result.getResponse().getStatus() == 200) {
+            long wronglyStarted = objectMapper.readTree(result.getResponse().getContentAsString())
+                    .get("id").asLong();
+            awaitTerminal(wronglyStarted);
+        }
+
+        assertThat(result.getResponse().getStatus()).isEqualTo(409);
+        assertThat(listChapters(stageId)).isEmpty();
+    }
+
+    @Test
+    void stoppedJobCannotBeContinued() throws Exception {
+        Long storyId = createStory();
+        long stageId = createActiveStage(storyId, 1);
+        jdbcTemplate.update("""
+                INSERT INTO generation_job
+                    (stage_id, mode, current_plan_index, total, status, phase,
+                     pause_requested, stop_requested)
+                VALUES (?, 'CONTINUOUS', 0, 1, 'STOPPED', 'CHECKPOINT', 0, 1)
+                """, stageId);
+        long jobId = jdbcTemplate.queryForObject(
+                "SELECT MAX(id) FROM generation_job WHERE stage_id = ?", Long.class, stageId);
+
+        MvcResult result = mockMvc.perform(post("/api/generation-jobs/{id}/continue", jobId))
+                .andReturn();
+        if (result.getResponse().getStatus() == 200) {
+            awaitTerminal(jobId);
+        }
+
+        assertThat(result.getResponse().getStatus()).isEqualTo(409);
+        assertThat(listChapters(stageId)).isEmpty();
+    }
+
+    @Test
+    void runningJobCannotBeRetriedOrDispatchAnotherWorker() throws Exception {
+        Long storyId = createStory();
+        long stageId = createActiveStage(storyId, 1);
+        jdbcTemplate.update("""
+                INSERT INTO generation_job
+                    (stage_id, mode, current_plan_index, total, status, phase,
+                     pause_requested, stop_requested)
+                VALUES (?, 'CONTINUOUS', 0, 1, 'RUNNING', 'WRITING', 0, 0)
+                """, stageId);
+        long jobId = jdbcTemplate.queryForObject(
+                "SELECT MAX(id) FROM generation_job WHERE stage_id = ?", Long.class, stageId);
+
+        mockMvc.perform(post("/api/generation-jobs/{id}/retry", jobId))
+                .andExpect(status().isConflict());
+        assertThat(listChapters(stageId)).isEmpty();
+    }
+
+    @Test
+    void stopRequestedDuringStepModeWinsAtTheSafeCheckpoint() throws Exception {
+        Long storyId = createStory();
+        long stageId = createActiveStage(storyId, 2);
+        CountDownLatch gate = stubWriterGatedOnFirstCall();
+
+        MvcResult started = mockMvc.perform(post("/api/stages/{id}/generate", stageId)
+                        .param("mode", "STEP"))
+                .andExpect(status().isOk())
+                .andReturn();
+        long jobId = objectMapper.readTree(started.getResponse().getContentAsString())
+                .get("id").asLong();
+        awaitPhase(jobId, "WRITING", 0);
+
+        mockMvc.perform(post("/api/generation-jobs/{id}/stop", jobId))
+                .andExpect(status().isOk());
+        gate.countDown();
+
+        JsonNode stopped = awaitTerminal(jobId);
+        assertThat(stopped.get("status").asText()).isEqualTo("STOPPED");
+        assertThat(listChapters(stageId)).hasSize(1);
+    }
+
+    @Test
+    void completionReconcilesAnyEarlierUnstableChapterMemory() throws Exception {
+        Long storyId = createStory();
+        long stageId = createActiveStage(storyId, 2);
+        CountDownLatch secondWriterEntered = new CountDownLatch(1);
+        CountDownLatch releaseSecondWriter = new CountDownLatch(1);
+        when(aiServiceClient.generateChapter(any(GenerateChapterRequest.class)))
+                .thenAnswer(inv -> {
+                    GenerateChapterRequest req = inv.getArgument(0);
+                    if (req.chapterOrder() == 2) {
+                        secondWriterEntered.countDown();
+                        releaseSecondWriter.await(POLL_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+                    }
+                    return new GenerateChapterResponse(
+                            "第" + req.chapterOrder() + "章", "正文", "摘要");
+                });
+
+        long jobId = startContinuous(stageId);
+        assertThat(secondWriterEntered.await(POLL_TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
+        jdbcTemplate.update("""
+                UPDATE chapter
+                SET memory_extraction_status = 'STALE'
+                WHERE stage_id = ? AND chapter_number = 1
+                """, stageId);
+        releaseSecondWriter.countDown();
+
+        JsonNode done = awaitTerminal(jobId);
+        assertThat(done.get("status").asText()).isEqualTo("COMPLETED");
+        assertThat(jdbcTemplate.queryForObject("""
+                SELECT memory_extraction_status FROM chapter
+                WHERE stage_id = ? AND chapter_number = 1
+                """, String.class, stageId)).isEqualTo("COMPLETED");
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT status FROM stage WHERE id = ?", String.class, stageId))
+                .isEqualTo("COMPLETED");
     }
 }

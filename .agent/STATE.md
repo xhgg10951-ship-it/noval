@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`RELEASE HARDENING REOPENED — RH-05 COMPLETE`
+`RELEASE HARDENING REOPENED — RH-06 COMPLETE`
 
 Current Task:
 
-`RH-06 — Length + Job Safety Revalidation`
+`RH-07 — Memory Review Hardening Revalidation`
 
 Task Status:
 
@@ -83,6 +83,19 @@ Task Evidence:
 - RH-05 Engineering Verification: PASSED — new regressions 2/2; backend context,
   generation, planning, assistance and Memory suites 24/24; Python prompt suite
   15/15.
+- RH-06 COMPLETE (2026-08-23, reopened gate) — HH-004 dynamic bounds,
+  HH-005 single-active-Job and HH-006 managed bounded executor remain intact.
+  The functional replay additionally reproduced six frozen business gaps:
+  Story/Stage/Chapter length precedence was not wired; PLANNING Stages could
+  start Jobs; STOPPED could Continue; non-FAILED Jobs accepted Retry; STEP Stop
+  lost to PAUSED; and an older STALE chapter could be skipped at completion.
+  V16 adds the nullable Stage length override, author-visible Stage/Chapter
+  controls now feed Writer and Chapter telemetry, lifecycle commands claim the
+  worker synchronously, and completion reconciles every unstable chapter.
+- RH-06 Engineering Verification: PASSED — new regressions 6/6; backend
+  generation/reliability/replan suites 32/32; Python focused length/context/mock
+  suite 15/15; frontend 7/7 and production build PASSED. V16 applied additively
+  to the existing local schema; RUN.md and CI now apply V1..V16.
 
 - RH-01 DONE (2026-08-23) — regression first reproduced stale summary after
   Manual Edit; fixed Manual Edit summary refresh + automatic re-extract,

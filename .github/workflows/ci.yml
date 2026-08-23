@@ -67,10 +67,10 @@ jobs:
           distribution: temurin
           java-version: "17"
           cache: maven
-      - name: Apply migrations V1 through V15
+      - name: Apply migrations V1 through V16
         shell: bash
         run: |
-          for version in $(seq 1 15); do
+          for version in $(seq 1 16); do
             migration=$(find backend/src/main/resources/db -name "V${version}__*.sql" -print -quit)
             test -n "$migration"
             mysql --protocol=tcp -h 127.0.0.1 -u story_dev -pstorypass story_ai < "$migration"

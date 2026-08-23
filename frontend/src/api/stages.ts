@@ -8,6 +8,7 @@ export interface ChapterPlanResponse {
   chapterOrder: number
   goal: string
   expectedProgress: string | null
+  targetCharacters: number | null
   planVersion: number
   active: boolean
   status: string // ACTIVE / COMPLETED / SUPERSEDED (v0.1.1 Phase 4)
@@ -22,6 +23,7 @@ export interface StageResponse {
   status: string
   suggestedChapterCount: number
   targetChapterCount: number | null
+  targetCharacters: number | null
   plans: ChapterPlanResponse[]
   createdAt: string
   updatedAt: string
@@ -33,6 +35,7 @@ export interface StageSummary {
   status: string
   suggestedChapterCount: number | null
   targetChapterCount: number | null
+  targetCharacters: number | null
   createdAt: string
 }
 
@@ -42,9 +45,11 @@ export async function createStage(
   storyId: number,
   direction: string,
   targetChapterCount?: number,
+  targetCharacters?: number,
 ): Promise<StageResponse> {
   const body: Record<string, unknown> = { direction }
   if (targetChapterCount != null) body.targetChapterCount = targetChapterCount
+  if (targetCharacters != null) body.targetCharacters = targetCharacters
   const { data } = await api.post<StageResponse>(`/stories/${storyId}/stages`, body)
   return data
 }
@@ -83,8 +88,14 @@ export async function confirmStage(stageId: number): Promise<StageResponse> {
   return data
 }
 
-export async function updatePlanGoal(planId: number, goal: string): Promise<ChapterPlanResponse> {
-  const { data } = await api.put<ChapterPlanResponse>(`/stages/plans/${planId}`, { goal })
+export async function updatePlanGoal(
+  planId: number,
+  goal: string,
+  targetCharacters?: number,
+): Promise<ChapterPlanResponse> {
+  const body: Record<string, unknown> = { goal }
+  if (targetCharacters != null) body.targetCharacters = targetCharacters
+  const { data } = await api.put<ChapterPlanResponse>(`/stages/plans/${planId}`, body)
   return data
 }
 

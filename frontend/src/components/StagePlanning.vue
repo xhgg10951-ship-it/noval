@@ -26,6 +26,7 @@ const stages = ref<StageSummary[]>([])
 
 // ---- new stage form ----
 const direction = ref('')
+const stageTargetCharacters = ref<number | null>(null)
 const generating = ref(false)
 const errorMsg = ref('')
 
@@ -36,6 +37,7 @@ const replanning = ref(false)
 const confirming = ref(false)
 const editingPlanId = ref<number | null>(null)
 const editingGoal = ref('')
+const editingTargetCharacters = ref<number | null>(null)
 const savingGoal = ref(false)
 const chapterRefreshToken = ref(0)
 
@@ -59,9 +61,15 @@ async function handleGenerate(): Promise<void> {
   }
   generating.value = true
   try {
-    stage.value = await createStage(props.storyId, direction.value.trim())
+    stage.value = await createStage(
+      props.storyId,
+      direction.value.trim(),
+      undefined,
+      stageTargetCharacters.value ?? undefined,
+    )
     targetCount.value = stage.value.suggestedChapterCount
     direction.value = ''
+    stageTargetCharacters.value = null
     await refreshStages()
   } catch (err) {
     errorMsg.value = extractStageError(err)
@@ -157,13 +165,18 @@ async function handleReplanRemaining(): Promise<void> {
 function startEditGoal(plan: ChapterPlanResponse): void {
   editingPlanId.value = plan.id
   editingGoal.value = plan.goal
+  editingTargetCharacters.value = plan.targetCharacters
 }
 
 async function saveGoal(): Promise<void> {
   if (editingPlanId.value == null || !editingGoal.value.trim()) return
   savingGoal.value = true
   try {
-    const updated = await updatePlanGoal(editingPlanId.value, editingGoal.value.trim())
+    const updated = await updatePlanGoal(
+      editingPlanId.value,
+      editingGoal.value.trim(),
+      editingTargetCharacters.value ?? undefined,
+    )
     if (stage.value) {
       const idx = stage.value.plans.findIndex((p) => p.id === updated.id)
       if (idx >= 0) stage.value.plans[idx] = updated
@@ -203,6 +216,17 @@ function statusLabel(status: string): string {
         placeholder="输入阶段方向，例：主角和艾琳前往冒险者公会完成注册，并在过程中第一次小规模展示自己的特殊力量。"
         rows="2"
       ></textarea>
+      <label class="stage-controls__label">
+        阶段默认字数（可选）
+        <input
+          v-model.number="stageTargetCharacters"
+          type="number"
+          min="300"
+          step="100"
+          class="form__input form__input--count"
+          placeholder="继承故事设置"
+        />
+      </label>
       <button class="btn btn--primary" :disabled="generating" @click="handleGenerate">
         {{ generating ? '规划中…' : '生成章节计划' }}
       </button>
@@ -230,6 +254,7 @@ function statusLabel(status: string): string {
         <span class="stage-detail__meta">
           AI 建议 {{ stage.suggestedChapterCount }} 章
           <template v-if="stage.targetChapterCount"> · 目标 {{ stage.targetChapterCount }} 章</template>
+          <template v-if="stage.targetCharacters"> · 阶段默认 {{ stage.targetCharacters }} 字/章</template>
         </span>
       </header>
 
@@ -241,6 +266,17 @@ function statusLabel(status: string): string {
           <div class="plan-item__body">
             <template v-if="editingPlanId === plan.id">
               <textarea v-model="editingGoal" class="form__textarea" rows="2"></textarea>
+              <label class="stage-controls__label">
+                本章目标字数
+                <input
+                  v-model.number="editingTargetCharacters"
+                  type="number"
+                  min="300"
+                  step="100"
+                  class="form__input form__input--count"
+                  placeholder="继承阶段/故事设置"
+                />
+              </label>
               <div class="plan-item__actions">
                 <button class="btn btn--primary btn--small" :disabled="savingGoal" @click="saveGoal">
                   {{ savingGoal ? '保存中…' : '保存' }}
@@ -251,6 +287,9 @@ function statusLabel(status: string): string {
             <template v-else>
               <p class="plan-item__goal">{{ plan.goal }}</p>
               <p v-if="plan.expectedProgress" class="plan-item__progress">{{ plan.expectedProgress }}</p>
+              <p class="plan-item__progress">
+                目标字数：{{ plan.targetCharacters ?? stage.targetCharacters ?? '继承故事设置' }}
+              </p>
               <span v-if="planStatusLabel(plan)" class="badge badge--muted">
                 {{ planStatusLabel(plan) }} · 计划版本 v{{ plan.planVersion }}
               </span>

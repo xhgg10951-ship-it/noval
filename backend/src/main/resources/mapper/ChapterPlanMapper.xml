@@ -52,6 +52,13 @@
         WHERE id = #{id}
     </update>
 
+    <update id="updateEditable">
+        UPDATE chapter_plan
+        SET goal = #{goal},
+            target_characters = #{targetCharacters}
+        WHERE id = #{id}
+    </update>
+
     <update id="markCompleted">
         UPDATE chapter_plan
         SET status = 'COMPLETED',

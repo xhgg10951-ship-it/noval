@@ -3848,6 +3848,54 @@ suite remains the RH-10 gate.
 
 Next active task: `RH-06 — Length + Job Safety Revalidation`
 
+## RH-06 Reopened — Length + Job Safety
+
+Status: `DONE`
+
+Observed regressions before fix:
+
+- `defaultTargetCharacters` was stored but a null Planner target reached Writer
+  and Chapter as null. Stage length override and author Chapter override did not
+  exist, so the frozen `Chapter > Stage > Story` hierarchy was unusable.
+- A PLANNING Stage could start a background Job before author confirmation.
+- Continue accepted a STOPPED Job and dispatched a worker; Retry silently
+  accepted a RUNNING Job; duplicate command windows were not claimed before
+  executor dispatch.
+- A Stop requested during STEP generation ended as PAUSED instead of STOPPED.
+- Completion inspected only the latest Chapter, so an earlier STALE Chapter
+  could be skipped while Job became COMPLETED and Stage stayed ACTIVE.
+
+Fix:
+
+- Additive V16 adds nullable `stage.target_characters`; UI/API expose Stage and
+  author Chapter targets. Java resolves the documented precedence and sends the
+  effective target to Writer while recording it on Chapter.
+- Job Start rejects unconfirmed Stages. Continue is PAUSED-only and Retry is
+  FAILED-only; both synchronously claim RUNNING before dispatch inside the
+  existing single-JVM boundary.
+- STEP checks Stop/Pause at the same safe checkpoint as CONTINUOUS.
+- Next Safe Action scans every persisted Chapter for unstable extraction, and
+  Stage completion now fails closed instead of silently returning ACTIVE.
+- Existing dynamic 75%/125% bounds, single active Stage guard and Spring-managed
+  bounded executor remain unchanged; no MQ, Redis or distributed lock was added.
+
+Engineering Verification: `PASSED`
+
+- Six new MySQL-backed regressions failed before their respective fixes and now
+  pass.
+- Backend `GenerationReliabilityRegressionTest`, `GenerationModesIntegrationTest`,
+  `ChapterGenerationIntegrationTest`, and `ReplanRemainingIntegrationTest`:
+  32/32 PASSED.
+- Python focused length/context/mock tests: 15/15 PASSED.
+- Frontend Vitest: 7/7 PASSED; production build PASSED.
+- V16 applied additively to the existing local schema; RUN.md and CI migrate
+  V1 through V16 in numeric order.
+
+Real-LLM Semantic Verification: `NOT_REQUIRED` here; target-specific semantic
+length behavior remains part of the final qwen3.7-plus RH-10 gate.
+
+Next active task: `RH-07 — Memory Review Hardening Revalidation`
+
 
 
 

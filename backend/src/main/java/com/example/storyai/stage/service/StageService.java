@@ -39,13 +39,14 @@ public class StageService {
      */
     @Transactional
     public Stage saveNewStage(Long storyId, String direction, Integer targetChapterCount,
-                              PlanStageResponse plan) {
+                              Integer targetCharacters, PlanStageResponse plan) {
         Stage stage = new Stage();
         stage.setStoryId(storyId);
         stage.setDirection(direction);
         stage.setStatus("PLANNING");
         stage.setSuggestedChapterCount(plan.suggestedChapterCount());
         stage.setTargetChapterCount(targetChapterCount);
+        stage.setTargetCharacters(targetCharacters);
         stageMapper.insert(stage);
         insertPlans(stage.getId(), plan, 1);
         return stageMapper.findById(stage.getId());
@@ -77,12 +78,14 @@ public class StageService {
 
     /** AT-B03: author edits a chapter goal. */
     @Transactional
-    public ChapterPlan updatePlanGoal(Long planId, String goal) {
+    public ChapterPlan updatePlanGoal(Long planId, String goal, Integer targetCharacters) {
         ChapterPlan plan = chapterPlanMapper.findById(planId);
         if (plan == null) {
             throw new ResourceNotFoundException("ChapterPlan", planId);
         }
-        chapterPlanMapper.updateGoal(planId, goal);
+        Integer effectiveTarget = targetCharacters != null
+                ? targetCharacters : plan.getTargetCharacters();
+        chapterPlanMapper.updateEditable(planId, goal, effectiveTarget);
         return chapterPlanMapper.findById(planId);
     }
 
@@ -104,7 +107,8 @@ public class StageService {
                 .allMatch(c -> com.example.storyai.chapter.model.MemoryExtractionStatus.COMPLETED
                         .equals(c.getMemoryExtractionStatus()));
         if (!allExtracted) {
-            return stage; // do not flip to COMPLETED while a chapter memory is unstable
+            throw new IllegalStateException(
+                    "阶段仍有章节记忆未稳定，不能标记为 COMPLETED");
         }
         stageMapper.updateStatus(stageId, "COMPLETED");
         return stageMapper.findById(stageId);
