@@ -4,7 +4,7 @@ import axios from 'axios'
 // server proxies to the Spring Boot backend (port 8080). The frontend never
 // calls the Python AI Service directly.
 //
-// NOTE: with a real LLM (qwen3-8b) a single chapter generation takes 30s+.
+// NOTE: with the release LLM (qwen3.7-plus) a single chapter generation can take 30s+.
 // The previous 10s timeout made the browser abort the request and surface a
 // false "请求失败，请检查后端服务与 AI 服务是否运行". Raise it well above
 // worst-case generation time.

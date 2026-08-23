@@ -13,9 +13,9 @@
 
     <groupId>com.example</groupId>
     <artifactId>story-ai-backend</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <name>story-ai-backend</name>
-    <description>AI Story Co-Author v0.1 — Spring Boot backend</description>
+    <description>AI Story Co-Author v0.1.1 — Spring Boot backend</description>
 
     <properties>
         <!-- Spec targets Java 21; local toolchain has Java 17 (Corretto).

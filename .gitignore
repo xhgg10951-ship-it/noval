@@ -10,6 +10,7 @@ venv/
 
 # ---- Java / Maven (Backend) ----
 target/
+.m2/
 build-deps/
 jarbuild/
 app-m6.jar

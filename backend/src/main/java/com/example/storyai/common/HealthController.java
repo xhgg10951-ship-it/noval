@@ -22,7 +22,7 @@ public class HealthController {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("status", "UP");
         body.put("service", "story-ai-backend");
-        body.put("version", "0.1.0");
+        body.put("version", "0.1.1");
         return body;
     }
 }

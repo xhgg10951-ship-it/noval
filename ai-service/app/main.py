@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.router import router
 from app.config import settings
 
-app = FastAPI(title="AI Story Co-Author — AI Service", version="0.1.0")
+app = FastAPI(title="AI Story Co-Author — AI Service", version="0.1.1")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,7 +22,7 @@ app.include_router(router, prefix="/ai")
 def health() -> dict:
     return {
         "status": "ok",
-        "version": "0.1.0",
+        "version": "0.1.1",
         "mock_llm": settings.using_mock_llm,
     }
 

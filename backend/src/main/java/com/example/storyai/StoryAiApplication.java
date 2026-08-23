@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * AI Story Co-Author v0.1 — Spring Boot backend entrypoint.
+ * AI Story Co-Author v0.1.1 — Spring Boot backend entrypoint.
  *
  * <p>Architecture principle: "AI proposes. Java decides. MySQL remembers."
  * Vue must never call the Python AI Service directly; it always goes through

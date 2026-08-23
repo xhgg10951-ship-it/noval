@@ -1,37 +1,32 @@
 # AI Story Co-Author
 
-> **Current development: v0.1.1-dev**
+> Active development: `v0.1.1-dev`
 
-AI-assisted co-writing tool for long-form serialized fiction. The author controls story direction, plans and final text; AI provides planning, drafts, memory extraction, assistance and polishing.
+AI-assisted co-writing for long-form serialized fiction. The author controls
+direction, plans, revisions, and final text; AI proposes plans, drafts, memory,
+assistance, and polish.
 
-## Status
-
-### v0.1
-
-```text
-Engineering Pipeline: ACCEPTED (v0.1)
-Real-LLM Product Behavior: ACCEPTED (v0.1.1, model qwen3.7-plus)
-```
-
-v0.1 证明了 Vue → Spring Boot → MyBatis/MySQL 与 Spring Boot → Python AI Service → LLM 的基础工程链路。真实使用暴露出续写、章节长度、计划执行、章节编辑、长篇节奏、Memory 质量、Generation Recovery 和 Mock 语义验收问题。
-
-### v0.1.1
+## Current Release Status
 
 ```text
-Requirements:            FROZEN
-Implementation:          COMPLETE (TASK-101..179)
-Engineering Verification: PASSED (backend 59/59 · python 7/7 · frontend build OK · V1..V14 applied)
-Real-LLM Acceptance:     6/7 PASS
-v0.1.1 Verdict:          **ACCEPTED** (model: qwen3.7-plus)
-Active plan:             .agent/TASKS.md
+Requirements:             FROZEN
+Implementation:           Feature Complete
+Release Hardening:        RH-01..RH-08 complete; RH-09 next
+Required Final Model:     qwen3.7-plus
+Final Real-LLM Suite:     NOT_RUN (RH-10)
+v0.1.1 Verdict:           NOT ACCEPTED
 ```
 
-真实 LLM（qwen3-8b）验收结果：Continuation ✓、Chapter Goal ✓、Replan Remaining ✓、
-Manual Edit + Memory Refresh ✓、Polish Fact Preservation ✓（7/7 结构化检查）、
-600-Chapter Pace Guard ✓、Low-value Detail Isolation ✓。
-原 qwen3-8b 曾因叙事输出上限（~1800–2000 字）导致 AC-103 FAIL；项目所有者
-决策切换 qwen3.7-plus 后重跑：3197/2788/2818/3795/3227 字，4/5 入带 PASS，
-正文抽查无灌水。详见 `.agent/evidence/ACCEPTANCE_METRICS.md` 与 `.agent/STATE.md`。
+v0.1.1 may be marked ACCEPTED only after RH-01 through RH-10 pass and the full
+RH-10 real-LLM suite passes on `qwen3.7-plus`. The old TASK-179 verdict is
+superseded by `V0.1.1_RELEASE_HARDENING.md`.
+
+Historical qwen3-8b results are retained as evidence only:
+
+> **HISTORICAL / SUPERSEDED FOR FINAL RELEASE VERDICT**
+
+They do not prove the current release and must not be used as the final model
+verdict.
 
 ## Architecture
 
@@ -49,20 +44,19 @@ Vue 3 → Spring Boot → MyBatis/MySQL
 ## Active Documents
 
 1. `AGENTS.md`
-2. `V0.1.1_IMPROVEMENT_PLAN.md`
-3. `.agent/STATE.md`
-4. `.agent/TASKS.md`
-5. `MVP_SCOPE.md`
-6. `PRODUCT_SPEC.md`
-7. `ACCEPTANCE_TESTS.md`
-8. `ARCHITECTURE.md`
-9. `TECH_STACK.md`
+2. `V0.1.1_RELEASE_HARDENING.md`
+3. `V0.1.1_IMPROVEMENT_PLAN.md`
+4. `.agent/STATE.md`
+5. `.agent/TASKS.md`
+6. `MVP_SCOPE.md`
+7. `PRODUCT_SPEC.md`
+8. `ACCEPTANCE_TESTS.md`
+9. `ARCHITECTURE.md`
+10. `TECH_STACK.md`
 
-`PROJECT_VISION.md` 仍是长期愿景。
+`PROJECT_VISION.md` is the long-term vision. Local setup and verification are
+documented in `RUN.md`.
 
-## Validation Rule
+## Verification Rule
 
 > **Mock proves plumbing. Real LLM proves AI behavior.**
-
-当前启动方式仍参考 `RUN.md`；只有实现改变运行方式时再同步 RUN。
-

@@ -1,6 +1,6 @@
 """Chapter writing service: /ai/generate-chapter.
 
-TASK-121 length guard: compact models (e.g. qwen3-8b) tend to emit ~1000-char
+TASK-121 length guard: compact models can tend to emit ~1000-char
 vignettes even when a 3000-char target is requested. To make the ChapterSpec
 target a real contract rather than a suggestion, we apply a bounded
 expand-and-reconcile step: if the first draft falls below the floor, we send it

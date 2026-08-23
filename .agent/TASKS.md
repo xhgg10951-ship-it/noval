@@ -198,7 +198,13 @@ Phase Gate 未通过：
 
 ---
 
-# 4. Phase 0 — Correct Evidence Base
+# 4. Historical TASK-101~179 Implementation Record
+
+> **HISTORICAL / SUPERSEDED FOR FINAL RELEASE VERDICT.** Sections 4 through 17
+> preserve pre-hardening implementation evidence. The active release gate is
+> the RH-01~RH-11 task tree in Section 18; no TASK-179 verdict overrides it.
+
+## Phase 0 — Correct Evidence Base
 
 目标：
 
@@ -3208,7 +3214,7 @@ TASK-177
 
 ---
 
-## TASK-179 — Freeze v0.1.1
+## TASK-179 — Historical Freeze Attempt (Superseded)
 
 Status: `DONE`
 
@@ -3296,11 +3302,11 @@ Frozen Requirement:
 
 Current Phase:
 
-`Release Hardening — RH-07 COMPLETE`
+`Release Hardening — RH-08 COMPLETE`
 
 Current Task:
 
-`RH-08 — Release Hygiene (NEXT)`
+`RH-09 — Full Engineering Verification (NEXT)`
 
 Task Status:
 
@@ -3308,7 +3314,7 @@ Task Status:
 
 Next Safe Action:
 
-> 从 RH-08 开始逐项核对 RUN.md、版本元数据、默认配置与仓库卫生，按 HR-001→HR-004 修复并验证。
+> 运行 RH-09 全量后端、Python、前端与迁移验证；通过前不得进入 RH-10。
 
 ---
 
@@ -3604,15 +3610,42 @@ Real-LLM Semantic Verification: `NOT_REQUIRED`
 
 ## RH-08 — Release Hygiene
 
-Status: `IN_PROGRESS`
+Status: `DONE`
 
 Scope: HR-001 / HR-002 / HR-003 / HR-004
 
 Dependencies: RH-07
 
+Implementation:
+
+- Replaced RUN.md with the v0.1.1 V1..V15 migration, qwen3.7-plus environment,
+  startup, revision/replan/job-control workflow, and current test instructions.
+- Synchronized backend, Python health, and frontend metadata to 0.1.1; the AI
+  service default release model is qwen3.7-plus.
+- Reconciled README and acceptance fixture/metrics around one truthful current
+  verdict; qwen3-8b evidence is explicitly historical and superseded.
+- Added deterministic pytest credential isolation, `.m2/` ignore, and minimal
+  frontend/Python/backend GitHub Actions CI with a MySQL 8.4 service and V1..V15.
+
+Regression Evidence:
+
+- Before fix, backend and Python health version assertions both failed because
+  their endpoints returned 0.1.0.
+- Before fix, collection order could initialize settings from an ambient API
+  key and make the ordinary Python suite call a real model.
+
+Engineering Verification: `PASSED`
+
+- Backend `HealthControllerTest`: 1/1
+- Python suite with deliberately injected fake ambient keys: 14/14 (mock)
+- Frontend Vitest: 6/6
+- Frontend production build: PASSED
+
+Real-LLM Semantic Verification: `NOT_REQUIRED`
+
 ## RH-09 — Full Engineering Verification
 
-Status: `TODO`
+Status: `IN_PROGRESS`
 
 Dependencies: RH-08
 

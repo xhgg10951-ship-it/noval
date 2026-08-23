@@ -25,7 +25,7 @@ class Settings:
     # Base URL — either convention is accepted (None -> default OpenAI endpoint).
     llm_base_url: str | None = _first_present("LLM_BASE_URL", "API_URL")
     # Model — either convention, case-insensitive for `model` / `MODEL`.
-    llm_model: str = _first_present("LLM_MODEL", "MODEL", "model") or "qwen3-8b"
+    llm_model: str = _first_present("LLM_MODEL", "MODEL", "model") or "qwen3.7-plus"
     ai_service_port: int = int(os.environ.get("AI_SERVICE_PORT", "8000"))
     ai_service_host: str = os.environ.get("AI_SERVICE_HOST", "0.0.0.0")
     log_level: str = os.environ.get("LOG_LEVEL", "INFO")

@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`RELEASE HARDENING — RH-07 COMPLETE`
+`RELEASE HARDENING — RH-08 COMPLETE`
 
 Current Task:
 
-`RH-08 — Release Hygiene (NEXT)`
+`RH-09 — Full Engineering Verification (NEXT)`
 
 Task Status:
 
@@ -98,6 +98,15 @@ Task Evidence:
   before the fix then MemoryV2 passed 9/9; related Memory suites passed 12/12;
   frontend passed 6/6 and production build PASSED.
 - AC-H09 Real-LLM Semantic Verification: NOT_REQUIRED.
+- RH-08 DONE (2026-08-23) — synchronized v0.1.1 version metadata and health
+  contracts, changed the release-model default to qwen3.7-plus, replaced the
+  stale runbook, reconciled active release/evidence documents, isolated normal
+  pytest from ambient real-LLM credentials, ignored the local Maven cache, and
+  added minimal three-stack GitHub Actions CI.
+- HR-001~HR-004 Engineering Verification: PASSED — both version regressions
+  failed at 0.1.0 before the fix then passed; Python mock suite passed 14/14
+  even with fake ambient keys; frontend passed 6/6 and production build passed.
+- RH-08 Real-LLM Semantic Verification: NOT_REQUIRED (release hygiene only).
 - Historical TASK-101~179 remain implementation history only and do not override
   the Release Hardening gate.
 
@@ -860,7 +869,11 @@ Do not ask the project owner where development stopped unless repository evidenc
 
 ---
 
-# 20. Final Current State
+# 20. Historical Pre-Hardening Verdict — Superseded
+
+> **HISTORICAL / SUPERSEDED FOR FINAL RELEASE VERDICT.** The snapshot below is
+> retained for audit history only. Section 21 and the release-hardening task tree
+> are the current authority; v0.1.1 is not currently ACCEPTED.
 
 ```text
 Version:
@@ -873,14 +886,14 @@ Implementation:
 IN PROGRESS (Phase 3 engineering DONE; TASK-132 regression suite pending;
 Phase 4 backend partially landed)
 
-Current Phase:
-v0.1.1 ACCEPTED — Phase 9 COMPLETE (BLOCKER-1 resolved via model upgrade qwen3.7-plus)
+Historical Phase:
+Phase 9 was considered complete before release hardening (superseded)
 
-Current Task:
-NONE — v0.1.1 frozen as ACCEPTED
+Historical Task:
+None under the pre-hardening task tree (superseded)
 
-Current Task Status:
-ACCEPTED (all 79 tasks terminal; DoD fully green)
+Historical Task Status:
+All 79 legacy tasks were terminal; this is not the current release verdict
 
 Phase 0 Gate:
 PASSED (2026-08-21, after commit 63781dd)
@@ -946,9 +959,8 @@ qwen3.7-plus; AC-103 re-run under frozen conditions produced
 manual inspection confirmed rich sensory prose, no padding. Original
 qwen3-8b FAIL records retained as capability-difference evidence.
 
-Next Safe Action:
-None required for v0.1.1 — it is ACCEPTED. Future work belongs to a new
-frozen version (candidates already recorded in the Deferred Backlog).
+Historical Next Action:
+Superseded by Section 21 and RH-09.
 ```
 
 # 21. Release Hardening Authority (Current)
@@ -960,7 +972,7 @@ repository is currently:
 
 Release verdict:
 
-`NOT ACCEPTED — RH-08 through RH-10 remain; RH-11 is gated`
+`NOT ACCEPTED — RH-09 and RH-10 remain; RH-11 is gated`
 
 Hardening progress:
 
@@ -972,8 +984,8 @@ RH-04 DONE — AC-H04/H05/H06 PASSED (engineering)
 RH-05 DONE — HH-001/HH-002/HH-003 PASSED (engineering)
 RH-06 DONE — AC-H07/H08 PASSED (engineering)
 RH-07 DONE — AC-H09 PASSED (engineering)
-RH-08 NEXT
-RH-09 TODO
+RH-08 DONE — HR-001/HR-002/HR-003/HR-004 PASSED (engineering)
+RH-09 NEXT
 RH-10 TODO — final qwen3.7-plus semantic suite
 RH-11 BLOCKED BY RH-08~RH-10
 ```

@@ -355,7 +355,7 @@ def _fmt_writer_spec(req: GenerateChapterRequest) -> str:
     """TASK-117/118: render the full ChapterSpec the Writer must execute.
 
     TASK-121 length hardening: the target character count is a HARD contract.
-    qwen3-8b (and similar compact models) tend to write ~1000-char vignettes
+    Compact models can tend to write ~1000-character vignettes
     unless explicitly pushed, so we state the floor/ceiling, forbid under-length
     output, and give concrete structural guidance (expand each beat into a
     paragraph-level scene with dialogue, action, and interiority).
