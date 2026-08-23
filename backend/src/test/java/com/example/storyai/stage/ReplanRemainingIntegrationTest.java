@@ -105,6 +105,20 @@ class ReplanRemainingIntegrationTest {
                 .toList());
     }
 
+    /** Mirrors the continuation-aware qwen response retained by RH-10. */
+    private PlanStageResponse globalPlanOf(int firstOrder, int count, String marker) {
+        return new PlanStageResponse(count, IntStream.range(0, count)
+                .mapToObj(offset -> {
+                    int order = firstOrder + offset;
+                    return new PlanStageResponse.ChapterPlanItem(
+                            order, marker + "：第" + order + "章",
+                            "新推进 " + (offset + 1) + "/" + count,
+                            3000, List.of("继续既成事实"), List.of("不得重开"),
+                            List.of("推进当前事件"), "衔接下一章");
+                })
+                .toList());
+    }
+
     private void stubWriter() {
         when(aiServiceClient.generateChapter(any(GenerateChapterRequest.class)))
                 .thenAnswer(inv -> {
@@ -374,6 +388,67 @@ class ReplanRemainingIntegrationTest {
         assertThat(writerRequests.getAllValues().stream()
                 .map(GenerateChapterRequest::chapterOrder)
                 .toList()).containsExactly(1, 2, 3, 4, 5, 6);
+    }
+
+    /**
+     * RH-03 regression: the real qwen continuation responses retained by RH-10
+     * use logical story orders (4..6), not relative orders (1..3). Java owns the
+     * canonical persisted order and must accept either representation without
+     * rejecting or double-shifting it.
+     */
+    @Test
+    void replanRemainingAcceptsGlobalLogicalOrdersFromPlanner() throws Exception {
+        Long storyId = createStory();
+        long stageId = createActiveStage(storyId, 9);
+
+        for (int i = 0; i < 3; i++) {
+            mockMvc.perform(post("/api/stages/{id}/chapters", stageId))
+                    .andExpect(status().isOk());
+        }
+
+        when(aiServiceClient.replanStage(any(PlanStageRequest.class)))
+                .thenReturn(globalPlanOf(4, 3, "qwen续写"));
+
+        mockMvc.perform(post("/api/stages/{id}/replan-remaining", stageId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"remainingChapterCount\":3}"))
+                .andExpect(status().isOk());
+
+        List<Integer> activeOrders = new java.util.ArrayList<>();
+        for (JsonNode plan : getStageJson(stageId).get("plans")) {
+            if (plan.get("planVersion").asInt() == 2
+                    && "ACTIVE".equals(plan.get("status").asText())) {
+                activeOrders.add(plan.get("chapterOrder").asInt());
+            }
+        }
+        assertThat(activeOrders).containsExactly(4, 5, 6);
+    }
+
+    /** A later Stage uses the same logical-order contract as Replan Remaining. */
+    @Test
+    void laterStageAcceptsGlobalLogicalOrdersFromPlanner() throws Exception {
+        Long storyId = createStory();
+        long firstStageId = createActiveStage(storyId, 3);
+        for (int i = 0; i < 3; i++) {
+            mockMvc.perform(post("/api/stages/{id}/chapters", firstStageId))
+                    .andExpect(status().isOk());
+        }
+
+        when(aiServiceClient.planStage(any(PlanStageRequest.class)))
+                .thenReturn(globalPlanOf(4, 2, "新阶段续写"));
+
+        MvcResult created = mockMvc.perform(post("/api/stories/{id}/stages", storyId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"direction\":\"继续现有剧情\",\"targetChapterCount\":2}"))
+                .andExpect(status().isCreated())
+                .andReturn();
+        JsonNode stage = objectMapper.readTree(
+                created.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8));
+        List<Integer> orders = new java.util.ArrayList<>();
+        for (JsonNode plan : stage.get("plans")) {
+            orders.add(plan.get("chapterOrder").asInt());
+        }
+        assertThat(orders).containsExactly(4, 5);
     }
 
     // ---- TASK-134 guard: wholesale replan is refused once generation started ----

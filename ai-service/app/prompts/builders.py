@@ -131,6 +131,7 @@ def build_plan_prompt(req: PlanStageRequest) -> Tuple[str, str]:
 目标章节数：{req.targetChapterCount or '由你决定'}
 
 每一章计划都必须包含完整的 ChapterSpec：
+- order：真实故事章节号；已有第 N 章时必须从 N+1 开始，尚无正文时从 1 开始
 - targetCharacters：本章目标字数（建议 2500–3500，长篇请接近上限）
 - mustAdvance：本章必须推进的要点列表
 - mustNotDo：本章禁止做的事列表（例如不得重复已完成阶段、不得重复开场）

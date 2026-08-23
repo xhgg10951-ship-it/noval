@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`RELEASE HARDENING REOPENED — RH-02 REVALIDATED`
+`RELEASE HARDENING REOPENED — RH-03 COMPLETE`
 
 Current Task:
 
-`RH-03 — Replan Logical Order Contract Repair`
+`RH-04 — Generation UI Completion Revalidation`
 
 Task Status:
 
@@ -56,6 +56,15 @@ Task Evidence:
   `MemoryProvenanceIntegrationTest` passed 2/2 against MySQL: deleting the
   sword event removed `item:铁剑`, while revising Chapter 1 left Chapter 2's
   newer location and relationship untouched. No source fix was required.
+- RH-03 COMPLETE (2026-08-23, reopened gate) — regression replayed the retained
+  qwen continuation contract (`4..6` for Replan Remaining and `4..5` for a
+  later Stage). Both cases failed with HTTP 502 before the fix. Java now accepts
+  either contiguous relative `1..N` or real logical `current+1..N` Planner
+  orders and canonicalizes persistence/Writer input to the real story chapter
+  numbers. The Planner prompt explicitly requests logical story order.
+- RH-03 Engineering Verification: PASSED — new regressions 2/2;
+  `ReplanRemainingIntegrationTest` 9/9; `StagePlanningIntegrationTest` 5/5;
+  Python 14/14.
 
 - RH-01 DONE (2026-08-23) — regression first reproduced stale summary after
   Manual Edit; fixed Manual Edit summary refresh + automatic re-extract,

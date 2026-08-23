@@ -3748,6 +3748,39 @@ Real-LLM Semantic Verification: `NOT_REQUIRED` (deterministic persistence)
 
 Next active task: `RH-03 — Replan Logical Order Contract Repair`
 
+## RH-03 Reopened — Replan Logical Order Contract
+
+Status: `DONE`
+
+Observed regression before fix:
+
+- The retained RH-10 qwen responses use global logical order (`4..6`, `6..10`).
+- Java required every raw Planner response to start at 1, so Replan Remaining
+  returned HTTP 502 before its existing shift and a later Stage also returned
+  HTTP 502.
+- Two new MySQL-backed regressions reproduced both failures.
+
+Fix:
+
+- Java accepts only contiguous relative `1..N` or contiguous real
+  `currentChapterNumber+1..N` Planner output.
+- Java canonicalizes both representations to the real next story chapter
+  numbers before persistence; no double shift is possible.
+- Planner prompt now explicitly defines `order` as the real story chapter number.
+
+Engineering Verification: `PASSED`
+
+- New qwen-contract regressions: 2/2 PASSED after failing before the fix.
+- `ReplanRemainingIntegrationTest`: 9/9 PASSED.
+- `StagePlanningIntegrationTest`: 5/5 PASSED.
+- Python: 14/14 PASSED.
+
+Real-LLM Semantic Verification: `NOT_REQUIRED` here; the exact retained qwen
+response shapes are covered deterministically and the full product-wired rerun
+remains RH-10.
+
+Next active task: `RH-04 — Generation UI Completion Revalidation`
+
 
 
 

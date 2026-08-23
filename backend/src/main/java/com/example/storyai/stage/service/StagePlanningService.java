@@ -64,7 +64,7 @@ public class StagePlanningService {
         List<StoryConstraint> constraints = storyService.getConstraints(storyId);
 
         PlanStageRequest request = buildRequest(story, constraints, direction, targetChapterCount);
-        PlanStageResponse plan = callPlanner(request, false);
+        PlanStageResponse plan = callPlanner(request, false, currentChapterNumber(storyId));
         return stageService.saveNewStage(storyId, direction, targetChapterCount, plan);
     }
 
@@ -88,7 +88,8 @@ public class StagePlanningService {
 
         PlanStageRequest request = buildRequest(story, constraints, stage.getDirection(),
                 targetChapterCount);
-        PlanStageResponse plan = callPlanner(request, true);
+        PlanStageResponse plan = callPlanner(
+                request, true, currentChapterNumber(story.getId()));
         return stageService.replacePlans(stageId, targetChapterCount, plan);
     }
 
@@ -159,29 +160,32 @@ public class StagePlanningService {
                     + "严禁重复或重演以下任何节拍）：\n" + String.join("\n", beats);
             request = buildRequest(story, constraints, direction, remainingChapterCount);
         }
-        PlanStageResponse plan = callPlanner(request, true);
-
         // RH-03: planVersion separates historical rows, so logical chapter order
         // must not be shifted behind superseded history. Start the new remainder
         // at the next real story chapter number (4 after Chapters 1..3), while V1
         // superseded orders remain queryable as history.
         List<ChapterPlan> existing = stageService.getPlans(stageId);
-        Integer currentChapterNumber = contextReader.getCurrentChapterNumber(story.getId());
-        int baseOrder = currentChapterNumber == null ? 0 : currentChapterNumber;
+        int baseOrder = currentChapterNumber(story.getId());
+        PlanStageResponse plan = callPlanner(request, true, baseOrder);
         int newVersion = existing.stream()
                 .mapToInt(p -> p.getPlanVersion() == null ? 1 : p.getPlanVersion())
                 .max().orElse(1) + 1;
-        PlanStageResponse shifted = shiftOrders(plan, baseOrder);
 
-        return stageService.replanRemaining(stageId, remainingChapterCount, shifted, newVersion);
+        return stageService.replanRemaining(stageId, remainingChapterCount, plan, newVersion);
     }
 
-    /** Re-numbers relative Planner items after the latest real chapter number. */
-    private PlanStageResponse shiftOrders(PlanStageResponse plan, int baseOrder) {
-        List<PlanStageResponse.ChapterPlanItem> shifted = new java.util.ArrayList<>();
-        for (PlanStageResponse.ChapterPlanItem item : plan.chapterPlans()) {
-            shifted.add(new PlanStageResponse.ChapterPlanItem(
-                    item.order() + baseOrder,
+    /**
+     * Java owns the canonical logical order. Continuation-aware models commonly
+     * return global orders (4..6), while deterministic mocks and older prompts
+     * return relative orders (1..3). Both representations are accepted only when
+     * contiguous, then normalized to the real next story chapter numbers.
+     */
+    private PlanStageResponse normalizeOrders(PlanStageResponse plan, int baseOrder) {
+        List<PlanStageResponse.ChapterPlanItem> normalized = new java.util.ArrayList<>();
+        for (int i = 0; i < plan.chapterPlans().size(); i++) {
+            PlanStageResponse.ChapterPlanItem item = plan.chapterPlans().get(i);
+            normalized.add(new PlanStageResponse.ChapterPlanItem(
+                    baseOrder + i + 1,
                     item.goal(),
                     item.expectedProgress(),
                     item.targetCharacters(),
@@ -190,7 +194,12 @@ public class StagePlanningService {
                     item.storyBeats(),
                     item.endingIntent()));
         }
-        return new PlanStageResponse(plan.suggestedChapterCount(), shifted);
+        return new PlanStageResponse(plan.suggestedChapterCount(), normalized);
+    }
+
+    private int currentChapterNumber(Long storyId) {
+        Integer current = contextReader.getCurrentChapterNumber(storyId);
+        return current == null ? 0 : current;
     }
 
     public Stage confirmPlan(Long stageId) {
@@ -241,19 +250,20 @@ public class StagePlanningService {
         );
     }
 
-    private PlanStageResponse callPlanner(PlanStageRequest request, boolean replan) {
+    private PlanStageResponse callPlanner(PlanStageRequest request, boolean replan,
+                                          int baseOrder) {
         PlanStageResponse plan = replan
                 ? aiServiceClient.replanStage(request)
                 : aiServiceClient.planStage(request);
-        validatePlan(plan);
-        return plan;
+        validatePlan(plan, baseOrder);
+        return normalizeOrders(plan, baseOrder);
     }
 
     /**
      * Structured-response validation: the planner must return a positive count
      * and a contiguous, non-empty plan. Anything else is a contract violation.
      */
-    private void validatePlan(PlanStageResponse plan) {
+    private void validatePlan(PlanStageResponse plan, int baseOrder) {
         if (plan == null) {
             throw new AiServiceException("AI 规划服务返回空响应");
         }
@@ -271,14 +281,22 @@ public class StagePlanningService {
                     "AI 规划服务返回的章节数(%d)与计划数量(%d)不一致",
                     plan.suggestedChapterCount(), items.size()));
         }
+        int firstOrder = items.get(0).order();
+        int globalFirstOrder = baseOrder + 1;
+        if (firstOrder != 1 && firstOrder != globalFirstOrder) {
+            throw new AiServiceException(String.format(
+                    "章节起始序号无效: 期望相对序号 1 或真实章节号 %d, 实际 %d",
+                    globalFirstOrder, firstOrder));
+        }
         for (int i = 0; i < items.size(); i++) {
             PlanStageResponse.ChapterPlanItem item = items.get(i);
             if (item.goal() == null || item.goal().isBlank()) {
                 throw new AiServiceException("第 " + (i + 1) + " 章的目标为空");
             }
-            if (item.order() != i + 1) {
+            int expectedOrder = firstOrder + i;
+            if (item.order() != expectedOrder) {
                 throw new AiServiceException(String.format(
-                        "章节序号不连续: 期望 %d, 实际 %d", i + 1, item.order()));
+                        "章节序号不连续: 期望 %d, 实际 %d", expectedOrder, item.order()));
             }
         }
     }
