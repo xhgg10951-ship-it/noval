@@ -1,0 +1,63 @@
+{
+  "method": "POST",
+  "path": "/api/stories/1595/stages",
+  "request": {
+    "direction": "第二天前往冒险者公会入会并接取委托：调查幽影森林失踪案。",
+    "targetChapterCount": 3,
+    "targetCharacters": 3000
+  },
+  "status": 201,
+  "durationSeconds": 26.547,
+  "response": {
+    "id": 1055,
+    "storyId": 1595,
+    "direction": "第二天前往冒险者公会入会并接取委托：调查幽影森林失踪案。",
+    "status": "PLANNING",
+    "suggestedChapterCount": 3,
+    "targetChapterCount": 3,
+    "targetCharacters": 3000,
+    "plans": [
+      {
+        "id": 3094,
+        "stageId": 1055,
+        "chapterOrder": 3,
+        "goal": "林夜在艾琳的陪同下前往冒险者公会，完成入会测试并注册身份，初步展示其现代思维对异世界规则的适应与伪装。",
+        "expectedProgress": "林夜成功获得冒险者徽章（最低等级），确立合法身份，但身体虚弱状态引起公会人员注意，需通过话术化解。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:42:58.11",
+        "updatedAt": "2026-08-23T23:42:58.11"
+      },
+      {
+        "id": 3095,
+        "stageId": 1055,
+        "chapterOrder": 4,
+        "goal": "林夜与艾琳共同接取'幽影森林失踪案'委托，并在出发前进行必要的物资准备与情报分析，展现林夜的逻辑推理能力。",
+        "expectedProgress": "两人正式组队（临时），明确任务目标与报酬，林夜通过提问获取关键线索，艾琳对林夜的'直觉'产生轻微好奇。",
+        "targetCharacters": 3200,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:42:58.11",
+        "updatedAt": "2026-08-23T23:42:58.11"
+      },
+      {
+        "id": 3096,
+        "stageId": 1055,
+        "chapterOrder": 5,
+        "goal": "进入幽影森林外围，遭遇初次环境危机与小规模魔物骚扰，林夜在实战中艰难求生，验证其生存策略。",
+        "expectedProgress": "林夜体验真实的魔法世界战斗残酷性，依靠艾琳救援脱险，同时发现第一个关键线索（如异常的植物或痕迹）。",
+        "targetCharacters": 3500,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:42:58.11",
+        "updatedAt": "2026-08-23T23:42:58.11"
+      }
+    ],
+    "createdAt": "2026-08-23T23:42:58.108",
+    "updatedAt": "2026-08-23T23:42:58.108"
+  }
+}

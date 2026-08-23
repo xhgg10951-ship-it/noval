@@ -1,0 +1,46 @@
+{
+  "method": "GET",
+  "path": "/api/stages/1054",
+  "request": null,
+  "status": 200,
+  "durationSeconds": 0.031,
+  "response": {
+    "id": 1054,
+    "storyId": 1595,
+    "direction": "用两章写完林夜初到异界、认识艾琳并在她住处安顿过夜。",
+    "status": "COMPLETED",
+    "suggestedChapterCount": 2,
+    "targetChapterCount": 2,
+    "targetCharacters": 3000,
+    "plans": [
+      {
+        "id": 3092,
+        "stageId": 1054,
+        "chapterOrder": 1,
+        "goal": "林夜初到异界，在城门附近遇见艾琳；两人建立初步信任。",
+        "expectedProgress": "林夜从现代意识苏醒到异界街头，经历短暂的生存恐慌，被艾琳救下或注意到，双方建立初步联系。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": false,
+        "status": "COMPLETED",
+        "createdAt": "2026-08-23T23:39:51.413",
+        "updatedAt": "2026-08-23T23:40:30.574"
+      },
+      {
+        "id": 3093,
+        "stageId": 1054,
+        "chapterOrder": 2,
+        "goal": "艾琳把林夜带回住处安顿；本章结束时已经过夜，二人已认识且林夜已有住所。",
+        "expectedProgress": "林夜在艾琳家中安顿，通过观察了解基本生活常识，两人进行有限度的交流，林夜成功获得一夜安眠权。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": false,
+        "status": "COMPLETED",
+        "createdAt": "2026-08-23T23:39:51.413",
+        "updatedAt": "2026-08-23T23:41:40.284"
+      }
+    ],
+    "createdAt": "2026-08-23T23:39:51.411",
+    "updatedAt": "2026-08-23T23:42:08.262"
+  }
+}

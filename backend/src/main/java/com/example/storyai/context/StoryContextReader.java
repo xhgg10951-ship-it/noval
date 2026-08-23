@@ -18,6 +18,7 @@ import com.example.storyai.arc.service.ArcService;
 import com.example.storyai.chapter.model.Chapter;
 import com.example.storyai.chapter.service.ChapterService;
 import com.example.storyai.memory.model.CurrentState;
+import com.example.storyai.memory.model.MemoryCandidate;
 import com.example.storyai.memory.model.MemoryTypes;
 import com.example.storyai.memory.model.RelationshipState;
 import com.example.storyai.memory.model.StoryMemory;
@@ -335,7 +336,8 @@ public class StoryContextReader {
         }
         if (endingExcerptChars > 0 && !recent.isEmpty()) {
             Chapter last = recent.get(recent.size() - 1);
-            String content = last.getContent();
+            String content = withoutIgnoredTransientEvidence(
+                    storyId, last.getId(), last.getContent());
             if (content != null && !content.isEmpty()) {
                 String excerpt = content.length() <= endingExcerptChars
                         ? content
@@ -432,7 +434,8 @@ public class StoryContextReader {
                     .orElse(null);
             if (last != null) {
                 lastSummary = last.getSummary();
-                String content = last.getContent();
+                String content = withoutIgnoredTransientEvidence(
+                        storyId, last.getId(), last.getContent());
                 if (content != null && !content.isEmpty() && endingExcerptChars > 0) {
                     lastEnding = content.length() <= endingExcerptChars
                             ? content
@@ -507,6 +510,48 @@ public class StoryContextReader {
                 arc == null ? null : arc.getTargetStartChapter(),
                 arc == null ? null : arc.getTargetEndChapter()
         );
+    }
+
+    /**
+     * AC-105: an ignored low-value candidate must not bypass selective Memory by
+     * re-entering AI context through the raw last-chapter ending. Evidence is
+     * grounded in the chapter body, so remove only those exact grounded spans;
+     * the surrounding narrative remains available as the continuity anchor.
+     */
+    private String withoutIgnoredTransientEvidence(Long storyId,
+                                                    Long chapterId,
+                                                    String content) {
+        if (content == null || content.isBlank() || chapterId == null) {
+            return content;
+        }
+        List<MemoryCandidate> candidates = memoryService.listCandidates(storyId);
+        if (candidates == null || candidates.isEmpty()) {
+            return content;
+        }
+        String sanitized = content;
+        for (MemoryCandidate candidate : candidates) {
+            if (candidate == null
+                    || !Objects.equals(chapterId, candidate.getSourceChapterId())
+                    || !MemoryTypes.TRANSIENT_DETAIL.equals(candidate.getType())
+                    || candidate.getImportance() > 2
+                    || !("IGNORE".equals(candidate.getSuggestedAction())
+                         || "IGNORED".equals(candidate.getProcessingStatus()))) {
+                continue;
+            }
+            String evidence = candidate.getEvidence();
+            if (evidence == null || evidence.isBlank()) continue;
+            // Extractors may join grounded quotes with "..."/"……". Each
+            // sufficiently specific fragment is still safe to remove literally.
+            for (String fragment : evidence.split("(?:\\.{3,}|…+)")) {
+                String grounded = fragment.trim();
+                if (grounded.length() >= 6) {
+                    sanitized = sanitized.replace(grounded, "");
+                }
+            }
+        }
+        return sanitized.replaceAll("[ \\t]+\\n", "\n")
+                .replaceAll("\\n{3,}", "\n\n")
+                .trim();
     }
 
     /** Frozen Writer context: long-form target and the chapter being written. */

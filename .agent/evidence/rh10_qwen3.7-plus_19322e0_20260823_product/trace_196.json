@@ -1,0 +1,29 @@
+{
+  "method": "POST",
+  "path": "/api/chapters/1445/polish",
+  "request": {
+    "userInstruction": "降低机械重复，保持全部事实、位置、物品和结尾意图，不新增事件。"
+  },
+  "status": 200,
+  "durationSeconds": 19.75,
+  "response": {
+    "id": 1445,
+    "storyId": 1595,
+    "stageId": 1055,
+    "planId": 3096,
+    "chapterNumber": 5,
+    "title": "第五章：腐臭与黑液",
+    "content": "林夜和艾琳在冒险者公会完成失踪案线索汇报后，仍站在公会大厅。他手中紧握着铁剑和调查委托书，脑海中再次确认失踪者最后出现在幽影森林。此时，他听见艾琳提醒他午夜去旧钟楼见见证人。林夜回答道：“我们午夜去旧钟楼。”随后，林夜将沾有黑色粘液的徽章交给艾琳，艾琳脸色微变，低声说出一个令人心悸的名字或现象，暗示案件背后涉及更深层的黑暗力量，两人决定继续深入追踪。",
+    "summary": "林夜与艾琳在公会汇报完线索后，约定午夜前往旧钟楼会见见证人。林夜将沾有黑色粘液的徽章交给艾琳，其反应暗示案件涉及深层黑暗力量，两人决定继续深入追踪。",
+    "generationStatus": "GENERATED",
+    "currentRevisionId": 1248,
+    "currentRevisionVersion": 3,
+    "sourceType": "AI_POLISH",
+    "status": "DRAFT",
+    "memoryExtractionStatus": "COMPLETED",
+    "targetCharacters": 3000,
+    "actualCharacterCount": 176,
+    "createdAt": "2026-08-23T23:45:44",
+    "updatedAt": "2026-08-23T23:46:38"
+  }
+}

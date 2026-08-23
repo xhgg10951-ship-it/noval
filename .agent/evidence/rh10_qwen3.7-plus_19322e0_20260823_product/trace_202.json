@@ -1,0 +1,85 @@
+{
+  "method": "GET",
+  "path": "/api/stages/1056",
+  "request": null,
+  "status": 200,
+  "durationSeconds": 0.015,
+  "response": {
+    "id": 1056,
+    "storyId": 1595,
+    "direction": "current=5；继续第一卷1–60章的生存融入，只安排近期公会委托、城镇立足和幽影森林调查，不揭示终局真相，不安排终局大战或最终返回通道。",
+    "status": "PLANNING",
+    "suggestedChapterCount": 5,
+    "targetChapterCount": 5,
+    "targetCharacters": 3000,
+    "plans": [
+      {
+        "id": 3097,
+        "stageId": 1056,
+        "chapterOrder": 6,
+        "goal": "描写前往旧钟楼的夜间潜行过程，营造灰石城夜晚的压抑氛围，并展示林夜在虚弱状态下对环境的敏锐观察。",
+        "expectedProgress": "两人抵达旧钟楼区域，发现环境异常安静，暗示有人提前清场或埋伏。",
+        "targetCharacters": 2800,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:47:09.201",
+        "updatedAt": "2026-08-23T23:47:09.201"
+      },
+      {
+        "id": 3098,
+        "stageId": 1056,
+        "chapterOrder": 7,
+        "goal": "在旧钟楼内与见证人接触，获取关于‘黑色粘液’和‘红土’的关键情报，同时暴露潜在的内部威胁。",
+        "expectedProgress": "见证人提供线索后迅速死亡或失踪，留下新的谜题，证实案件涉及公会内部或高层势力。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:47:09.201",
+        "updatedAt": "2026-08-23T23:47:09.201"
+      },
+      {
+        "id": 3099,
+        "stageId": 1056,
+        "chapterOrder": 8,
+        "goal": "紧急撤离旧钟楼，林夜利用地形优势帮助艾琳摆脱可能的追兵，初步建立信任纽带。",
+        "expectedProgress": "成功甩掉尾巴，回到安全屋或临时据点。林夜的‘观察力’特长在实战中首次得到艾琳的真正认可。",
+        "targetCharacters": 2900,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:47:09.201",
+        "updatedAt": "2026-08-23T23:47:09.201"
+      },
+      {
+        "id": 3100,
+        "stageId": 1056,
+        "chapterOrder": 9,
+        "goal": "休整与分析阶段。林夜结合之前发现的‘红土’线索与地图碎片，完善推理，并解决生存压力（会费/医药费）。",
+        "expectedProgress": "确定下一步行动目标为南部废弃矿坑。林夜意识到必须提升实力或赚取更多佣金才能购买抗黑雾药剂。",
+        "targetCharacters": 2700,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:47:09.201",
+        "updatedAt": "2026-08-23T23:47:09.201"
+      },
+      {
+        "id": 3101,
+        "stageId": 1056,
+        "chapterOrder": 10,
+        "goal": "执行低级委托‘清理变异鼠患’，作为林夜的第一次实战试炼，重点描写他的非战斗贡献和团队协作。",
+        "expectedProgress": "任务完成，获得少量报酬。林夜证明了自己即使在战斗中也能通过策略发挥作用，巩固了在队伍中的位置。",
+        "targetCharacters": 3200,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:47:09.201",
+        "updatedAt": "2026-08-23T23:47:09.201"
+      }
+    ],
+    "createdAt": "2026-08-23T23:47:09.199",
+    "updatedAt": "2026-08-23T23:47:09.199"
+  }
+}

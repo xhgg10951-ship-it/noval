@@ -1,0 +1,23 @@
+{
+  "method": "PUT",
+  "path": "/api/stages/plans/3093",
+  "request": {
+    "goal": "艾琳把林夜带回住处安顿；本章结束时已经过夜，二人已认识且林夜已有住所。",
+    "targetCharacters": 3000
+  },
+  "status": 200,
+  "durationSeconds": 0.032,
+  "response": {
+    "id": 3093,
+    "stageId": 1054,
+    "chapterOrder": 2,
+    "goal": "艾琳把林夜带回住处安顿；本章结束时已经过夜，二人已认识且林夜已有住所。",
+    "expectedProgress": "林夜在艾琳家中安顿，通过观察了解基本生活常识，两人进行有限度的交流，林夜成功获得一夜安眠权。",
+    "targetCharacters": 3000,
+    "planVersion": 1,
+    "active": true,
+    "status": "ACTIVE",
+    "createdAt": "2026-08-23T23:39:51.413",
+    "updatedAt": "2026-08-23T23:39:51.458"
+  }
+}

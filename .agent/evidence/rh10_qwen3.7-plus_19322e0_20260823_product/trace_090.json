@@ -1,0 +1,59 @@
+{
+  "method": "POST",
+  "path": "/api/stages/1055/confirm",
+  "request": null,
+  "status": 200,
+  "durationSeconds": 0.0,
+  "response": {
+    "id": 1055,
+    "storyId": 1595,
+    "direction": "第二天前往冒险者公会入会并接取委托：调查幽影森林失踪案。",
+    "status": "ACTIVE",
+    "suggestedChapterCount": 3,
+    "targetChapterCount": 3,
+    "targetCharacters": 3000,
+    "plans": [
+      {
+        "id": 3094,
+        "stageId": 1055,
+        "chapterOrder": 3,
+        "goal": "完成冒险者公会登记并取得资格；林夜必须隐藏穿越者身份，不得向任何人暴露。",
+        "expectedProgress": "林夜成功获得冒险者徽章（最低等级），确立合法身份，但身体虚弱状态引起公会人员注意，需通过话术化解。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:42:58.11",
+        "updatedAt": "2026-08-23T23:42:58.138"
+      },
+      {
+        "id": 3095,
+        "stageId": 1055,
+        "chapterOrder": 4,
+        "goal": "接取调查幽影森林失踪案的初步委托，核对失踪者记录；不得围绕早餐或面包展开。",
+        "expectedProgress": "两人正式组队（临时），明确任务目标与报酬，林夜通过提问获取关键线索，艾琳对林夜的'直觉'产生轻微好奇。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:42:58.11",
+        "updatedAt": "2026-08-23T23:42:58.17"
+      },
+      {
+        "id": 3096,
+        "stageId": 1055,
+        "chapterOrder": 5,
+        "goal": "与艾琳准备调查物资并确认出城路线，只推进近期调查；不得围绕早餐或面包展开。",
+        "expectedProgress": "林夜体验真实的魔法世界战斗残酷性，依靠艾琳救援脱险，同时发现第一个关键线索（如异常的植物或痕迹）。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:42:58.11",
+        "updatedAt": "2026-08-23T23:42:58.201"
+      }
+    ],
+    "createdAt": "2026-08-23T23:42:58.108",
+    "updatedAt": "2026-08-23T23:42:58.209"
+  }
+}

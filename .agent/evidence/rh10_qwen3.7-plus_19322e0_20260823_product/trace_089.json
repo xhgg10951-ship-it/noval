@@ -1,0 +1,23 @@
+{
+  "method": "PUT",
+  "path": "/api/stages/plans/3096",
+  "request": {
+    "goal": "与艾琳准备调查物资并确认出城路线，只推进近期调查；不得围绕早餐或面包展开。",
+    "targetCharacters": 3000
+  },
+  "status": 200,
+  "durationSeconds": 0.032,
+  "response": {
+    "id": 3096,
+    "stageId": 1055,
+    "chapterOrder": 5,
+    "goal": "与艾琳准备调查物资并确认出城路线，只推进近期调查；不得围绕早餐或面包展开。",
+    "expectedProgress": "林夜体验真实的魔法世界战斗残酷性，依靠艾琳救援脱险，同时发现第一个关键线索（如异常的植物或痕迹）。",
+    "targetCharacters": 3000,
+    "planVersion": 1,
+    "active": true,
+    "status": "ACTIVE",
+    "createdAt": "2026-08-23T23:42:58.11",
+    "updatedAt": "2026-08-23T23:42:58.201"
+  }
+}

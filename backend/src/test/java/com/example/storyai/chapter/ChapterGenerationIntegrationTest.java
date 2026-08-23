@@ -424,6 +424,51 @@ class ChapterGenerationIntegrationTest {
                 .andExpect(jsonPath("$.length()").value(2));
     }
 
+    @Test
+    void ignoredTransientEvidenceDoesNotLeakThroughRecentNarrativeContext() throws Exception {
+        Long storyId = createStory();
+        when(aiServiceClient.planStage(any(PlanStageRequest.class)))
+                .thenReturn(planOf(2, "无关后续"));
+        when(aiServiceClient.generateChapter(any(GenerateChapterRequest.class)))
+                .thenAnswer(inv -> {
+                    GenerateChapterRequest request = inv.getArgument(0);
+                    if (request.chapterOrder() == 1) {
+                        return new GenerateChapterResponse(
+                                "安顿", "林夜在住处制定公会计划。早餐时，林夜吃掉一块普通面包，只是填饱肚子，随后不再关注它。",
+                                "林夜已经安顿并准备前往公会。");
+                    }
+                    return new GenerateChapterResponse(
+                            "登记", "林夜完成公会登记。", "林夜已经完成登记。");
+                });
+        when(aiServiceClient.extractMemory(any())).thenReturn(
+                new com.example.storyai.ai.dto.ExtractMemoryResponse(java.util.List.of(
+                        new com.example.storyai.ai.dto.ExtractMemoryResponse.MemoryCandidate(
+                                "TRANSIENT_DETAIL", "林夜", null, "食用普通面包填饱肚子",
+                                "IGNORE", "早餐时，林夜吃掉一块普通面包，只是填饱肚子，随后不再关注它。",
+                                1, "CHAPTER"))),
+                new com.example.storyai.ai.dto.ExtractMemoryResponse(java.util.List.of()));
+
+        long stageId = objectMapper.readTree(mockMvc.perform(
+                        post("/api/stories/{id}/stages", storyId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"direction\":\"第二章只办理公会登记\"}"))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString())
+                .get("id").asLong();
+
+        mockMvc.perform(post("/api/stages/{id}/chapters", stageId))
+                .andExpect(status().isOk());
+        mockMvc.perform(post("/api/stages/{id}/chapters", stageId))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<GenerateChapterRequest> captor =
+                ArgumentCaptor.forClass(GenerateChapterRequest.class);
+        verify(aiServiceClient, times(2)).generateChapter(captor.capture());
+        GenerateChapterRequest second = captor.getAllValues().get(1);
+        assertThat(second.recentContext()).contains("林夜已经安顿并准备前往公会");
+        assertThat(second.recentContext()).doesNotContain("普通面包");
+        assertThat(second.recentContext()).doesNotContain("填饱肚子");
+    }
+
     // ---- invalid writer response (missing content) -> 502 AI_SERVICE_ERROR ----
 
     @Test

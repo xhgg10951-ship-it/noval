@@ -1,0 +1,23 @@
+{
+  "method": "PUT",
+  "path": "/api/stages/plans/3095",
+  "request": {
+    "goal": "接取调查幽影森林失踪案的初步委托，核对失踪者记录；不得围绕早餐或面包展开。",
+    "targetCharacters": 3000
+  },
+  "status": 200,
+  "durationSeconds": 0.031,
+  "response": {
+    "id": 3095,
+    "stageId": 1055,
+    "chapterOrder": 4,
+    "goal": "接取调查幽影森林失踪案的初步委托，核对失踪者记录；不得围绕早餐或面包展开。",
+    "expectedProgress": "两人正式组队（临时），明确任务目标与报酬，林夜通过提问获取关键线索，艾琳对林夜的'直觉'产生轻微好奇。",
+    "targetCharacters": 3000,
+    "planVersion": 1,
+    "active": true,
+    "status": "ACTIVE",
+    "createdAt": "2026-08-23T23:42:58.11",
+    "updatedAt": "2026-08-23T23:42:58.17"
+  }
+}

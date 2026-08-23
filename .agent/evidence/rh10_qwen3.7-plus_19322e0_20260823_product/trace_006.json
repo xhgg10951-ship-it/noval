@@ -1,0 +1,23 @@
+{
+  "method": "PUT",
+  "path": "/api/stages/plans/3092",
+  "request": {
+    "goal": "林夜初到异界，在城门附近遇见艾琳；两人建立初步信任。",
+    "targetCharacters": 3000
+  },
+  "status": 200,
+  "durationSeconds": 0.0,
+  "response": {
+    "id": 3092,
+    "stageId": 1054,
+    "chapterOrder": 1,
+    "goal": "林夜初到异界，在城门附近遇见艾琳；两人建立初步信任。",
+    "expectedProgress": "林夜从现代意识苏醒到异界街头，经历短暂的生存恐慌，被艾琳救下或注意到，双方建立初步联系。",
+    "targetCharacters": 3000,
+    "planVersion": 1,
+    "active": true,
+    "status": "ACTIVE",
+    "createdAt": "2026-08-23T23:39:51.413",
+    "updatedAt": "2026-08-23T23:39:51.427"
+  }
+}
