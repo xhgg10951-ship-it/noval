@@ -28,17 +28,29 @@ Current Implementation Plan:
 
 Current Phase:
 
-`RELEASE HARDENING — RH-11 COMPLETE`
+`RELEASE HARDENING REOPENED — RH-01 REVALIDATED`
 
 Current Task:
 
-`NONE — v0.1.1 release frozen`
+`RH-02 — Memory Provenance Revalidation`
 
 Task Status:
 
-`ACCEPTED — RH-01~RH-11 complete; engineering, hosted CI, and qwen3.7-plus 7/7 passed`
+`NOT ACCEPTED — post-release functional audit found unresolved release blockers; strict RH-01→RH-11 revalidation is in progress`
 
 Task Evidence:
+
+- Release review reopened (2026-08-23) — `main`, `v0.1.1-dev`,
+  `origin/main`, and `origin/v0.1.1-dev` all pointed to `36ac510`; therefore
+  the functional audit findings on `main` apply unchanged to the development
+  branch. The prior ACCEPTED verdict is historical until RH-01~RH-10 and a
+  product-wired qwen3.7-plus suite pass again.
+- RH-01 REVALIDATED (2026-08-23) — real code still synchronizes current
+  content/title/summary and closes revision → summary refresh → Memory
+  re-extraction. `ChapterRevisionIntegrationTest` passed 8/8 against MySQL and
+  Python `tests/test_mock.py` passed 8/8. No source fix was required; the
+  existing regression covers Manual Edit, Regenerate, Polish, active Memory,
+  and subsequent Writer recent context.
 
 - RH-01 DONE (2026-08-23) — regression first reproduced stale summary after
   Manual Edit; fixed Manual Edit summary refresh + automatic re-extract,

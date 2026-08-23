@@ -3704,6 +3704,36 @@ Release rule:
 > RH-10 passed on qwen3.7-plus and RH-11 accepted the verified release.
 > Merge `v0.1.1-dev` to `main` and identify the release with tag `v0.1.1`.
 
+---
+
+# Post-release Functional Re-audit (2026-08-23)
+
+The repository-level functional review was performed at commit `36ac510`.
+`main` and `v0.1.1-dev` pointed to the same commit, so the findings apply to
+both branches. The earlier RH-11 ACCEPTED verdict is withdrawn while the
+strict RH-01 → RH-11 release-hardening sequence is revalidated.
+
+Current release verdict: `NOT ACCEPTED`
+
+## RH-01 Revalidation — Revision Consistency
+
+Status: `REVALIDATED`
+
+- Inspected the real Manual Edit, Regenerate, Polish, summary refresh, current
+  Chapter projection, Memory invalidation/re-extraction, and Writer recent
+  context paths.
+- Existing regression reproduces HB-001 and covers the complete AC-H01 chain;
+  no duplicate regression or source change was required.
+- Backend: `ChapterRevisionIntegrationTest` 8/8 PASSED against MySQL.
+- Python: `tests/test_mock.py` 8/8 PASSED, including current-body summary refresh.
+
+Engineering Verification: `PASSED`
+
+Real-LLM Semantic Verification: `NOT_REQUIRED` (deterministic workflow; final
+product-wired qwen3.7-plus gate remains RH-10)
+
+Next active task: `RH-02 — Memory Provenance Revalidation`
+
 
 
 
