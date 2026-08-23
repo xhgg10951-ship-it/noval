@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`RELEASE HARDENING REOPENED — RH-08 COMPLETE`
+`RELEASE HARDENING REOPENED — RH-09 COMPLETE`
 
 Current Task:
 
-`RH-09 — Full Engineering Verification`
+`RH-10 — qwen3.7-plus Full Real-LLM Acceptance`
 
 Task Status:
 
@@ -117,6 +117,15 @@ Task Evidence:
   health/version 1/1; Python full deterministic suite 17/17; frontend 8/8 and
   production build PASSED; CI YAML parsed with backend/frontend/python jobs.
   Hosted CI is intentionally NOT_RUN until RH-09.
+- RH-09 COMPLETE (2026-08-23, reopened gate) — the complete backend suite
+  passed 81/81 against MySQL, the complete Python deterministic suite passed
+  17/17, and frontend Vitest passed 8/8 with a successful production build.
+  An isolated empty MySQL 8.4 instance applied V1 through V16 in numeric order
+  and produced 12 tables, one `stage.target_characters` column and two
+  `source_candidate_id` provenance columns. GitHub Actions run `32647712308`
+  passed on product commit `177c2ef` with backend/frontend/python jobs.
+- RH-09 Engineering Verification: PASSED. Release status remains NOT ACCEPTED;
+  RH-10 must now pass the complete product-wired qwen3.7-plus Real-LLM suite.
 
 - RH-01 DONE (2026-08-23) — regression first reproduced stale summary after
   Manual Edit; fixed Manual Edit summary refresh + automatic re-extract,

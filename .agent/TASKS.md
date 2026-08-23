@@ -3969,6 +3969,28 @@ Real-LLM Semantic Verification: `NOT_REQUIRED` (RH-10 remains pending).
 
 Next active task: `RH-09 — Full Engineering Verification`
 
+## RH-09 Reopened — Full Engineering Verification
+
+Status: `DONE`
+
+Engineering Verification: `PASSED`
+
+- Complete backend Maven suite: 81/81 PASSED against MySQL.
+- Complete Python deterministic suite: 17/17 PASSED.
+- Complete frontend Vitest suite: 8/8 PASSED; production build PASSED.
+- A disposable isolated MySQL 8.4 instance applied V1 through V16 from an
+  empty schema in numeric order. The resulting schema contained 12 tables,
+  `stage.target_characters`, and both `source_candidate_id` provenance columns.
+- GitHub Actions run `32647712308` passed on commit `177c2ef` with the minimal
+  backend/frontend/python workflow.
+
+Real-LLM Semantic Verification: `NOT_REQUIRED` here; the mandatory complete
+qwen3.7-plus product-wired suite is RH-10.
+
+Release verdict remains `NOT ACCEPTED`.
+
+Next active task: `RH-10 — qwen3.7-plus Full Real-LLM Acceptance`
+
 
 
 
