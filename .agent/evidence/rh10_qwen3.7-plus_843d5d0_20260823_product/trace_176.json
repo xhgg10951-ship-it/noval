@@ -1,0 +1,29 @@
+{
+  "method": "POST",
+  "path": "/api/chapters/1411/polish",
+  "request": {
+    "userInstruction": "降低机械重复，保持全部事实、位置、物品和结尾意图，不新增事件。"
+  },
+  "status": 200,
+  "durationSeconds": 14.203,
+  "response": {
+    "id": 1411,
+    "storyId": 1569,
+    "stageId": 1027,
+    "planId": 3038,
+    "chapterNumber": 5,
+    "title": "第五章：阴影中的契约",
+    "content": "公会大厅的喧嚣被厚重的石墙隔绝在外，空气中弥漫着陈旧的羊皮纸与铁锈味。林夜静立原地，指尖无意识地摩挲着怀中那枚冰凉的见习徽章，贴身口袋里的现代衣物早已藏入屏风后的阴影，那是他必须守住的秘密锚点。\n\n失踪者的最后踪迹指向幽影森林，这一结论已随调查委托书一同归档。艾琳的声音在侧畔响起，简短而清晰：“午夜，旧钟楼。去见见证人。”\n\n“午夜去旧钟楼。”林夜低声复述，语调平稳，没有多余的情绪波动。他压下脑海中关于语言与常识的匮乏焦虑，维持着“失忆学者”的沉默表象，将接下来的行动路线刻入记忆。",
+    "summary": "林夜在公会大厅隐藏现代衣物并确认证据已归档，随后接受艾琳指令，定于午夜前往旧钟楼会见见证人。",
+    "generationStatus": "GENERATED",
+    "currentRevisionId": 1205,
+    "currentRevisionVersion": 3,
+    "sourceType": "AI_POLISH",
+    "status": "DRAFT",
+    "memoryExtractionStatus": "COMPLETED",
+    "targetCharacters": 3000,
+    "actualCharacterCount": 243,
+    "createdAt": "2026-08-23T23:24:50",
+    "updatedAt": "2026-08-23T23:25:38"
+  }
+}

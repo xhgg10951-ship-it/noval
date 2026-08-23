@@ -4,7 +4,12 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from app.llm.provider import get_provider, parse_json_response
-from app.prompts.builders import build_polish_prompt, build_suggest_prompt, build_summary_prompt
+from app.prompts.builders import (
+    build_polish_prompt,
+    build_polish_repair_prompt,
+    build_suggest_prompt,
+    build_summary_prompt,
+)
 from app.schemas.models import (
     ExtractMemoryRequest,
     ExtractMemoryResponse,
@@ -51,7 +56,9 @@ def polish_chapter(req: PolishChapterRequest) -> PolishChapterResponse:
     system, user = build_polish_prompt(req)
     raw = provider.complete(user, system=system)
     polished = parse_json_response(PolishChapterResponse, raw)
-    return polished
+    audit_system, audit_user = build_polish_repair_prompt(req, polished.polishedContent)
+    audited_raw = provider.complete(audit_user, system=audit_system)
+    return parse_json_response(PolishChapterResponse, audited_raw)
 
 
 @router.post("/summarize-chapter", response_model=SummarizeChapterResponse)

@@ -1,0 +1,89 @@
+{
+  "method": "POST",
+  "path": "/api/stories/1569/stages",
+  "request": {
+    "direction": "current=5；继续第一卷1–60章的生存融入，只安排近期公会委托、城镇立足和幽影森林调查，不揭示终局真相，不安排终局大战或最终返回通道。",
+    "targetChapterCount": 5,
+    "targetCharacters": 3000
+  },
+  "status": 201,
+  "durationSeconds": 33.219,
+  "response": {
+    "id": 1028,
+    "storyId": 1569,
+    "direction": "current=5；继续第一卷1–60章的生存融入，只安排近期公会委托、城镇立足和幽影森林调查，不揭示终局真相，不安排终局大战或最终返回通道。",
+    "status": "PLANNING",
+    "suggestedChapterCount": 5,
+    "targetChapterCount": 5,
+    "targetCharacters": 3000,
+    "plans": [
+      {
+        "id": 3039,
+        "stageId": 1028,
+        "chapterOrder": 6,
+        "goal": "描写午夜旧钟楼的会面，林夜通过观察与逻辑推演获取幽影森林的关键线索，同时展现其‘学者’身份的特殊价值。",
+        "expectedProgress": "3000字左右",
+        "targetCharacters": 3,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:26:12.016",
+        "updatedAt": "2026-08-23T23:26:12.016"
+      },
+      {
+        "id": 3040,
+        "stageId": 1028,
+        "chapterOrder": 7,
+        "goal": "出发前的准备阶段，林夜在艾琳的指导下学习基础野外生存技能，并尝试将现代知识转化为异界可用的工具或策略。",
+        "expectedProgress": "3000字左右",
+        "targetCharacters": 2,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:26:12.016",
+        "updatedAt": "2026-08-23T23:26:12.016"
+      },
+      {
+        "id": 3041,
+        "stageId": 1028,
+        "chapterOrder": 8,
+        "goal": "进入幽影森林边缘，描写异世界生态的诡异与美丽并存，林夜初次面对超自然环境的心理冲击与适应。",
+        "expectedProgress": "3200字左右",
+        "targetCharacters": 2,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:26:12.016",
+        "updatedAt": "2026-08-23T23:26:12.016"
+      },
+      {
+        "id": 3042,
+        "stageId": 1028,
+        "chapterOrder": 9,
+        "goal": "遭遇小型魔物或森林陷阱，林夜在危机中利用智慧协助艾琳脱困，初步证明其在团队中的辅助价值。",
+        "expectedProgress": "3500字左右",
+        "targetCharacters": 2,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:26:12.016",
+        "updatedAt": "2026-08-23T23:26:12.016"
+      },
+      {
+        "id": 3043,
+        "stageId": 1028,
+        "chapterOrder": 10,
+        "goal": "深入森林腹地，发现失踪者营地的遗迹，线索中断但发现新的恐怖迹象，决定暂时撤退或寻找更安全的路径。",
+        "expectedProgress": "3000字左右",
+        "targetCharacters": 2,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:26:12.016",
+        "updatedAt": "2026-08-23T23:26:12.016"
+      }
+    ],
+    "createdAt": "2026-08-23T23:26:12.014",
+    "updatedAt": "2026-08-23T23:26:12.014"
+  }
+}

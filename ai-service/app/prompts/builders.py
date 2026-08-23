@@ -303,6 +303,38 @@ def build_polish_prompt(req) -> Tuple[str, str]:
     return system, user
 
 
+def build_polish_repair_prompt(req, proposed_content: str) -> Tuple[str, str]:
+    """Audit and repair a proposed polish against the original fact source.
+
+    A separate pass is intentional: the first pass optimizes prose, while this
+    pass has one job only—remove inventions and restore every omitted fact.
+    """
+    system = (
+        "你是一名小说润色事实审计 AI。原文是唯一事实来源。请审计【候选润色稿】，"
+        "并直接返回修复后的最终正文。\n"
+        "必须逐项保留原文中的全部人物名、具体地点名、具体物品名、时间、已发生事件、"
+        "状态、因果顺序和结尾行动意图；这些具体词面不得被上位词、代词或概括替代。"
+        "候选稿遗漏的事实必须恢复，候选稿新增的设定、人物、地点、物品或事件必须删除。"
+        "在事实完全等价的前提下，保留其较自然的句式，避免恢复机械重复。"
+        "必须只返回严格 JSON，格式为：\n" + POLISH_OUTPUT_HINT
+    )
+    ending = req.endingIntent or "(未指定)"
+    user = f"""原文（唯一事实来源）：
+{req.content}
+
+结尾意图（必须保持）：
+{ending}
+
+作者润色指令：
+{req.userInstruction or "(无)"}
+
+候选润色稿（需要事实审计修复）：
+{proposed_content}
+
+执行事实审计修复。逐字核对原文中的人物名、地点名、物品名、时间和结尾行动，缺一不可。只输出 JSON。"""
+    return system, user
+
+
 def build_generate_prompt(req: GenerateChapterRequest) -> Tuple[str, str]:
     system = (
         "你是一名小说章节写作 AI。根据阶段导演指令、本章目标与上下文，写出一章连贯的叙事正文，"
@@ -452,6 +484,10 @@ def build_extract_prompt(req: ExtractMemoryRequest) -> Tuple[str, str]:
         "FORESHADOWING, WORLD_RULE, TRANSIENT_DETAIL。"
         "suggestedAction 建议：核心事实与状态→AUTO；伏笔与世界规则→REVIEW；"
         "低价值细节→IGNORE。\n"
+        "低价值也不得省略：正文中明确出现的一次性食物或纯过场物件，即使不会进入"
+        "后续 Writer 上下文，也必须输出候选。若正文明确说明普通面包只用于填饱肚子、"
+        "随后不再关注，固定分类为 TRANSIENT_DETAIL / importance=1 / scope=CHAPTER / "
+        "suggestedAction=IGNORE。\n"
         "每个候选给出 subject、可选 field、value、evidence 证据原文。"
         "必须只返回严格 JSON，格式为：\n" + EXTRACT_OUTPUT_HINT
     )

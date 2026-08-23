@@ -1,0 +1,141 @@
+{
+  "method": "POST",
+  "path": "/api/stories/1570/stages",
+  "request": {
+    "direction": "用九章推进一次城镇失踪调查，线索逐步升级但不进入终局。",
+    "targetChapterCount": 9,
+    "targetCharacters": 800
+  },
+  "status": 201,
+  "durationSeconds": 42.813,
+  "response": {
+    "id": 1029,
+    "storyId": 1570,
+    "direction": "用九章推进一次城镇失踪调查，线索逐步升级但不进入终局。",
+    "status": "PLANNING",
+    "suggestedChapterCount": 9,
+    "targetChapterCount": 9,
+    "targetCharacters": 800,
+    "plans": [
+      {
+        "id": 3044,
+        "stageId": 1029,
+        "chapterOrder": 1,
+        "goal": "确立林夜的穿越者身份困境、与艾琳的初遇及收留关系，铺垫城镇背景。",
+        "expectedProgress": "林夜在异界醒来，因语言或常识差异险些暴露，被艾琳解围并带回住所。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:26:54.944",
+        "updatedAt": "2026-08-23T23:26:54.944"
+      },
+      {
+        "id": 3045,
+        "stageId": 1029,
+        "chapterOrder": 2,
+        "goal": "林夜尝试融入社会并获取基础信息，正式接触‘失踪调查’的边缘线索。",
+        "expectedProgress": "林夜通过艾琳了解冒险者公会规则，并在市井中听到第一起失踪案的传闻。",
+        "targetCharacters": 2800,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:26:54.944",
+        "updatedAt": "2026-08-23T23:26:54.944"
+      },
+      {
+        "id": 3046,
+        "stageId": 1029,
+        "chapterOrder": 3,
+        "goal": "初次实地勘察，发现非自然痕迹，悬念升级。",
+        "expectedProgress": "两人前往第一个失踪地点，林夜利用现代知识发现被忽略的物理/魔法痕迹。",
+        "targetCharacters": 3200,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:26:54.944",
+        "updatedAt": "2026-08-23T23:26:54.944"
+      },
+      {
+        "id": 3047,
+        "stageId": 1029,
+        "chapterOrder": 4,
+        "goal": "线索指向特定群体，遭遇阻力，调查难度提升。",
+        "expectedProgress": "查明粉末属于某个低调的炼金术士协会或黑市商人，接触受阻。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:26:54.944",
+        "updatedAt": "2026-08-23T23:26:54.944"
+      },
+      {
+        "id": 3048,
+        "stageId": 1029,
+        "chapterOrder": 5,
+        "goal": "深入地下网络，林夜面临身份暴露的高风险时刻。",
+        "expectedProgress": "追踪线索至黑市或地下渠道，林夜因不懂黑话或规矩差点露馅。",
+        "targetCharacters": 3500,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:26:54.944",
+        "updatedAt": "2026-08-23T23:26:54.944"
+      },
+      {
+        "id": 3049,
+        "stageId": 1029,
+        "chapterOrder": 6,
+        "goal": "准备阶段与心理建设，揭示部分世界观设定。",
+        "expectedProgress": "分析徽章，制定潜入计划，林夜与艾琳的关系加深。",
+        "targetCharacters": 2800,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:26:54.944",
+        "updatedAt": "2026-08-23T23:26:54.944"
+      },
+      {
+        "id": 3050,
+        "stageId": 1029,
+        "chapterOrder": 7,
+        "goal": "地下探索，环境恐怖与悬疑感达到高峰。",
+        "expectedProgress": "在地下设施中发现囚禁痕迹和实验记录，但未见到幕后黑手。",
+        "targetCharacters": 3200,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:26:54.944",
+        "updatedAt": "2026-08-23T23:26:54.944"
+      },
+      {
+        "id": 3051,
+        "stageId": 1029,
+        "chapterOrder": 8,
+        "goal": "偷听与推理，拼凑出阴谋的一角，但不触及核心。",
+        "expectedProgress": "得知幕后主使并非单人，而是一个小团体，且目标不仅是失踪者。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:26:54.944",
+        "updatedAt": "2026-08-23T23:26:54.944"
+      },
+      {
+        "id": 3052,
+        "stageId": 1029,
+        "chapterOrder": 9,
+        "goal": "阶段性收尾，提交部分成果，悬念保留，为下一阶段做铺垫。",
+        "expectedProgress": "将证据匿名交给可信的高层或媒体，引发城镇震动，但主谋逃脱。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:26:54.944",
+        "updatedAt": "2026-08-23T23:26:54.944"
+      }
+    ],
+    "createdAt": "2026-08-23T23:26:54.942",
+    "updatedAt": "2026-08-23T23:26:54.942"
+  }
+}

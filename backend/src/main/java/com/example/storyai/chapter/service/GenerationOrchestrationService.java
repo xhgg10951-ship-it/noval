@@ -176,7 +176,19 @@ public class GenerationOrchestrationService {
     }
 
     /** TASK-130 — author requests STOP; loop terminates, chapters retained. */
-    public GenerationJob requestStop(Long jobId) {
+    public synchronized GenerationJob requestStop(Long jobId) {
+        GenerationJob job = jobService.get(jobId);
+        // PAUSED is already a safe checkpoint and has no worker left to consume
+        // stopRequested. Converge it synchronously so Stop is a real terminal
+        // author action rather than a flag that can remain pending forever.
+        if (GenerationJob.Status.PAUSED.name().equals(job.getStatus())) {
+            return stop(jobId);
+        }
+        if (GenerationJob.Status.STOPPED.name().equals(job.getStatus())
+                || GenerationJob.Status.COMPLETED.name().equals(job.getStatus())
+                || GenerationJob.Status.FAILED.name().equals(job.getStatus())) {
+            return job;
+        }
         jobMapper.updateControlSignals(jobId, false, true);
         return jobService.get(jobId);
     }

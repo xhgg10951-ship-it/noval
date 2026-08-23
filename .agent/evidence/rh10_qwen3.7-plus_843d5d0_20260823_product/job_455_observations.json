@@ -1,0 +1,16 @@
+[
+  {
+    "status": "RUNNING",
+    "phase": "WRITING",
+    "currentPlanIndex": 2,
+    "total": 3,
+    "lastError": null
+  },
+  {
+    "status": "COMPLETED",
+    "phase": "CHECKPOINT",
+    "currentPlanIndex": 3,
+    "total": 3,
+    "lastError": null
+  }
+]

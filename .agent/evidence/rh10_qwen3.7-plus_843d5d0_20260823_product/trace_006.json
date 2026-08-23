@@ -1,0 +1,23 @@
+{
+  "method": "PUT",
+  "path": "/api/stages/plans/3034",
+  "request": {
+    "goal": "林夜初到异界，在城门附近遇见艾琳；两人建立初步信任。",
+    "targetCharacters": 3000
+  },
+  "status": 200,
+  "durationSeconds": 0.015,
+  "response": {
+    "id": 3034,
+    "stageId": 1026,
+    "chapterOrder": 1,
+    "goal": "林夜初到异界，在城门附近遇见艾琳；两人建立初步信任。",
+    "expectedProgress": "林夜从现代环境突兀切换至异界荒野或城镇边缘，经历短暂的生存恐慌与认知冲击。在即将被魔兽袭击或遭遇危险时，艾琳出手相救或发现了他。林夜意识到语言相通但文化迥异，决定暂时保持沉默或伪装失忆以隐藏穿越者身份。",
+    "targetCharacters": 3000,
+    "planVersion": 1,
+    "active": true,
+    "status": "ACTIVE",
+    "createdAt": "2026-08-23T23:19:44.529",
+    "updatedAt": "2026-08-23T23:19:44.544"
+  }
+}

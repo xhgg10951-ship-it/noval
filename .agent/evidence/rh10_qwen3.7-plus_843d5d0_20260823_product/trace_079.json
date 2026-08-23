@@ -1,0 +1,63 @@
+{
+  "method": "POST",
+  "path": "/api/stories/1569/stages",
+  "request": {
+    "direction": "第二天前往冒险者公会入会并接取委托：调查幽影森林失踪案。",
+    "targetChapterCount": 3,
+    "targetCharacters": 3000
+  },
+  "status": 201,
+  "durationSeconds": 22.218,
+  "response": {
+    "id": 1027,
+    "storyId": 1569,
+    "direction": "第二天前往冒险者公会入会并接取委托：调查幽影森林失踪案。",
+    "status": "PLANNING",
+    "suggestedChapterCount": 3,
+    "targetChapterCount": 3,
+    "targetCharacters": 3000,
+    "plans": [
+      {
+        "id": 3036,
+        "stageId": 1027,
+        "chapterOrder": 3,
+        "goal": "展示黑沼城镇风貌，林夜在前往公会途中通过观察完善“失忆学者”人设，并抵达冒险者公会。",
+        "expectedProgress": "完成从住处到公会的移动，建立对城镇社会结构的初步认知，确立林夜作为“观察者”的视角。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:22:29.132",
+        "updatedAt": "2026-08-23T23:22:29.132"
+      },
+      {
+        "id": 3037,
+        "stageId": 1027,
+        "chapterOrder": 4,
+        "goal": "林夜完成冒险者注册测试，利用“学者”身份巧妙通过基础考核，正式获得见习冒险者资格。",
+        "expectedProgress": "解决身份合法性问题，获得进入公会的权限，为接取任务做铺垫。",
+        "targetCharacters": 3200,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:22:29.132",
+        "updatedAt": "2026-08-23T23:22:29.132"
+      },
+      {
+        "id": 3038,
+        "stageId": 1027,
+        "chapterOrder": 5,
+        "goal": "林夜与艾琳在公告栏前筛选任务，最终锁定“幽影森林失踪案”，并遭遇竞争对手或质疑。",
+        "expectedProgress": "确立本卷第一个主要剧情线索（失踪案），建立外部冲突（其他冒险者的竞争或轻视）。",
+        "targetCharacters": 3500,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:22:29.132",
+        "updatedAt": "2026-08-23T23:22:29.132"
+      }
+    ],
+    "createdAt": "2026-08-23T23:22:29.131",
+    "updatedAt": "2026-08-23T23:22:29.131"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "method": "PUT",
+  "path": "/api/stages/plans/3038",
+  "request": {
+    "goal": "与艾琳准备调查物资并确认出城路线，只推进近期调查；不得围绕早餐或面包展开。",
+    "targetCharacters": 3000
+  },
+  "status": 200,
+  "durationSeconds": 0.016,
+  "response": {
+    "id": 3038,
+    "stageId": 1027,
+    "chapterOrder": 5,
+    "goal": "与艾琳准备调查物资并确认出城路线，只推进近期调查；不得围绕早餐或面包展开。",
+    "expectedProgress": "确立本卷第一个主要剧情线索（失踪案），建立外部冲突（其他冒险者的竞争或轻视）。",
+    "targetCharacters": 3000,
+    "planVersion": 1,
+    "active": true,
+    "status": "ACTIVE",
+    "createdAt": "2026-08-23T23:22:29.132",
+    "updatedAt": "2026-08-23T23:22:29.205"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "method": "POST",
+  "path": "/api/stories/1569/stages",
+  "request": {
+    "direction": "用两章写完林夜初到异界、认识艾琳并在她住处安顿过夜。",
+    "targetChapterCount": 2,
+    "targetCharacters": 3000
+  },
+  "status": 201,
+  "durationSeconds": 21.188,
+  "response": {
+    "id": 1026,
+    "storyId": 1569,
+    "direction": "用两章写完林夜初到异界、认识艾琳并在她住处安顿过夜。",
+    "status": "PLANNING",
+    "suggestedChapterCount": 2,
+    "targetChapterCount": 2,
+    "targetCharacters": 3000,
+    "plans": [
+      {
+        "id": 3034,
+        "stageId": 1026,
+        "chapterOrder": 1,
+        "goal": "描述林夜穿越后的混乱与危机，建立异世界世界观基调，并引入关键人物艾琳进行初步接触。",
+        "expectedProgress": "林夜从现代环境突兀切换至异界荒野或城镇边缘，经历短暂的生存恐慌与认知冲击。在即将被魔兽袭击或遭遇危险时，艾琳出手相救或发现了他。林夜意识到语言相通但文化迥异，决定暂时保持沉默或伪装失忆以隐藏穿越者身份。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:19:44.529",
+        "updatedAt": "2026-08-23T23:19:44.529"
+      },
+      {
+        "id": 3035,
+        "stageId": 1026,
+        "chapterOrder": 2,
+        "goal": "深入刻画艾琳的居住环境与性格侧面，通过夜间对话进一步巩固林夜的伪装，并完成‘安顿过夜’的情节任务。",
+        "expectedProgress": "两人抵达艾琳的住所（可能是简陋但温馨的公寓或旅馆房间）。林夜通过观察室内细节了解这个世界的常识（如照明方式、货币、武器）。艾琳提供食物和基本衣物，双方在轻松但略带警惕的氛围中交流。林夜成功掩饰了对现代物品缺失的不适，并在艾琳入睡后独自思考未来计划。",
+        "targetCharacters": 3200,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:19:44.529",
+        "updatedAt": "2026-08-23T23:19:44.529"
+      }
+    ],
+    "createdAt": "2026-08-23T23:19:44.527",
+    "updatedAt": "2026-08-23T23:19:44.527"
+  }
+}

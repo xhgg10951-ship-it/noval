@@ -1,0 +1,12 @@
+{
+  "method": "GET",
+  "path": "/api/health",
+  "request": null,
+  "status": 200,
+  "durationSeconds": 0.016,
+  "response": {
+    "status": "UP",
+    "service": "story-ai-backend",
+    "version": "0.1.1"
+  }
+}

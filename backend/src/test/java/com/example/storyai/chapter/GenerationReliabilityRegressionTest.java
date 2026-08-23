@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import org.mockito.ArgumentCaptor;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
@@ -543,6 +544,30 @@ class GenerationReliabilityRegressionTest {
 
         JsonNode stopped = awaitTerminal(jobId);
         assertThat(stopped.get("status").asText()).isEqualTo("STOPPED");
+        assertThat(listChapters(stageId)).hasSize(1);
+    }
+
+    @Test
+    void stoppingAnAlreadyPausedStepJobConvergesImmediatelyToStopped() throws Exception {
+        Long storyId = createStory();
+        long stageId = createActiveStage(storyId, 2);
+
+        MvcResult started = mockMvc.perform(post("/api/stages/{id}/generate", stageId)
+                        .param("mode", "STEP"))
+                .andExpect(status().isOk())
+                .andReturn();
+        long jobId = objectMapper.readTree(started.getResponse().getContentAsString())
+                .get("id").asLong();
+        JsonNode paused = awaitTerminal(jobId);
+        assertThat(paused.get("status").asText()).isEqualTo("PAUSED");
+        assertThat(listChapters(stageId)).hasSize(1);
+
+        mockMvc.perform(post("/api/generation-jobs/{id}/stop", jobId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("STOPPED"))
+                .andExpect(jsonPath("$.phase").value("CHECKPOINT"));
+
+        assertThat(getJob(jobId).get("status").asText()).isEqualTo("STOPPED");
         assertThat(listChapters(stageId)).hasSize(1);
     }
 

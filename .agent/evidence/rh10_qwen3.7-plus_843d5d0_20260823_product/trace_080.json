@@ -1,0 +1,23 @@
+{
+  "method": "PUT",
+  "path": "/api/stages/plans/3036",
+  "request": {
+    "goal": "完成冒险者公会登记并取得资格；林夜必须隐藏穿越者身份，不得向任何人暴露。",
+    "targetCharacters": 3000
+  },
+  "status": 200,
+  "durationSeconds": 0.047,
+  "response": {
+    "id": 3036,
+    "stageId": 1027,
+    "chapterOrder": 3,
+    "goal": "完成冒险者公会登记并取得资格；林夜必须隐藏穿越者身份，不得向任何人暴露。",
+    "expectedProgress": "完成从住处到公会的移动，建立对城镇社会结构的初步认知，确立林夜作为“观察者”的视角。",
+    "targetCharacters": 3000,
+    "planVersion": 1,
+    "active": true,
+    "status": "ACTIVE",
+    "createdAt": "2026-08-23T23:22:29.132",
+    "updatedAt": "2026-08-23T23:22:29.166"
+  }
+}

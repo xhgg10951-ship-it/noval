@@ -1,0 +1,12 @@
+{
+  "runId": "rh10_qwen3.7-plus_843d5d0_20260823_product",
+  "runDate": "2026-08-23",
+  "model": "qwen3.7-plus",
+  "mockLlm": false,
+  "productWired": true,
+  "branch": "v0.1.1-dev",
+  "productCommit": "843d5d0",
+  "promptVersion": "ai-service/app/prompts/builders.py@843d5d0",
+  "storyIds": [1569, 1570],
+  "status": "FAILED_AND_ABORTED_AFTER_BLOCKER_DIAGNOSIS"
+}
