@@ -3811,6 +3811,43 @@ Real-LLM Semantic Verification: `NOT_REQUIRED`
 
 Next active task: `RH-05 — Context Hardening Contract Repair`
 
+## RH-05 Reopened — Context Hardening Contract
+
+Status: `DONE`
+
+Observed regressions before fix:
+
+- A story with an Arc covering Chapter 1 sent `currentArc=null` to its first
+  Stage Planner request because Arc lookup required an already-written chapter.
+- Writer requests did not contain Long-form Position, Current Arc or
+  `ChapterPlan.expectedProgress`, so the documented context hierarchy existed
+  in requirements but was not fully wired to the model.
+
+Fix:
+
+- Planner Arc lookup now uses the next chapter number, including Chapter 1.
+- Writer receives target/current chapter position, the Arc covering the target
+  chapter, and expected progress from the selected ChapterPlan.
+- The Python Writer schema and prompt render these blocks in frozen priority:
+  hard constraints, long-form position, current Arc, Stage, ChapterSpec,
+  state/selected Memory, then recent narrative context.
+- Existing HH-001 relevant Writer selection, HH-002 bounded Planner selection,
+  and HH-003 Continuation Anchor behavior remain covered by their integration
+  suites; no RAG or architecture expansion was introduced.
+
+Engineering Verification: `PASSED`
+
+- New first-Stage Arc and Writer-context regressions: 2/2 PASSED after failing
+  before the fix.
+- Backend `ChapterGenerationIntegrationTest`, `StagePlanningIntegrationTest`,
+  `StoryAssistanceIntegrationTest`, and `MemoryV2IntegrationTest`: 24/24 PASSED.
+- Python full prompt/mock suite: 15/15 PASSED.
+
+Real-LLM Semantic Verification: `NOT_REQUIRED` here; full qwen3.7-plus product
+suite remains the RH-10 gate.
+
+Next active task: `RH-06 — Length + Job Safety Revalidation`
+
 
 
 

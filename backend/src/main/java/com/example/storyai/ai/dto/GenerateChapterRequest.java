@@ -15,8 +15,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public record GenerateChapterRequest(
         String coreIdea,
         List<ConstraintItem> constraints,
+        LongFormPosition longFormPosition,
+        CurrentArc currentArc,
         String stageDirection,
         String chapterGoal,
+        String expectedProgress,
         int chapterOrder,
         List<StateItem> currentState,
         List<MemoryItem> storyMemories,
@@ -46,5 +49,17 @@ public record GenerateChapterRequest(
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record RelationshipItem(String subjectA, String subjectB, String description) {
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record LongFormPosition(Integer targetChapterCount, Integer currentChapterNumber) {
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record CurrentArc(
+            String title,
+            String goal,
+            Integer targetStartChapter,
+            Integer targetEndChapter) {
     }
 }

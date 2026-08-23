@@ -352,8 +352,11 @@ public class ChapterGenerationService {
         return new GenerateChapterRequest(
                 story.getCoreIdea(),
                 constraintItems,
+                contextReader.buildWriterLongFormPosition(storyId, plan.getChapterOrder()),
+                contextReader.buildWriterCurrentArc(storyId, plan.getChapterOrder()),
                 stage.getDirection(),
                 plan.getGoal(),
+                plan.getExpectedProgress(),
                 plan.getChapterOrder(),
                 contextReader.getWriterStateItems(storyId),
                 contextReader.getWriterMemoryItems(storyId, stage, plan),

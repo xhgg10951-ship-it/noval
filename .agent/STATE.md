@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`RELEASE HARDENING REOPENED — RH-04 COMPLETE`
+`RELEASE HARDENING REOPENED — RH-05 COMPLETE`
 
 Current Task:
 
-`RH-05 — Context Hardening Contract Repair`
+`RH-06 — Length + Job Safety Revalidation`
 
 Task Status:
 
@@ -73,6 +73,16 @@ Task Evidence:
   terminal state and cleans timers on Stage change/unmount.
 - RH-04 Engineering Verification: PASSED — new regressions 2/2; frontend 7/7;
   production build PASSED.
+- RH-05 COMPLETE (2026-08-23, reopened gate) — the existing HH-001/HH-002/
+  HH-003 selectors remain wired, but the functional audit found two frozen
+  context omissions: the first Stage Planner did not receive its configured
+  Arc, and Writer requests omitted Long-form Position, Current Arc and
+  ChapterPlan.expectedProgress. Both omissions were reproduced before repair.
+  Planner now resolves the Arc for the next chapter, and Writer receives and
+  renders the full frozen context in the documented priority order.
+- RH-05 Engineering Verification: PASSED — new regressions 2/2; backend context,
+  generation, planning, assistance and Memory suites 24/24; Python prompt suite
+  15/15.
 
 - RH-01 DONE (2026-08-23) — regression first reproduced stale summary after
   Manual Edit; fixed Manual Edit summary refresh + automatic re-extract,

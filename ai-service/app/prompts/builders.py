@@ -314,6 +314,13 @@ def build_generate_prompt(req: GenerateChapterRequest) -> Tuple[str, str]:
     user = f"""核心创意：
 {req.coreIdea}
 
+硬性约束：
+{_fmt_constraints(req.constraints)}
+
+{_fmt_writer_long_form_position(req)}
+
+{_fmt_writer_current_arc(req)}
+
 阶段导演指令：
 {req.stageDirection}
 
@@ -324,9 +331,6 @@ def build_generate_prompt(req: GenerateChapterRequest) -> Tuple[str, str]:
 
 本章目标（第 {req.chapterOrder} 章）：
 {req.chapterGoal}
-
-约束：
-{_fmt_constraints(req.constraints)}
 
 当前状态：
 {_fmt_state(req.currentState)}
@@ -342,11 +346,12 @@ def build_generate_prompt(req: GenerateChapterRequest) -> Tuple[str, str]:
 
 【执行优先级，必须自上而下遵守】
 1. 硬性约束（约束列表）高于一切；
-2. 本章目标（ChapterSpec）是本章必须执行的主线；
-3. 必须推进（mustAdvance）必须发生；禁止事项（mustNotDo）绝不可违反；
-4. 故事记忆用于丰富细节，不得用它替换本章主线；
-5. 与本章无关的旧细节不要重复铺陈；
-6. 本章结尾意图（endingIntent）应被满足，为下一章留接口。
+2. 长篇定位限制当前进度，不得提前收束全书；
+3. 当前卷目标限定本阶段服务的宏观方向；
+4. 当前阶段导演指令限定本阶段方向；
+5. 本章目标与完整 ChapterSpec 是本章必须执行的主线；
+6. 当前状态与选中记忆只提供事实支持，不得替换本章主线；
+7. 近期叙事上下文用于连续衔接，与本章无关的旧细节不要重复铺陈。
 
 请只输出 JSON。"""
     return system, user
@@ -362,6 +367,8 @@ def _fmt_writer_spec(req: GenerateChapterRequest) -> str:
     paragraph-level scene with dialogue, action, and interiority).
     """
     lines = ["本章执行规格（ChapterSpec）："]
+    if req.expectedProgress:
+        lines.append(f"- 预期进度：{req.expectedProgress}")
     if req.targetCharacters is not None:
         lo, hi = length_bounds(req.targetCharacters)
         lines.append(
@@ -383,6 +390,31 @@ def _fmt_writer_spec(req: GenerateChapterRequest) -> str:
         lines.append(f"- 结尾意图：{req.endingIntent}")
     if len(lines) == 1:
         lines.append("- （无显式规格，按本章目标自由发挥）")
+    return "\n".join(lines)
+
+
+def _fmt_writer_long_form_position(req: GenerateChapterRequest) -> str:
+    pos = req.longFormPosition
+    if pos is None:
+        return "长篇定位：\n(未配置)"
+    lines = ["长篇定位："]
+    if pos.targetChapterCount is not None:
+        lines.append(f"- 全书目标约 {pos.targetChapterCount} 章")
+    if pos.currentChapterNumber is not None:
+        lines.append(f"- 当前正在写第 {pos.currentChapterNumber} 章")
+    return "\n".join(lines)
+
+
+def _fmt_writer_current_arc(req: GenerateChapterRequest) -> str:
+    arc = req.currentArc
+    if arc is None:
+        return "当前卷：\n(未配置)"
+    chapter_range = ""
+    if arc.targetStartChapter is not None and arc.targetEndChapter is not None:
+        chapter_range = f"（第 {arc.targetStartChapter}–{arc.targetEndChapter} 章）"
+    lines = [f"当前卷：{arc.title or '(未命名卷)'}{chapter_range}"]
+    if arc.goal:
+        lines.append(f"- 当前卷目标：{arc.goal}")
     return "\n".join(lines)
 
 

@@ -72,6 +72,30 @@ class ChapterGenerationIntegrationTest {
                 .get("id").asLong();
     }
 
+    private Long createLongStory() throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/stories")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name":"长篇上下文测试","coreIdea":"主角在异世界逐步成长",
+                                 "targetChapterCount":600,
+                                 "constraints":[{"type":"风格","content":"冷峻克制"}]}
+                                """))
+                .andExpect(status().isCreated())
+                .andReturn();
+        return objectMapper.readTree(result.getResponse().getContentAsString())
+                .get("id").asLong();
+    }
+
+    private void createOpeningArc(Long storyId) throws Exception {
+        mockMvc.perform(post("/api/stories/{id}/arcs", storyId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"title":"生存融入卷","goal":"在王都站稳脚跟",
+                                 "targetStartChapter":1,"targetEndChapter":60,"status":"ACTIVE"}
+                                """))
+                .andExpect(status().isCreated());
+    }
+
     private PlanStageResponse planOf(int count, String goalPrefix) {
         return new PlanStageResponse(count, IntStream.rangeClosed(1, count)
                 .mapToObj(i -> new PlanStageResponse.ChapterPlanItem(
@@ -151,6 +175,65 @@ class ChapterGenerationIntegrationTest {
         assertThat(sent.constraints()).hasSize(1);
         assertThat(sent.chapterGoal()).contains("第1章目标");
         assertThat(sent.chapterOrder()).isEqualTo(1);
+    }
+
+    @Test
+    void firstStagePlannerReceivesConfiguredCurrentArc() throws Exception {
+        Long storyId = createLongStory();
+        createOpeningArc(storyId);
+        when(aiServiceClient.planStage(any(PlanStageRequest.class)))
+                .thenReturn(planOf(1, "开篇"));
+
+        mockMvc.perform(post("/api/stories/{id}/stages", storyId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"direction\":\"先解决住处和身份\"}"))
+                .andExpect(status().isCreated());
+
+        ArgumentCaptor<PlanStageRequest> captor =
+                ArgumentCaptor.forClass(PlanStageRequest.class);
+        verify(aiServiceClient).planStage(captor.capture());
+        assertThat(captor.getValue().longFormPosition()).isNotNull();
+        assertThat(captor.getValue().longFormPosition().arcTitle()).isEqualTo("生存融入卷");
+        assertThat(captor.getValue().longFormPosition().arcGoal()).isEqualTo("在王都站稳脚跟");
+    }
+
+    @Test
+    void writerReceivesLongFormArcAndExpectedProgress() throws Exception {
+        Long storyId = createLongStory();
+        createOpeningArc(storyId);
+        PlanStageResponse plan = new PlanStageResponse(1, java.util.List.of(
+                new PlanStageResponse.ChapterPlanItem(
+                        1, "办理王都身份登记", "完成身份登记并确定临时住处", 3000,
+                        java.util.List.of("取得临时身份"), java.util.List.of("不得离开王都"),
+                        java.util.List.of("进入登记处", "完成审核"), "前往临时住处")));
+        when(aiServiceClient.planStage(any(PlanStageRequest.class))).thenReturn(plan);
+        stubWriter();
+        stubExtractor();
+
+        long stageId = objectMapper.readTree(mockMvc.perform(
+                        post("/api/stories/{id}/stages", storyId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"direction\":\"先在王都完成生存融入\"}"))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString())
+                .get("id").asLong();
+        mockMvc.perform(post("/api/stages/{id}/chapters", stageId))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<GenerateChapterRequest> captor =
+                ArgumentCaptor.forClass(GenerateChapterRequest.class);
+        verify(aiServiceClient).generateChapter(captor.capture());
+        com.fasterxml.jackson.databind.JsonNode request =
+                objectMapper.valueToTree(captor.getValue());
+        assertThat(request.path("expectedProgress").asText())
+                .isEqualTo("完成身份登记并确定临时住处");
+        assertThat(request.path("longFormPosition").path("targetChapterCount").asInt())
+                .isEqualTo(600);
+        assertThat(request.path("longFormPosition").path("currentChapterNumber").asInt())
+                .isEqualTo(1);
+        assertThat(request.path("currentArc").path("title").asText())
+                .isEqualTo("生存融入卷");
+        assertThat(request.path("currentArc").path("goal").asText())
+                .isEqualTo("在王都站稳脚跟");
     }
 
     // ---- RH-05 / HH-001: Writer memory is relevant to Arc + Stage + ChapterSpec ----

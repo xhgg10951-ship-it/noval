@@ -493,9 +493,9 @@ public class StoryContextReader {
     public PlanStageRequest.LongFormPosition buildLongFormPosition(Long storyId) {
         var story = storyService.getStory(storyId);
         Integer current = getCurrentChapterNumber(storyId);
-        com.example.storyai.arc.model.Arc arc = current != null
-                ? arcService.findCurrent(storyId, current)
-                : null;
+        int nextChapterNumber = current == null ? 1 : current + 1;
+        com.example.storyai.arc.model.Arc arc =
+                arcService.findCurrent(storyId, nextChapterNumber);
         if (story.getTargetChapterCount() == null && current == null && arc == null) {
             return null; // nothing long-form about this project — omit the block
         }
@@ -507,5 +507,32 @@ public class StoryContextReader {
                 arc == null ? null : arc.getTargetStartChapter(),
                 arc == null ? null : arc.getTargetEndChapter()
         );
+    }
+
+    /** Frozen Writer context: long-form target and the chapter being written. */
+    public GenerateChapterRequest.LongFormPosition buildWriterLongFormPosition(
+            Long storyId, Integer chapterNumber) {
+        var story = storyService.getStory(storyId);
+        if (story.getTargetChapterCount() == null && chapterNumber == null) {
+            return null;
+        }
+        return new GenerateChapterRequest.LongFormPosition(
+                story.getTargetChapterCount(), chapterNumber);
+    }
+
+    /** Frozen Writer context: the Arc covering the chapter being written. */
+    public GenerateChapterRequest.CurrentArc buildWriterCurrentArc(
+            Long storyId, Integer chapterNumber) {
+        int effectiveChapter = chapterNumber == null ? chapterService.nextChapterNumber(storyId)
+                : chapterNumber;
+        Arc arc = arcService.findCurrent(storyId, effectiveChapter);
+        if (arc == null) {
+            return null;
+        }
+        return new GenerateChapterRequest.CurrentArc(
+                arc.getTitle(),
+                arc.getGoal(),
+                arc.getTargetStartChapter(),
+                arc.getTargetEndChapter());
     }
 }

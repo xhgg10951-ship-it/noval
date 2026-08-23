@@ -60,6 +60,13 @@ class LongFormPosition(BaseModel):
     arcEndChapter: Optional[int] = None
 
 
+class CurrentArc(BaseModel):
+    title: Optional[str] = None
+    goal: Optional[str] = None
+    targetStartChapter: Optional[int] = None
+    targetEndChapter: Optional[int] = None
+
+
 # --------------------------------------------------------------------------
 # Plan Stage
 # --------------------------------------------------------------------------
@@ -104,8 +111,11 @@ class PlanStageResponse(BaseModel):
 class GenerateChapterRequest(BaseModel):
     coreIdea: str
     constraints: List[ConstraintItem] = Field(default_factory=list)
+    longFormPosition: Optional[LongFormPosition] = None
+    currentArc: Optional[CurrentArc] = None
     stageDirection: str
     chapterGoal: str
+    expectedProgress: Optional[str] = None
     chapterOrder: int
     currentState: List[StateItem] = Field(default_factory=list)
     storyMemories: List[MemoryItem] = Field(default_factory=list)
