@@ -43,6 +43,37 @@ Stage direction:         第二天前往冒险者公会入会并接取委托：�
 The next RH-10 must execute every result from one fixed qwen3.7-plus release
 configuration and record it in `ACCEPTANCE_METRICS.md` before RH-11.
 
+## Fixed Product-wired Execution Contract
+
+The current run uses `scripts/rh10_product_suite.py` and talks only to the
+public Spring Boot API. It does not call an AI endpoint, prompt builder, or LLM
+provider directly.
+
+- Story A creates the frozen 600-chapter Story and Arc 1–60. A two-chapter
+  Stage persists meeting Erin and being housed. A three-chapter second Stage
+  then exercises AC-101 and produces five consecutive 3000-character chapters
+  for AC-103. Its first chapter must complete guild registration without an
+  identity disclosure for AC-104.
+- Before the second Stage, Manual Edit adds one incidental ordinary-bread
+  sentence. The product's automatic re-extraction must classify it as
+  `TRANSIENT_DETAIL / 1 / CHAPTER / IGNORE`; none of the next three chapters
+  may mention bread for AC-105.
+- AC-109 polishes a fixed deliberately mechanical chapter through the public
+  revision API. Every named character, location, item, case clue and ending
+  intent must remain, while repeated sentence starts decrease.
+- At exactly current chapter 5, a new five-plan Stage is generated under
+  target=600 and Arc 1–60. Orders must be 6–10, at least one local-progress
+  term must occur, and no frozen endgame pattern may occur for AC-114.
+- Story B creates a nine-plan Stage, generates three chapters, stops the STEP
+  Job, replans the remainder to three, and generates the new remainder. AC-106
+  requires logical orders 4–6, unchanged first-three IDs/content/revisions,
+  final chapter numbers 1–6, and no duplicate normalized titles.
+
+AC-103 requires at least 4/5 persisted `actualCharacterCount` values in
+2250–3750 and zero exact duplicate sentences of 24 or more non-space
+characters across the five chapters. These inputs and evaluators are frozen
+before the current qwen3.7-plus output is generated.
+
 ## Historical Fixture Notice
 
 > **HISTORICAL / SUPERSEDED FOR FINAL RELEASE VERDICT**
