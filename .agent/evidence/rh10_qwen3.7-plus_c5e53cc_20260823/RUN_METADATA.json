@@ -1,0 +1,14 @@
+{
+  "runId": "rh10_qwen3.7-plus_c5e53cc_20260823",
+  "runDate": "2026-08-23",
+  "model": "qwen3.7-plus",
+  "mockLlm": false,
+  "branch": "v0.1.1-dev",
+  "productCommit": "c5e53cc",
+  "promptVersion": "ai-service/app/prompts/builders.py@c5e53cc",
+  "fixture": ".agent/evidence/ACCEPTANCE_FIXTURE.md",
+  "storyId": null,
+  "storyIdNote": "Direct-contract semantic fixture; no persisted Story row was created.",
+  "targetCharacters": 3000,
+  "requiredLengthBand": [2250, 3750]
+}

@@ -1,0 +1,152 @@
+{
+  "request": {
+    "coreIdea": "林夜穿越到剑与魔法世界，被艾琳收留，正成长为冒险者。",
+    "constraints": [
+      {
+        "type": "设定",
+        "content": "林夜已穿越、已认识艾琳、已有住所"
+      },
+      {
+        "type": "风格",
+        "content": "冷峻克制"
+      }
+    ],
+    "stageDirection": "将尚未完成的剧情收束为3章：调查幽影森林失踪案，发现幕后线索并安全返回公会。",
+    "currentState": [
+      {
+        "category": "LOCATION",
+        "subject": "林夜",
+        "field": "location",
+        "value": "幽影森林入口"
+      },
+      {
+        "category": "GOAL",
+        "subject": "林夜",
+        "field": "current_goal",
+        "value": "调查失踪案"
+      }
+    ],
+    "storyMemories": [
+      {
+        "type": "PLOT_FACT",
+        "subject": "林夜",
+        "description": "已完成冒险者登记并接取失踪案委托"
+      }
+    ],
+    "relationshipState": [
+      {
+        "subjectA": "林夜",
+        "subjectB": "艾琳",
+        "description": "共同执行委托的同伴"
+      }
+    ],
+    "recentContext": "第3章结尾：林夜与艾琳抵达幽影森林入口，发现失踪者留下的脚印。",
+    "targetChapterCount": 3,
+    "currentChapterNumber": 3,
+    "completedStageSummaries": [
+      "第1章：林夜与艾琳前往公会。",
+      "第2章：林夜完成登记并取得冒险者资格。",
+      "第3章：两人接取失踪案并抵达森林入口。"
+    ],
+    "recentChapterSummaries": [
+      "第2章：林夜完成登记并取得冒险者资格。",
+      "第3章：两人接取失踪案并抵达森林入口。"
+    ],
+    "continuationAnchor": {
+      "lastChapterNumber": 3,
+      "currentLocation": "幽影森林入口",
+      "activeCharacters": [
+        "林夜",
+        "艾琳"
+      ],
+      "currentImmediateGoal": "调查失踪案",
+      "lastChapterSummary": "两人接取失踪案并抵达森林入口。",
+      "lastChapterEnding": "湿泥里的脚印一直延伸向森林深处。"
+    }
+  },
+  "response": {
+    "suggestedChapterCount": 3,
+    "chapterPlans": [
+      {
+        "order": 4,
+        "goal": "深入幽影森林，追踪脚印并遭遇首次异常威胁，展现林夜的冷静与战斗本能。",
+        "expectedProgress": "2800-3200字",
+        "targetCharacters": 2,
+        "mustAdvance": [
+          "进入森林深处，环境描写需体现压抑与危险",
+          "发现失踪者遗留的非自然痕迹（如被腐蚀的装备或魔法残留）",
+          "遭遇低阶魔物或陷阱，林夜与艾琳配合解决"
+        ],
+        "mustNotDo": [
+          "不得让角色轻易获胜，需体现战斗的残酷性",
+          "不得出现大量对话，保持冷峻风格",
+          "不得揭示最终幕后黑手，仅展示线索"
+        ],
+        "storyBeats": [
+          "林夜分析脚印中断处的细节，判断方向",
+          "森林中雾气加重，能见度降低，艾琳施展照明法术",
+          "遭遇潜伏的影狼群，林夜利用地形设伏",
+          "战斗结束后，在影狼巢穴发现失踪者的徽章，但徽章上缠绕着黑色丝线"
+        ],
+        "endingIntent": "两人意识到这并非普通野兽袭击，而是有预谋的捕猎，决定继续深入核心区域。"
+      },
+      {
+        "order": 5,
+        "goal": "发现失踪案的核心线索，揭露幕后操纵者的冰山一角，气氛转为紧张悬疑。",
+        "expectedProgress": "3000-3500字",
+        "targetCharacters": 2,
+        "mustAdvance": [
+          "找到失踪者最后的藏身地或被困处",
+          "发现人为布置的法阵或仪式痕迹",
+          "确认幕后势力与某种禁忌魔法有关"
+        ],
+        "mustNotDo": [
+          "不得让主角直接面对最终BOSS",
+          "不得过度解释魔法原理，保持神秘感",
+          "不得出现救援情节，必须靠二人自救"
+        ],
+        "storyBeats": [
+          "顺着黑色丝线的踪迹，找到一处隐蔽的林间空地",
+          "空地上留有残缺的法阵，空气中弥漫着血腥味",
+          "发现一名重伤的失踪者，他在临死前交出半张地图或信物",
+          "林夜通过信物推断出敌人可能在森林中心的遗迹活动",
+          "远处传来诡异的吟唱声，敌人正在接近"
+        ],
+        "endingIntent": "敌人逼近，两人被迫放弃调查现场，带着关键信物紧急撤离，留下悬念。"
+      },
+      {
+        "order": 6,
+        "goal": "摆脱追兵，安全返回公会提交证据，完成委托收束，并为下一阶段铺垫。",
+        "expectedProgress": "2500-3000字",
+        "targetCharacters": 2,
+        "mustAdvance": [
+          "利用森林环境甩开追兵",
+          "回到公会提交任务，获得报酬与声望",
+          "林夜对信物进行初步研究，引出新的危机感"
+        ],
+        "mustNotDo": [
+          "不得详细描写公会日常琐事，聚焦于任务结算",
+          "不得让林夜表现出过度的喜悦，保持克制",
+          "不得完全解开信物的秘密，保留伏笔"
+        ],
+        "storyBeats": [
+          "林夜利用烟雾弹或魔法干扰制造混乱，与艾琳分头行动后汇合",
+          "冲出森林边界，回望深处，感到被注视的寒意",
+          "回到公会，向接待员提交失踪者遗物与报告",
+          "公会高层对信物表现出异常关注，暗示此事非同小可",
+          "林夜回到住所，独自审视信物，意识到自己已卷入更大的漩涡"
+        ],
+        "endingIntent": "任务看似完成，但林夜手中的信物发热，预示着新的麻烦即将找上门，故事节奏由动转静，蓄势待发。"
+      }
+    ]
+  },
+  "planCount": 3,
+  "forbiddenRepeatHits": [],
+  "continuationTermHits": [
+    "森林",
+    "失踪",
+    "线索",
+    "脚印"
+  ],
+  "verdict": "PASS"
+}

@@ -28,15 +28,15 @@ Current Implementation Plan:
 
 Current Phase:
 
-`RELEASE HARDENING — RH-09 COMPLETE`
+`RELEASE HARDENING — RH-10 COMPLETE`
 
 Current Task:
 
-`RH-10 — Final qwen3.7-plus Semantic Suite (NEXT)`
+`RH-11 — Freeze v0.1.1 Release (NEXT)`
 
 Task Status:
 
-`Feature Complete, Release Hardening Required — v0.1.1 is NOT ACCEPTED until RH-01~RH-10 and the final qwen3.7-plus suite pass`
+`Release Freeze Pending — RH-01~RH-10 and qwen3.7-plus 7/7 passed; v0.1.1 remains NOT ACCEPTED until RH-11`
 
 Task Evidence:
 
@@ -115,6 +115,16 @@ Task Evidence:
   workflow parsed with backend/frontend/python jobs. A hosted Actions run was
   NOT_RUN because the local branch was not pushed; no remote-green claim is made.
 - RH-09 Real-LLM Semantic Verification: NOT_REQUIRED.
+- RH-10 DONE (2026-08-23) — one fixed qwen3.7-plus (`mock_llm=false`) run
+  passed AC-101/103/104/105/106/109/114. Raw prompts/responses, run metadata,
+  exact character counts, semantic checks and latency are stored under
+  `.agent/evidence/rh10_qwen3.7-plus_c5e53cc_20260823/`.
+- RH-10 Real-LLM Semantic Verification: PASSED — 7/7. AC-103 produced
+  2896/2828/3155/2874/2843 characters (5/5 in band) with zero exact duplicate
+  long sentences; AC-105 produced exact transient classification and 0/3 later
+  bread repetitions; all other frozen semantic gates passed.
+- Release remains NOT ACCEPTED until the separate RH-11 freeze checkpoint is
+  committed and the verified branch is merged/tagged.
 - Historical TASK-101~179 remain implementation history only and do not override
   the Release Hardening gate.
 
@@ -980,7 +990,7 @@ repository is currently:
 
 Release verdict:
 
-`NOT ACCEPTED — RH-10 remains; RH-11 is gated`
+`NOT ACCEPTED — RH-10 passed; RH-11 release freeze remains`
 
 Hardening progress:
 
@@ -994,8 +1004,8 @@ RH-06 DONE — AC-H07/H08 PASSED (engineering)
 RH-07 DONE — AC-H09 PASSED (engineering)
 RH-08 DONE — HR-001/HR-002/HR-003/HR-004 PASSED (engineering)
 RH-09 DONE — full engineering gate PASSED
-RH-10 NEXT — final qwen3.7-plus semantic suite
-RH-11 BLOCKED BY RH-08~RH-10
+RH-10 DONE — qwen3.7-plus 7/7 PASSED
+RH-11 NEXT — freeze the verified release
 ```
 
 RH-01 verification details:

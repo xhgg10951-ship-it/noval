@@ -6,11 +6,12 @@
 
 ```text
 Required model:     qwen3.7-plus (mock_llm=false)
-Prompt/code commit: recorded immediately before RH-10
+Prompt/code commit: c5e53cc
 Branch:             v0.1.1-dev
 Database:           MySQL story_ai, migrations V1..V15
 Engineering suite:  PASSED at RH-09 (backend 70 · Python 14 · frontend 6/build)
-Release verdict:    NOT ACCEPTED until the complete RH-10 suite passes
+Run ID:             rh10_qwen3.7-plus_c5e53cc_20260823
+Release verdict:    RH-10 PASSED; RH-11 release freeze still pending
 ```
 
 ## Fixed Story Settings

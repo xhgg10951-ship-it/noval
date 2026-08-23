@@ -10,6 +10,7 @@ PASS: all planned chapter goals/beats stay within arc-scope progression;
       main-conflict resolution.
 """
 import json
+import os
 import sys
 import urllib.request
 
@@ -64,7 +65,9 @@ req = urllib.request.Request(
 with urllib.request.urlopen(req, timeout=300) as resp:
     plan = json.loads(resp.read().decode("utf-8"))
 
-out_path = ".agent/evidence/ac114_plan.json"
+out_dir = os.environ.get("ACCEPTANCE_EVIDENCE_DIR", ".agent/evidence")
+os.makedirs(out_dir, exist_ok=True)
+out_path = os.path.join(out_dir, "ac114_plan.json")
 with open(out_path, "w", encoding="utf-8") as f:
     json.dump(plan, f, ensure_ascii=False, indent=2)
 

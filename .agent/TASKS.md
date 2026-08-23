@@ -3302,11 +3302,11 @@ Frozen Requirement:
 
 Current Phase:
 
-`Release Hardening — RH-09 COMPLETE`
+`Release Hardening — RH-10 COMPLETE`
 
 Current Task:
 
-`RH-10 — Final qwen3.7-plus Semantic Suite (NEXT)`
+`RH-11 — Freeze v0.1.1 Release (NEXT)`
 
 Task Status:
 
@@ -3314,7 +3314,7 @@ Task Status:
 
 Next Safe Action:
 
-> 按冻结 fixture 在 qwen3.7-plus 上运行完整 RH-10 Real-LLM Gate，并保存原始证据。
+> 审核 RH-01~RH-10 的提交与证据，完成 RH-11 release freeze；通过前保持 NOT ACCEPTED。
 
 ---
 
@@ -3666,13 +3666,24 @@ Real-LLM Semantic Verification: `NOT_REQUIRED`
 
 ## RH-10 — Final qwen3.7-plus Semantic Suite
 
-Status: `IN_PROGRESS`
+Status: `DONE`
 
 Dependencies: RH-09
 
+Engineering Verification: `PASSED` (RH-09 prerequisite)
+
+Real-LLM Semantic Verification: `PASSED`
+
+- Fixed model/config: qwen3.7-plus, mock_llm=false
+- Product/prompt commit: c5e53cc
+- Run ID: rh10_qwen3.7-plus_c5e53cc_20260823
+- AC-101/103/104/105/106/109/114: 7/7 PASSED
+- AC-103: 5/5 in the 2250–3750 band; deterministic repetition review passed
+- Raw evidence and metrics saved in the run-specific evidence directory
+
 ## RH-11 — Freeze v0.1.1 Release
 
-Status: `TODO`
+Status: `IN_PROGRESS`
 
 Dependencies: RH-01 through RH-10 all PASSED
 

@@ -5,12 +5,31 @@
 ```text
 Required final model: qwen3.7-plus
 Engineering suite:    PASSED RH-09 (backend 70 · Python 14 · frontend 6/build)
-Real-LLM suite:       NOT_RUN — PENDING RH-10
-Release verdict:      NOT ACCEPTED
+Real-LLM suite:       PASSED RH-10 — 7/7 on qwen3.7-plus
+Release verdict:      NOT ACCEPTED until RH-11 freezes the verified release
 ```
 
-Final metrics will be written from one complete RH-10 run after RH-09 passes.
-No earlier partial model run is promoted into the release verdict.
+Run ID: `rh10_qwen3.7-plus_c5e53cc_20260823`
+
+Product/prompt commit: `c5e53cc`
+
+Raw evidence: `.agent/evidence/rh10_qwen3.7-plus_c5e53cc_20260823/`
+
+| Metric | Final value |
+|---|---|
+| Model | qwen3.7-plus (`mock_llm=false`) |
+| Story ID | N/A — direct-contract semantic fixture; no persisted Story row |
+| Target / actual characters | 3000 / 2896, 2828, 3155, 2874, 2843 |
+| Length pass rate | 5/5 in 2250–3750 |
+| Obvious padding | PASS; 0 exact duplicate long sentences |
+| Chapter-goal completion | 3/3 advance groups; 0 hidden-identity violations |
+| Continuation failures | 0 |
+| Low-value detail repetition | 0/3 later chapters |
+| Duplicate Memory | 0 in fixture; deterministic dedup gate passed at RH-09 |
+| Manual Edit / Regenerate | all three revision regressions passed at RH-01 |
+| Polish count | 3 real-LLM requests (one evidence-format rerun, one checker false negative); final 7/7 checks |
+| Memory extraction failures | 0 |
+| Average AC-103 chapter generation latency | 34.63 seconds/chapter |
 
 ## Historical qwen3-8b Record
 
@@ -21,4 +40,5 @@ AC-103 length pass rate of 0/5 at the frozen 2250-character lower bound, while
 the other exercised semantic checks passed. This evidence neither passes nor
 fails the required qwen3.7-plus RH-10 suite.
 
-Detailed raw artifacts remain under `.agent/evidence/`.
+Detailed historical raw artifacts remain under `.agent/evidence/` outside the
+RH-10 run directory.

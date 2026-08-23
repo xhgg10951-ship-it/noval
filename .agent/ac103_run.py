@@ -91,7 +91,11 @@ def main() -> int:
 
     results = []
     recent_context = "前情：林夜穿越后被艾琳救下并收留，决定成为冒险者。"
-    out_dir = os.path.dirname(os.path.abspath(__file__))
+    out_dir = os.environ.get(
+        "ACCEPTANCE_EVIDENCE_DIR",
+        os.path.dirname(os.path.abspath(__file__)),
+    )
+    os.makedirs(out_dir, exist_ok=True)
     ts = dt.datetime.now().strftime("%Y%m%d_%H%M%S")
 
     for i, (goal, must_advance, must_not, beats, ending) in enumerate(specs, start=4):

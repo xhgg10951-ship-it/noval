@@ -1,0 +1,42 @@
+{
+  "request": {
+    "content": "林夜和艾琳走进了幽影森林。森林里很黑。林夜拔出铁剑。艾琳说：小心点，这里不对劲。他们走了很久。后来他们发现了一个山洞。山洞里有一些痕迹。总之这一天发生了很多事情，总的来说是一次难忘的经历。最后他们决定先回去。",
+    "chapterGoal": "调查幽影森林失踪案，发现失踪者留下的线索",
+    "endingIntent": "以发现关键线索收尾，为下一章深入调查留接口",
+    "constraints": [
+      {
+        "type": "风格",
+        "content": "冷峻克制"
+      }
+    ],
+    "currentState": [
+      {
+        "category": "INVENTORY",
+        "subject": "林夜",
+        "field": "item:铁剑",
+        "value": "铁剑"
+      },
+      {
+        "category": "LOCATION",
+        "subject": "林夜",
+        "field": "location",
+        "value": "幽影森林"
+      }
+    ],
+    "writingStyle": "冷峻克制，多用具体感官细节，少用形容词堆砌",
+    "userInstruction": "把机械总结式的结尾改掉，让对话更自然。"
+  },
+  "response": {
+    "polishedContent": "幽影森林的树冠遮蔽了天光，林间弥漫着潮湿的腐叶气息。林夜拇指推开剑格，铁剑出鞘的轻响在死寂中显得格外刺耳。\n\n“别松懈。”艾琳的声音压得很低，目光扫过周围扭曲的枝干，“这里的空气太沉了。”\n\n两人深入林地，脚下的枯枝发出断续的脆响。不知走了多久，一处被藤蔓半掩的山洞出现在视野中。洞口地面的泥土有近期被翻动的痕迹，几道凌乱的拖拽印记延伸进黑暗深处。\n\n林夜蹲下身，指尖划过那道新鲜的凹痕。"
+  },
+  "checks": {
+    "location_preserved": true,
+    "inventory_preserved": true,
+    "character_preserved": true,
+    "clue_plot_preserved": true,
+    "mechanical_summary_removed": true,
+    "no_new_destination": true,
+    "ending_intent_preserved": true
+  },
+  "verdict": "PASS"
+}

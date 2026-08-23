@@ -82,7 +82,11 @@ def main() -> int:
 
     raw = provider.complete(user, system=system)
 
-    out_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+    out_dir = os.environ.get(
+        "ACCEPTANCE_EVIDENCE_DIR",
+        os.path.join(os.path.dirname(os.path.abspath(__file__))),
+    )
+    os.makedirs(out_dir, exist_ok=True)
     ts = dt.datetime.now().strftime("%Y%m%d_%H%M%S")
     with open(os.path.join(out_dir, f"EVIDENCE_AC101_prompt_{ts}.txt"), "w", encoding="utf-8") as f:
         f.write("===== SYSTEM =====\n" + system + "\n\n===== USER =====\n" + user)

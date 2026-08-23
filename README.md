@@ -11,11 +11,11 @@ assistance, and polish.
 ```text
 Requirements:             FROZEN
 Implementation:           Feature Complete
-Release Hardening:        RH-01..RH-09 complete; RH-10 next
+Release Hardening:        RH-01..RH-10 complete; RH-11 freeze next
 Engineering Verification: PASSED (backend 70 · Python 14 · frontend 6/build)
 Required Final Model:     qwen3.7-plus
-Final Real-LLM Suite:     NOT_RUN (RH-10)
-v0.1.1 Verdict:           NOT ACCEPTED
+Final Real-LLM Suite:     PASSED 7/7 (RH-10)
+v0.1.1 Verdict:           NOT ACCEPTED until RH-11 release freeze
 ```
 
 v0.1.1 may be marked ACCEPTED only after RH-01 through RH-10 pass and the full
