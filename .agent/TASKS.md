@@ -3896,6 +3896,41 @@ length behavior remains part of the final qwen3.7-plus RH-10 gate.
 
 Next active task: `RH-07 — Memory Review Hardening Revalidation`
 
+## RH-07 Reopened — Memory Review Hardening
+
+Status: `DONE`
+
+Observed regressions before fix:
+
+- StoryMemory rows displayed the frozen v2 metadata, but review candidates did
+  not expose or render `importance` and `scope`, leaving the author without the
+  main decision signals before Apply/Ignore.
+- Revision invalidation marks old applied candidates `SUPERSEDED`, yet the UI
+  labelled them as pending and offered Apply/Ignore; the API accepted Apply and
+  re-created a fact that had already been removed from the current chapter.
+
+Fix:
+
+- Candidate DTO/API/UI now show importance, scope and source chapter alongside
+  existing type/evidence metadata.
+- `SUPERSEDED` is rendered as `已失效`, has no review actions, and is rejected
+  by the unified `applyCandidate()` boundary with HTTP 409.
+- The existing frozen-type whitelist remains at that same boundary: unknown
+  types still return HTTP 400 and remain PENDING without StoryMemory writes.
+
+Engineering Verification: `PASSED`
+
+- Two backend regressions and one frontend regression failed before repair and
+  now pass.
+- Backend Memory v2, Memory workflow, provenance and Chapter revision suites:
+  21/21 PASSED.
+- Frontend Vitest: 8/8 PASSED; production build PASSED.
+
+Real-LLM Semantic Verification: `NOT_REQUIRED` (review metadata and mutation
+guards are deterministic business behavior).
+
+Next active task: `RH-08 — Release Hygiene Revalidation`
+
 
 
 

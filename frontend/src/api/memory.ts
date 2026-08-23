@@ -12,7 +12,9 @@ export interface MemoryCandidate {
   value: string
   suggestedAction: 'AUTO' | 'REVIEW' | 'IGNORE'
   evidence: string | null
-  processingStatus: 'PENDING' | 'APPLIED' | 'IGNORED'
+  importance: number
+  scope: 'CHAPTER' | 'STAGE' | 'ARC' | 'STORY'
+  processingStatus: 'PENDING' | 'APPLIED' | 'IGNORED' | 'SUPERSEDED'
   applied: boolean
   createdAt: string
 }

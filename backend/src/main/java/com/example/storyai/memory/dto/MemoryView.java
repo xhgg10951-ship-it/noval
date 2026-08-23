@@ -46,6 +46,8 @@ public class MemoryView {
         public String value;
         public String suggestedAction;
         public String evidence;
+        public Integer importance;
+        public String scope;
         public String processingStatus;
         public boolean applied;
         public LocalDateTime createdAt;

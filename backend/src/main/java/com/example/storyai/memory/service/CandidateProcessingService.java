@@ -77,6 +77,13 @@ public class CandidateProcessingService {
     /** Author (or explicit override) accepts a candidate and applies it to live memory. */
     public void applyCandidate(MemoryCandidate candidate) {
         String type = candidate.getType();
+        // A revision invalidation is final for that extraction result. Allowing
+        // a later manual Apply would resurrect facts deleted from the current
+        // chapter body and bypass RH-01/RH-02 consistency guarantees.
+        if ("SUPERSEDED".equals(candidate.getProcessingStatus())) {
+            throw new IllegalStateException(
+                    "该 Memory candidate 已因章节修订失效，不能重新应用");
+        }
         // RH-07 / HH-008: every explicit Apply path terminates here, including
         // the review UI. Unknown extractor output may remain PENDING for audit,
         // but the author endpoint must never turn it into StoryMemory.

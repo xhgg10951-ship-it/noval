@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`RELEASE HARDENING REOPENED — RH-06 COMPLETE`
+`RELEASE HARDENING REOPENED — RH-07 COMPLETE`
 
 Current Task:
 
-`RH-07 — Memory Review Hardening Revalidation`
+`RH-08 — Release Hygiene Revalidation`
 
 Task Status:
 
@@ -96,6 +96,16 @@ Task Evidence:
   generation/reliability/replan suites 32/32; Python focused length/context/mock
   suite 15/15; frontend 7/7 and production build PASSED. V16 applied additively
   to the existing local schema; RUN.md and CI now apply V1..V16.
+- RH-07 COMPLETE (2026-08-23, reopened gate) — HH-007/HH-008 remained present,
+  but functional replay found the review queue omitted candidate importance and
+  scope, and a chapter-revision `SUPERSEDED` candidate was still shown as
+  actionable and could resurrect an obsolete fact through manual Apply.
+  Candidate DTO/UI now expose decision metadata, render invalidated candidates
+  as `已失效` without actions, and the unified Apply boundary rejects them with
+  409 while retaining the frozen unknown-type 400 guard.
+- RH-07 Engineering Verification: PASSED — new/strengthened regressions 3/3;
+  related backend Memory/Revision suites 21/21; frontend 8/8 and production
+  build PASSED.
 
 - RH-01 DONE (2026-08-23) — regression first reproduced stale summary after
   Manual Edit; fixed Manual Edit summary refresh + automatic re-extract,

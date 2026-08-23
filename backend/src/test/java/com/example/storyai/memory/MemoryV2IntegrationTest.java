@@ -127,11 +127,38 @@ class MemoryV2IntegrationTest {
                 storyId, "MYSTICAL_VIBES", "林夜")).isEmpty();
     }
 
+    @Test
+    void manualApplyRejectsSupersededCandidateFromObsoleteRevision() throws Exception {
+        long storyId = createStory();
+        MemoryCandidate obsolete = candidate(storyId, "PLOT_FACT", "林夜", null,
+                "林夜仍持有已从正文删除的铁剑", "REVIEW");
+        obsolete.setImportance(5);
+        obsolete.setScope("STORY");
+        obsolete.setProcessingStatus("SUPERSEDED");
+        obsolete.setApplied(false);
+        memoryService.saveCandidate(obsolete);
+
+        mockMvc.perform(post("/api/memory/candidates/{id}/apply", obsolete.getId()))
+                .andExpect(status().isConflict());
+
+        assertThat(memoryService.getCandidate(obsolete.getId()).getProcessingStatus())
+                .isEqualTo("SUPERSEDED");
+        assertThat(memoryService.findActiveByTypeSubject(storyId, "PLOT_FACT", "林夜"))
+                .isEmpty();
+    }
+
     // ---- RH-07 / HH-007: MemoryView exposes all Memory v2 review metadata ----
 
     @Test
     void memoryViewExposesImportanceScopeActiveSourceAndEvidence() throws Exception {
         long storyId = createStory();
+        MemoryCandidate review = candidate(storyId, "FORESHADOWING", "月蚀教团", null,
+                "教团可能在北境重现", "REVIEW");
+        review.setImportance(4);
+        review.setScope("ARC");
+        review.setProcessingStatus("PENDING");
+        review.setApplied(false);
+        memoryService.saveCandidate(review);
         StoryMemory sourced = new StoryMemory();
         sourced.setStoryId(storyId);
         sourced.setType("PLOT_THREAD");
@@ -155,7 +182,11 @@ class MemoryV2IntegrationTest {
                 .andExpect(jsonPath("$.storyMemories[?(@.type=='PLOT_THREAD')].sourceChapterId")
                         .value(org.hamcrest.Matchers.contains(org.hamcrest.Matchers.nullValue())))
                 .andExpect(jsonPath("$.storyMemories[?(@.type=='PLOT_THREAD')].evidence")
-                        .value(org.hamcrest.Matchers.contains("第十二章末尾提及半封信")));
+                        .value(org.hamcrest.Matchers.contains("第十二章末尾提及半封信")))
+                .andExpect(jsonPath("$.candidates[?(@.id==" + review.getId() + ")].importance")
+                        .value(org.hamcrest.Matchers.contains(4)))
+                .andExpect(jsonPath("$.candidates[?(@.id==" + review.getId() + ")].scope")
+                        .value(org.hamcrest.Matchers.contains("ARC")));
     }
 
     // ---- TASK-159: importance clamped 1..5, scope normalized ----

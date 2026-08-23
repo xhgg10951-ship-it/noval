@@ -52,7 +52,10 @@ function actionLabel(a: string): string {
 }
 
 function statusLabel(s: string): string {
-  return s === 'APPLIED' ? '已应用' : s === 'IGNORED' ? '已忽略' : '待处理'
+  return s === 'APPLIED' ? '已应用'
+    : s === 'IGNORED' ? '已忽略'
+      : s === 'SUPERSEDED' ? '已失效'
+        : '待处理'
 }
 
 onMounted(refresh)
@@ -119,8 +122,16 @@ watch(() => props.refreshToken, refresh)
             <span class="cand-item__status">{{ statusLabel(c.processingStatus) }}</span>
           </div>
           <p class="cand-item__value">{{ c.value }}</p>
+          <div class="mem-list__meta">
+            <span>重要度 {{ c.importance }}</span>
+            <span>范围 {{ c.scope }}</span>
+            <span>来源章节 {{ c.sourceChapterId == null ? '未记录' : `#${c.sourceChapterId}` }}</span>
+          </div>
           <p v-if="c.evidence" class="cand-item__evidence">依据：{{ c.evidence }}</p>
-          <div v-if="c.processingStatus !== 'APPLIED' && c.processingStatus !== 'IGNORED'" class="cand-item__actions">
+          <div
+            v-if="!['APPLIED', 'IGNORED', 'SUPERSEDED'].includes(c.processingStatus)"
+            class="cand-item__actions"
+          >
             <button class="btn btn--primary btn--small" :disabled="busyId === c.id" @click="handleApply(c)">采用</button>
             <button class="btn btn--ghost btn--small" :disabled="busyId === c.id" @click="handleIgnore(c)">忽略</button>
           </div>

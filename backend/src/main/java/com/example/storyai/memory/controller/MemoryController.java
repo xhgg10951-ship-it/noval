@@ -107,6 +107,8 @@ public class MemoryController {
         d.value = c.getValue();
         d.suggestedAction = c.getSuggestedAction();
         d.evidence = c.getEvidence();
+        d.importance = c.getImportance();
+        d.scope = c.getScope();
         d.processingStatus = c.getProcessingStatus();
         d.applied = c.isApplied();
         d.createdAt = c.getCreatedAt();
