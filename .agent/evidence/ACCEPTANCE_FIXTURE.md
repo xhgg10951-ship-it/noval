@@ -11,7 +11,8 @@ Branch:             v0.1.1-dev
 Database:           MySQL story_ai, migrations V1..V15
 Engineering suite:  PASSED at RH-09 (backend 70 · Python 14 · frontend 6/build)
 Run ID:             rh10_qwen3.7-plus_c5e53cc_20260823
-Release verdict:    RH-10 PASSED; RH-11 release freeze still pending
+Hosted CI:          PASSED, run 32643065616, evidence commit 95908cc
+Release verdict:    ACCEPTED at RH-11
 ```
 
 ## Fixed Story Settings
@@ -38,8 +39,8 @@ Stage direction:         第二天前往冒险者公会入会并接取委托：�
 - AC-114 600-chapter pace guard
 - release-hardening semantic cases required by `V0.1.1_RELEASE_HARDENING.md`
 
-Every result must come from the same qwen3.7-plus release configuration and be
-recorded in `ACCEPTANCE_METRICS.md` before RH-11 can make a release verdict.
+Every result came from the same qwen3.7-plus release configuration and was
+recorded in `ACCEPTANCE_METRICS.md` before the RH-11 release verdict.
 
 ## Historical Fixture Notice
 

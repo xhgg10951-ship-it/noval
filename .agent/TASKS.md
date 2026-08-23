@@ -3302,19 +3302,19 @@ Frozen Requirement:
 
 Current Phase:
 
-`Release Hardening — RH-10 COMPLETE`
+`Release Hardening — RH-11 COMPLETE`
 
 Current Task:
 
-`RH-11 — Freeze v0.1.1 Release (NEXT)`
+`NONE — v0.1.1 release frozen`
 
 Task Status:
 
-`IN_PROGRESS`
+`ACCEPTED`
 
 Next Safe Action:
 
-> 审核 RH-01~RH-10 的提交与证据，完成 RH-11 release freeze；通过前保持 NOT ACCEPTED。
+> v0.1.1 已冻结；不要自动开始 v0.2。先进行 20–30 章真实使用并记录指标。
 
 ---
 
@@ -3683,14 +3683,26 @@ Real-LLM Semantic Verification: `PASSED`
 
 ## RH-11 — Freeze v0.1.1 Release
 
-Status: `IN_PROGRESS`
+Status: `DONE`
 
 Dependencies: RH-01 through RH-10 all PASSED
 
+Engineering Verification: `PASSED`
+
+- Audited strict RH-01→RH-10 commit order and clean worktree
+- Verified `main` is an ancestor of `v0.1.1-dev` for a safe fast-forward
+- RH-10 offline evidence verifier: 7/7 PASSED
+- Hosted GitHub Actions run 32643065616 at 95908cc: Python/frontend/backend
+  all completed with conclusion `success`
+
+Real-LLM Semantic Verification: `PASSED` (RH-10 qwen3.7-plus 7/7)
+
+Release Verdict: `ACCEPTED`
+
 Release rule:
 
-> v0.1.1 remains NOT ACCEPTED until RH-10 passes on qwen3.7-plus. Only then may
-> RH-11 merge `v0.1.1-dev` to `main` and create tag `v0.1.1`.
+> RH-10 passed on qwen3.7-plus and RH-11 accepted the verified release.
+> Merge `v0.1.1-dev` to `main` and identify the release with tag `v0.1.1`.
 
 
 

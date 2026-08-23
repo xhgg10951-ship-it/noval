@@ -11,16 +11,17 @@ assistance, and polish.
 ```text
 Requirements:             FROZEN
 Implementation:           Feature Complete
-Release Hardening:        RH-01..RH-10 complete; RH-11 freeze next
+Release Hardening:        RH-01..RH-11 complete
 Engineering Verification: PASSED (backend 70 · Python 14 · frontend 6/build)
 Required Final Model:     qwen3.7-plus
 Final Real-LLM Suite:     PASSED 7/7 (RH-10)
-v0.1.1 Verdict:           NOT ACCEPTED until RH-11 release freeze
+Hosted CI:                PASSED (run 32643065616)
+v0.1.1 Verdict:           ACCEPTED
 ```
 
-v0.1.1 may be marked ACCEPTED only after RH-01 through RH-10 pass and the full
-RH-10 real-LLM suite passes on `qwen3.7-plus`. The old TASK-179 verdict is
-superseded by `V0.1.1_RELEASE_HARDENING.md`.
+RH-01 through RH-10 passed, including the full qwen3.7-plus semantic suite;
+RH-11 froze the verified release. The old TASK-179 verdict remains superseded
+by `V0.1.1_RELEASE_HARDENING.md`.
 
 Historical qwen3-8b results are retained as evidence only:
 

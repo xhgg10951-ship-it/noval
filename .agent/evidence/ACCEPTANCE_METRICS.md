@@ -6,12 +6,17 @@
 Required final model: qwen3.7-plus
 Engineering suite:    PASSED RH-09 (backend 70 · Python 14 · frontend 6/build)
 Real-LLM suite:       PASSED RH-10 — 7/7 on qwen3.7-plus
-Release verdict:      NOT ACCEPTED until RH-11 freezes the verified release
+Hosted CI:            PASSED — run 32643065616 at evidence commit 95908cc
+Release verdict:      ACCEPTED — RH-11
 ```
 
 Run ID: `rh10_qwen3.7-plus_c5e53cc_20260823`
 
 Product/prompt commit: `c5e53cc`
+
+RH-10 evidence commit: `95908cc`
+
+Hosted CI: [run 32643065616](https://github.com/xhgg10951-ship-it/noval/actions/runs/32643065616)
 
 Raw evidence: `.agent/evidence/rh10_qwen3.7-plus_c5e53cc_20260823/`
 

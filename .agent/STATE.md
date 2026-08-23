@@ -28,15 +28,15 @@ Current Implementation Plan:
 
 Current Phase:
 
-`RELEASE HARDENING — RH-10 COMPLETE`
+`RELEASE HARDENING — RH-11 COMPLETE`
 
 Current Task:
 
-`RH-11 — Freeze v0.1.1 Release (NEXT)`
+`NONE — v0.1.1 release frozen`
 
 Task Status:
 
-`Release Freeze Pending — RH-01~RH-10 and qwen3.7-plus 7/7 passed; v0.1.1 remains NOT ACCEPTED until RH-11`
+`ACCEPTED — RH-01~RH-11 complete; engineering, hosted CI, and qwen3.7-plus 7/7 passed`
 
 Task Evidence:
 
@@ -123,8 +123,10 @@ Task Evidence:
   2896/2828/3155/2874/2843 characters (5/5 in band) with zero exact duplicate
   long sentences; AC-105 produced exact transient classification and 0/3 later
   bread repetitions; all other frozen semantic gates passed.
-- Release remains NOT ACCEPTED until the separate RH-11 freeze checkpoint is
-  committed and the verified branch is merged/tagged.
+- RH-11 DONE (2026-08-23) — GitHub Actions run 32643065616 passed Python,
+  frontend and backend jobs against RH-10 evidence commit 95908cc. RH-01~RH-10
+  were audited in strict order, the evidence verifier passed 7/7, and the
+  release verdict is now ACCEPTED. Release source is identified by tag v0.1.1.
 - Historical TASK-101~179 remain implementation history only and do not override
   the Release Hardening gate.
 
@@ -990,7 +992,7 @@ repository is currently:
 
 Release verdict:
 
-`NOT ACCEPTED — RH-10 passed; RH-11 release freeze remains`
+`ACCEPTED — RH-01 through RH-11 complete`
 
 Hardening progress:
 
@@ -1005,7 +1007,7 @@ RH-07 DONE — AC-H09 PASSED (engineering)
 RH-08 DONE — HR-001/HR-002/HR-003/HR-004 PASSED (engineering)
 RH-09 DONE — full engineering gate PASSED
 RH-10 DONE — qwen3.7-plus 7/7 PASSED
-RH-11 NEXT — freeze the verified release
+RH-11 DONE — hosted CI PASSED; release frozen as ACCEPTED
 ```
 
 RH-01 verification details:
