@@ -15,6 +15,10 @@ public class ChapterPlanResponse {
     private String goal;
     private String expectedProgress;
     private Integer targetCharacters;
+    private String mustAdvance;
+    private String mustNotDo;
+    private String storyBeats;
+    private String endingIntent;
     // ---- TASK-133/136: plan versioning surfaced to the UI ----
     private Integer planVersion;
     private Boolean active;
@@ -32,6 +36,10 @@ public class ChapterPlanResponse {
         this.goal = plan.getGoal();
         this.expectedProgress = plan.getExpectedProgress();
         this.targetCharacters = plan.getTargetCharacters();
+        this.mustAdvance = plan.getMustAdvance();
+        this.mustNotDo = plan.getMustNotDo();
+        this.storyBeats = plan.getStoryBeats();
+        this.endingIntent = plan.getEndingIntent();
         this.planVersion = plan.getPlanVersion();
         this.active = plan.getActive();
         this.status = plan.getStatus();
@@ -86,6 +94,15 @@ public class ChapterPlanResponse {
     public void setTargetCharacters(Integer targetCharacters) {
         this.targetCharacters = targetCharacters;
     }
+
+    public String getMustAdvance() { return mustAdvance; }
+    public void setMustAdvance(String mustAdvance) { this.mustAdvance = mustAdvance; }
+    public String getMustNotDo() { return mustNotDo; }
+    public void setMustNotDo(String mustNotDo) { this.mustNotDo = mustNotDo; }
+    public String getStoryBeats() { return storyBeats; }
+    public void setStoryBeats(String storyBeats) { this.storyBeats = storyBeats; }
+    public String getEndingIntent() { return endingIntent; }
+    public void setEndingIntent(String endingIntent) { this.endingIntent = endingIntent; }
 
     public Integer getPlanVersion() {
         return planVersion;

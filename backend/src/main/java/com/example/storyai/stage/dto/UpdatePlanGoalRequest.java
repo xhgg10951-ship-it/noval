@@ -14,6 +14,11 @@ public class UpdatePlanGoalRequest {
 
     @Min(value = 300, message = "本章目标字数至少为 300")
     private Integer targetCharacters;
+    private String expectedProgress;
+    private String mustAdvance;
+    private String mustNotDo;
+    private String storyBeats;
+    private String endingIntent;
 
     public String getGoal() {
         return goal;
@@ -30,4 +35,15 @@ public class UpdatePlanGoalRequest {
     public void setTargetCharacters(Integer targetCharacters) {
         this.targetCharacters = targetCharacters;
     }
+
+    public String getExpectedProgress() { return expectedProgress; }
+    public void setExpectedProgress(String expectedProgress) { this.expectedProgress = expectedProgress; }
+    public String getMustAdvance() { return mustAdvance; }
+    public void setMustAdvance(String mustAdvance) { this.mustAdvance = mustAdvance; }
+    public String getMustNotDo() { return mustNotDo; }
+    public void setMustNotDo(String mustNotDo) { this.mustNotDo = mustNotDo; }
+    public String getStoryBeats() { return storyBeats; }
+    public void setStoryBeats(String storyBeats) { this.storyBeats = storyBeats; }
+    public String getEndingIntent() { return endingIntent; }
+    public void setEndingIntent(String endingIntent) { this.endingIntent = endingIntent; }
 }

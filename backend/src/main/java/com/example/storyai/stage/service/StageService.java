@@ -78,14 +78,23 @@ public class StageService {
 
     /** AT-B03: author edits a chapter goal. */
     @Transactional
-    public ChapterPlan updatePlanGoal(Long planId, String goal, Integer targetCharacters) {
+    public ChapterPlan updatePlanGoal(Long planId, String goal, Integer targetCharacters,
+                                      String expectedProgress, String mustAdvance,
+                                      String mustNotDo, String storyBeats, String endingIntent) {
         ChapterPlan plan = chapterPlanMapper.findById(planId);
         if (plan == null) {
             throw new ResourceNotFoundException("ChapterPlan", planId);
         }
         Integer effectiveTarget = targetCharacters != null
                 ? targetCharacters : plan.getTargetCharacters();
-        chapterPlanMapper.updateEditable(planId, goal, effectiveTarget);
+        chapterPlanMapper.updateEditable(
+                planId, goal,
+                expectedProgress != null ? expectedProgress : plan.getExpectedProgress(),
+                effectiveTarget,
+                mustAdvance != null ? mustAdvance : plan.getMustAdvance(),
+                mustNotDo != null ? mustNotDo : plan.getMustNotDo(),
+                storyBeats != null ? storyBeats : plan.getStoryBeats(),
+                endingIntent != null ? endingIntent : plan.getEndingIntent());
         return chapterPlanMapper.findById(planId);
     }
 

@@ -142,6 +142,49 @@ class StagePlanningIntegrationTest {
     // ---- AT-B03: edit chapter goal, then confirm the plan ----
 
     @Test
+    void authorCanReviewAndEditTheCompleteChapterSpec() throws Exception {
+        Long storyId = createStory();
+        when(aiServiceClient.planStage(any(PlanStageRequest.class)))
+                .thenReturn(new PlanStageResponse(1, List.of(
+                        new PlanStageResponse.ChapterPlanItem(
+                                1, "进入公会", "走到接待台", 3000,
+                                List.of("到达", "登记", "测试铺垫"),
+                                List.of("不暴露天帝身份"),
+                                List.of("进入大厅", "填写档案"), "取得身份牌"))));
+
+        MvcResult created = mockMvc.perform(post("/api/stories/{id}/stages", storyId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"direction\":\"进入公会并登记\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.plans[0].mustAdvance").value("到达\n登记\n测试铺垫"))
+                .andExpect(jsonPath("$.plans[0].mustNotDo").value("不暴露天帝身份"))
+                .andExpect(jsonPath("$.plans[0].storyBeats").value("进入大厅\n填写档案"))
+                .andExpect(jsonPath("$.plans[0].endingIntent").value("取得身份牌"))
+                .andReturn();
+        long planId = objectMapper.readTree(created.getResponse().getContentAsString())
+                .get("plans").get(0).get("id").asLong();
+
+        mockMvc.perform(put("/api/stages/plans/{id}", planId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(java.util.Map.of(
+                                "goal", "完成登记",
+                                "expectedProgress", "登记已办结",
+                                "targetCharacters", 3200,
+                                "mustAdvance", "进入公会\n完成登记\n安排测试",
+                                "mustNotDo", "不得暴露穿越者身份",
+                                "storyBeats", "抵达柜台\n填写档案\n领取身份牌",
+                                "endingIntent", "登记完成后查看委托板"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.goal").value("完成登记"))
+                .andExpect(jsonPath("$.expectedProgress").value("登记已办结"))
+                .andExpect(jsonPath("$.targetCharacters").value(3200))
+                .andExpect(jsonPath("$.mustAdvance").value("进入公会\n完成登记\n安排测试"))
+                .andExpect(jsonPath("$.mustNotDo").value("不得暴露穿越者身份"))
+                .andExpect(jsonPath("$.storyBeats").value("抵达柜台\n填写档案\n领取身份牌"))
+                .andExpect(jsonPath("$.endingIntent").value("登记完成后查看委托板"));
+    }
+
+    @Test
     void editGoalThenConfirmActivatesStage() throws Exception {
         Long storyId = createStory();
         when(aiServiceClient.planStage(any(PlanStageRequest.class)))

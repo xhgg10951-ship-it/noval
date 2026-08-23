@@ -208,8 +208,11 @@ public class StagePlanningService {
         return stageService.confirmPlan(stageId);
     }
 
-    public ChapterPlan updatePlanGoal(Long planId, String goal, Integer targetCharacters) {
-        return stageService.updatePlanGoal(planId, goal, targetCharacters);
+    public ChapterPlan updatePlanGoal(Long planId, String goal, Integer targetCharacters,
+                                      String expectedProgress, String mustAdvance,
+                                      String mustNotDo, String storyBeats, String endingIntent) {
+        return stageService.updatePlanGoal(planId, goal, targetCharacters,
+                expectedProgress, mustAdvance, mustNotDo, storyBeats, endingIntent);
     }
 
     // ---- helpers ----

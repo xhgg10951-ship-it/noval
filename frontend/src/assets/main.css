@@ -490,6 +490,14 @@ body {
   color: var(--muted);
 }
 
+.plan-item__spec {
+  margin: 0 0 0.35rem 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--muted);
+  white-space: pre-line;
+}
+
 .plan-item__actions {
   display: flex;
   gap: 0.5rem;

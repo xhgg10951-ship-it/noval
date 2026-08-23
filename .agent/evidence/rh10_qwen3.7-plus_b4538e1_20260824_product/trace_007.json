@@ -1,0 +1,23 @@
+{
+  "method": "PUT",
+  "path": "/api/stages/plans/3243",
+  "request": {
+    "goal": "艾琳把林夜带回住处安顿；本章结束时已经过夜，二人已认识且林夜已有住所。",
+    "targetCharacters": 3000
+  },
+  "status": 200,
+  "durationSeconds": 0.016,
+  "response": {
+    "id": 3243,
+    "stageId": 1097,
+    "chapterOrder": 2,
+    "goal": "艾琳把林夜带回住处安顿；本章结束时已经过夜，二人已认识且林夜已有住所。",
+    "expectedProgress": "到达艾琳简陋但温馨的住所。林夜观察环境，学习基本礼仪以避免露馅。艾琳提供食物和基本衣物，双方进行有限度的交流。林夜意识到在这个世界没有身份和金钱寸步难行，而艾琳也表现出对额外负担的轻微不满但依然保持底线善良。夜晚，林夜独自反思现状，制定初步生存策略。",
+    "targetCharacters": 3000,
+    "planVersion": 1,
+    "active": true,
+    "status": "ACTIVE",
+    "createdAt": "2026-08-24T00:16:04.958",
+    "updatedAt": "2026-08-24T00:16:04.994"
+  }
+}

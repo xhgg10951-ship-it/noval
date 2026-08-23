@@ -1,0 +1,85 @@
+{
+  "method": "GET",
+  "path": "/api/stages/1099",
+  "request": null,
+  "status": 200,
+  "durationSeconds": 0.0,
+  "response": {
+    "id": 1099,
+    "storyId": 1637,
+    "direction": "current=5；继续第一卷1–60章的生存融入，只安排近期公会委托、城镇立足和幽影森林调查，不揭示终局真相，不安排终局大战或最终返回通道。",
+    "status": "PLANNING",
+    "suggestedChapterCount": 5,
+    "targetChapterCount": 5,
+    "targetCharacters": 3000,
+    "plans": [
+      {
+        "id": 3247,
+        "stageId": 1099,
+        "chapterOrder": 6,
+        "goal": "采购物资与建立初步信任，展示林夜的观察力与伪装技巧",
+        "expectedProgress": "完成进入幽影森林前的物资准备，林夜通过细节观察获得艾琳的轻微改观，但维持哑巴人设",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-24T00:23:02.068",
+        "updatedAt": "2026-08-24T00:23:02.068"
+      },
+      {
+        "id": 3248,
+        "stageId": 1099,
+        "chapterOrder": 7,
+        "goal": "午夜旧钟楼会面，获取关键线索，营造悬疑氛围",
+        "expectedProgress": "见证人出现并提供关于失踪者的异常信息，暗示案件背后有非自然力量",
+        "targetCharacters": 3200,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-24T00:23:02.068",
+        "updatedAt": "2026-08-24T00:23:02.068"
+      },
+      {
+        "id": 3249,
+        "stageId": 1099,
+        "chapterOrder": 8,
+        "goal": "进入幽影森林边缘，适应野外环境，展示团队磨合",
+        "expectedProgress": "林夜在野外生存中发挥作用，同时继续隐藏实力，确立'累赘但有点用'的定位",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-24T00:23:02.068",
+        "updatedAt": "2026-08-24T00:23:02.068"
+      },
+      {
+        "id": 3250,
+        "stageId": 1099,
+        "chapterOrder": 9,
+        "goal": "深入北侧溪流，发现失踪者营地遗迹，线索升级",
+        "expectedProgress": "找到采药人遗留的物品，发现非人类活动的痕迹，危机感加剧",
+        "targetCharacters": 3300,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-24T00:23:02.068",
+        "updatedAt": "2026-08-24T00:23:02.068"
+      },
+      {
+        "id": 3251,
+        "stageId": 1099,
+        "chapterOrder": 10,
+        "goal": "小规模遭遇战，林夜首次间接参与战斗，验证成长",
+        "expectedProgress": "通过战术配合击败敌人，林夜利用环境优势助攻，获得艾琳的认可",
+        "targetCharacters": 3500,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-24T00:23:02.068",
+        "updatedAt": "2026-08-24T00:23:02.068"
+      }
+    ],
+    "createdAt": "2026-08-24T00:23:02.067",
+    "updatedAt": "2026-08-24T00:23:02.067"
+  }
+}

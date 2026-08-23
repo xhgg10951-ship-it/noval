@@ -1,0 +1,50 @@
+{
+  "method": "POST",
+  "path": "/api/stories/1637/stages",
+  "request": {
+    "direction": "用两章写完林夜初到异界、认识艾琳并在她住处安顿过夜。",
+    "targetChapterCount": 2,
+    "targetCharacters": 3000
+  },
+  "status": 201,
+  "durationSeconds": 21.485,
+  "response": {
+    "id": 1097,
+    "storyId": 1637,
+    "direction": "用两章写完林夜初到异界、认识艾琳并在她住处安顿过夜。",
+    "status": "PLANNING",
+    "suggestedChapterCount": 2,
+    "targetChapterCount": 2,
+    "targetCharacters": 3000,
+    "plans": [
+      {
+        "id": 3242,
+        "stageId": 1097,
+        "chapterOrder": 1,
+        "goal": "描绘林夜穿越后的混乱与危机，建立异世界基础认知，并通过艾琳的介入解决 immediate danger，初步建立两人联系。",
+        "expectedProgress": "林夜从现代都市瞬间转移至异界荒野/城镇边缘，经历短暂的生理不适与认知冲击。在遭遇低级魔物或当地流氓骚扰时，因语言不通和力量薄弱陷入绝境。艾琳登场，以干练的战斗技巧迅速解决危机，但并未深究林夜来历，仅将其视为需要帮助的可怜人。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-24T00:16:04.958",
+        "updatedAt": "2026-08-24T00:16:04.958"
+      },
+      {
+        "id": 3243,
+        "stageId": 1097,
+        "chapterOrder": 2,
+        "goal": "在艾琳的住处完成初步安顿，通过细节互动深化人物关系，确立林夜‘隐藏身份’的行为模式，并暗示后续生存压力。",
+        "expectedProgress": "到达艾琳简陋但温馨的住所。林夜观察环境，学习基本礼仪以避免露馅。艾琳提供食物和基本衣物，双方进行有限度的交流。林夜意识到在这个世界没有身份和金钱寸步难行，而艾琳也表现出对额外负担的轻微不满但依然保持底线善良。夜晚，林夜独自反思现状，制定初步生存策略。",
+        "targetCharacters": 3200,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-24T00:16:04.958",
+        "updatedAt": "2026-08-24T00:16:04.958"
+      }
+    ],
+    "createdAt": "2026-08-24T00:16:04.956",
+    "updatedAt": "2026-08-24T00:16:04.956"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "method": "POST",
+  "path": "/api/chapters/1504/polish",
+  "request": {
+    "userInstruction": "降低机械重复，保持全部事实、位置、物品和结尾意图，不新增事件。"
+  },
+  "status": 200,
+  "durationSeconds": 17.031,
+  "response": {
+    "id": 1504,
+    "storyId": 1637,
+    "stageId": 1098,
+    "planId": 3246,
+    "chapterNumber": 5,
+    "title": "第五章：幽影的轮廓",
+    "content": "林夜和艾琳在冒险者公会完成了失踪案线索的汇报。林夜仍站在公会大厅，手中紧握着铁剑和调查委托书，确认了失踪者最后出现的地点是幽影森林。此时，他听见艾琳提醒他午夜去旧钟楼见见证人。林夜回答道：“我们午夜去旧钟楼。”任务接取完毕，两人走出公会，准备采购物资，故事节奏从城市日常转向即将开始的野外冒险悬念。",
+    "summary": "林夜和艾琳在冒险者公会汇报完失踪案线索，确认失踪者最后出现在幽影森林，并约定午夜去旧钟楼见见证人。两人随后走出公会准备采购物资，故事节奏转向即将开始的野外冒险。",
+    "generationStatus": "GENERATED",
+    "currentRevisionId": 1320,
+    "currentRevisionVersion": 3,
+    "sourceType": "AI_POLISH",
+    "status": "DRAFT",
+    "memoryExtractionStatus": "COMPLETED",
+    "targetCharacters": 3000,
+    "actualCharacterCount": 149,
+    "createdAt": "2026-08-24T00:21:40",
+    "updatedAt": "2026-08-24T00:22:31"
+  }
+}

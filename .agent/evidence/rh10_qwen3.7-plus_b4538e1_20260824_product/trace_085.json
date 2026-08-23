@@ -1,0 +1,59 @@
+{
+  "method": "POST",
+  "path": "/api/stages/1098/confirm",
+  "request": null,
+  "status": 200,
+  "durationSeconds": 0.0,
+  "response": {
+    "id": 1098,
+    "storyId": 1637,
+    "direction": "第二天前往冒险者公会入会并接取委托：调查幽影森林失踪案。",
+    "status": "ACTIVE",
+    "suggestedChapterCount": 3,
+    "targetChapterCount": 3,
+    "targetCharacters": 3000,
+    "plans": [
+      {
+        "id": 3244,
+        "stageId": 1098,
+        "chapterOrder": 3,
+        "goal": "完成冒险者公会登记并取得资格；林夜必须隐藏穿越者身份，不得向任何人暴露。",
+        "expectedProgress": "林夜离开住所，进入灰石城公共区域，观察到货币交易或基础社会规则。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-24T00:19:03.865",
+        "updatedAt": "2026-08-24T00:19:03.877"
+      },
+      {
+        "id": 3245,
+        "stageId": 1098,
+        "chapterOrder": 4,
+        "goal": "接取调查幽影森林失踪案的初步委托，核对三名失踪者最后活动的时间与地点。",
+        "expectedProgress": "林夜拿到某种形式的身份证明或徽章，了解公会的层级结构。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-24T00:19:03.865",
+        "updatedAt": "2026-08-24T00:19:03.886"
+      },
+      {
+        "id": 3246,
+        "stageId": 1098,
+        "chapterOrder": 5,
+        "goal": "与艾琳准备调查药剂和绳索，确认南城门出城路线，并决定次日清晨出发。",
+        "expectedProgress": "确定接下来的主线任务方向，林夜通过观察地图或任务描述获取关键情报。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-24T00:19:03.865",
+        "updatedAt": "2026-08-24T00:19:03.915"
+      }
+    ],
+    "createdAt": "2026-08-24T00:19:03.863",
+    "updatedAt": "2026-08-24T00:19:03.925"
+  }
+}

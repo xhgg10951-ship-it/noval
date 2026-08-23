@@ -38,6 +38,11 @@ const confirming = ref(false)
 const editingPlanId = ref<number | null>(null)
 const editingGoal = ref('')
 const editingTargetCharacters = ref<number | null>(null)
+const editingExpectedProgress = ref('')
+const editingMustAdvance = ref('')
+const editingMustNotDo = ref('')
+const editingStoryBeats = ref('')
+const editingEndingIntent = ref('')
 const savingGoal = ref(false)
 const chapterRefreshToken = ref(0)
 
@@ -166,6 +171,11 @@ function startEditGoal(plan: ChapterPlanResponse): void {
   editingPlanId.value = plan.id
   editingGoal.value = plan.goal
   editingTargetCharacters.value = plan.targetCharacters
+  editingExpectedProgress.value = plan.expectedProgress ?? ''
+  editingMustAdvance.value = plan.mustAdvance ?? ''
+  editingMustNotDo.value = plan.mustNotDo ?? ''
+  editingStoryBeats.value = plan.storyBeats ?? ''
+  editingEndingIntent.value = plan.endingIntent ?? ''
 }
 
 async function saveGoal(): Promise<void> {
@@ -176,6 +186,13 @@ async function saveGoal(): Promise<void> {
       editingPlanId.value,
       editingGoal.value.trim(),
       editingTargetCharacters.value ?? undefined,
+      {
+        expectedProgress: editingExpectedProgress.value,
+        mustAdvance: editingMustAdvance.value,
+        mustNotDo: editingMustNotDo.value,
+        storyBeats: editingStoryBeats.value,
+        endingIntent: editingEndingIntent.value,
+      },
     )
     if (stage.value) {
       const idx = stage.value.plans.findIndex((p) => p.id === updated.id)
@@ -265,7 +282,18 @@ function statusLabel(status: string): string {
           <span class="plan-item__order">{{ plan.chapterOrder }}</span>
           <div class="plan-item__body">
             <template v-if="editingPlanId === plan.id">
+              <label class="stage-controls__label">本章目标</label>
               <textarea v-model="editingGoal" class="form__textarea" rows="2"></textarea>
+              <label class="stage-controls__label">预期进度</label>
+              <textarea v-model="editingExpectedProgress" class="form__textarea" rows="2"></textarea>
+              <label class="stage-controls__label">必须推进（每行一项）</label>
+              <textarea v-model="editingMustAdvance" class="form__textarea" rows="3"></textarea>
+              <label class="stage-controls__label">禁止事项（每行一项）</label>
+              <textarea v-model="editingMustNotDo" class="form__textarea" rows="3"></textarea>
+              <label class="stage-controls__label">剧情节拍（每行一项）</label>
+              <textarea v-model="editingStoryBeats" class="form__textarea" rows="3"></textarea>
+              <label class="stage-controls__label">结尾意图</label>
+              <textarea v-model="editingEndingIntent" class="form__textarea" rows="2"></textarea>
               <label class="stage-controls__label">
                 本章目标字数
                 <input
@@ -287,6 +315,10 @@ function statusLabel(status: string): string {
             <template v-else>
               <p class="plan-item__goal">{{ plan.goal }}</p>
               <p v-if="plan.expectedProgress" class="plan-item__progress">{{ plan.expectedProgress }}</p>
+              <p v-if="plan.mustAdvance" class="plan-item__spec"><strong>必须推进：</strong>{{ plan.mustAdvance }}</p>
+              <p v-if="plan.mustNotDo" class="plan-item__spec"><strong>禁止事项：</strong>{{ plan.mustNotDo }}</p>
+              <p v-if="plan.storyBeats" class="plan-item__spec"><strong>剧情节拍：</strong>{{ plan.storyBeats }}</p>
+              <p v-if="plan.endingIntent" class="plan-item__spec"><strong>结尾意图：</strong>{{ plan.endingIntent }}</p>
               <p class="plan-item__progress">
                 目标字数：{{ plan.targetCharacters ?? stage.targetCharacters ?? '继承故事设置' }}
               </p>
@@ -298,7 +330,7 @@ function statusLabel(status: string): string {
                 class="btn btn--ghost btn--small"
                 @click="startEditGoal(plan)"
               >
-                编辑目标
+                编辑 ChapterSpec
               </button>
             </template>
           </div>

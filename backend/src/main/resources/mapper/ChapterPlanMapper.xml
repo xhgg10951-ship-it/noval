@@ -55,7 +55,12 @@
     <update id="updateEditable">
         UPDATE chapter_plan
         SET goal = #{goal},
-            target_characters = #{targetCharacters}
+            expected_progress = #{expectedProgress},
+            target_characters = #{targetCharacters},
+            must_advance = #{mustAdvance},
+            must_not_do = #{mustNotDo},
+            story_beats = #{storyBeats},
+            ending_intent = #{endingIntent}
         WHERE id = #{id}
     </update>
 

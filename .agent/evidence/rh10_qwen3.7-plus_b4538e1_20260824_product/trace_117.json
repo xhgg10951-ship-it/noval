@@ -1,0 +1,19 @@
+{
+  "method": "POST",
+  "path": "/api/generation-jobs/486/continue",
+  "request": null,
+  "status": 200,
+  "durationSeconds": 0.047,
+  "response": {
+    "id": 486,
+    "stageId": 1098,
+    "mode": "STEP",
+    "currentPlanIndex": 1,
+    "total": 3,
+    "status": "RUNNING",
+    "phase": "PLANNING",
+    "lastError": null,
+    "createdAt": "2026-08-24T00:19:03",
+    "updatedAt": "2026-08-24T00:20:00"
+  }
+}

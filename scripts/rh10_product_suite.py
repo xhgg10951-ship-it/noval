@@ -32,6 +32,37 @@ AC105_UNRELATED_GOALS = [
     "与艾琳准备调查药剂和绳索，确认南城门出城路线，并决定次日清晨出发。",
 ]
 
+AC105_UNRELATED_SPECS = [
+    {
+        "expectedProgress": "林夜进入公会大厅，完成登记和基础测试，取得合法身份牌。",
+        "mustAdvance": "进入冒险者公会\n完成身份登记\n完成基础测试铺垫",
+        "mustNotDo": "不得暴露天帝身份\n不得暴露穿越者身份",
+        "storyBeats": "抵达接待台\n填写身份档案\n完成基础测试\n领取身份牌",
+        "endingIntent": "登记完成后前往委托板",
+    },
+    {
+        "expectedProgress": "领取失踪案委托并整理三名失踪者的时空线索。",
+        "mustAdvance": "领取调查委托\n核对失踪时间\n核对最后活动地点",
+        "mustNotDo": "不得直接找到幕后真凶",
+        "storyBeats": "查看委托板\n与接待员核对档案\n整理调查顺序",
+        "endingIntent": "确定调查幽影森林失踪案",
+    },
+    {
+        "expectedProgress": "备齐调查物资并确认从南城门前往幽影森林的路线。",
+        "mustAdvance": "准备药剂和绳索\n确认南城门路线\n决定次日清晨出发",
+        "mustNotDo": "不得提前进入幽影森林深处",
+        "storyBeats": "清点物资\n查看地图\n确认出发时间",
+        "endingIntent": "次日清晨从南城门出发",
+    },
+]
+
+
+def remove_preexisting_bread(text: str) -> str:
+    """Make AC-105 measure only the deliberately inserted ordinary bread."""
+    paragraphs = (text or "").splitlines()
+    cleaned = [line for line in paragraphs if "面包" not in line]
+    return "\n".join(cleaned).strip()
+
 
 class ProductSuite:
     def __init__(self, base_url: str, evidence_dir: Path, run_id: str,
@@ -223,8 +254,9 @@ class ProductSuite:
         chapter2 = sorted(first_two, key=lambda c: c["chapterNumber"])[-1]
 
         bread_sentence = "早餐时，林夜吃掉一块普通面包，只是填饱肚子，随后不再关注它。"
+        clean_chapter2 = remove_preexisting_bread(chapter2["content"])
         edited = self.api("PUT", f"/api/chapters/{chapter2['id']}/content", {
-            "content": chapter2["content"].rstrip() + "\n\n" + bread_sentence,
+            "content": clean_chapter2 + "\n\n" + bread_sentence,
         })
         if edited["memoryExtractionStatus"] != "COMPLETED":
             raise AssertionError("Manual Edit did not complete Memory refresh")
@@ -256,7 +288,13 @@ class ProductSuite:
             plannerText=plan_text,
         )
 
-        self.update_goals(stage2, AC105_UNRELATED_GOALS, 3000)
+        for plan, goal, spec in zip(
+                stage2["plans"], AC105_UNRELATED_GOALS, AC105_UNRELATED_SPECS):
+            self.api("PUT", f"/api/stages/plans/{plan['id']}", {
+                "goal": goal,
+                "targetCharacters": 3000,
+                **spec,
+            })
         self.api("POST", f"/api/stages/{stage2['id']}/confirm")
         self.finish_step_job(stage2["id"], 3)
         later_three = sorted(

@@ -1,0 +1,63 @@
+{
+  "method": "POST",
+  "path": "/api/stories/1637/stages",
+  "request": {
+    "direction": "第二天前往冒险者公会入会并接取委托：调查幽影森林失踪案。",
+    "targetChapterCount": 3,
+    "targetCharacters": 3000
+  },
+  "status": 201,
+  "durationSeconds": 24.438,
+  "response": {
+    "id": 1098,
+    "storyId": 1637,
+    "direction": "第二天前往冒险者公会入会并接取委托：调查幽影森林失踪案。",
+    "status": "PLANNING",
+    "suggestedChapterCount": 3,
+    "targetChapterCount": 3,
+    "targetCharacters": 3000,
+    "plans": [
+      {
+        "id": 3244,
+        "stageId": 1098,
+        "chapterOrder": 3,
+        "goal": "林夜通过观察艾琳的晨间准备，初步了解冒险者的装备与日常，并随其前往灰石城街道，建立对城市环境的初步认知。",
+        "expectedProgress": "林夜离开住所，进入灰石城公共区域，观察到货币交易或基础社会规则。",
+        "targetCharacters": 2800,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-24T00:19:03.865",
+        "updatedAt": "2026-08-24T00:19:03.865"
+      },
+      {
+        "id": 3245,
+        "stageId": 1098,
+        "chapterOrder": 4,
+        "goal": "进入冒险者公会，林夜在艾琳的帮助下完成注册手续，正式获得临时冒险者身份（或附属身份），并接触公会内的氛围。",
+        "expectedProgress": "林夜拿到某种形式的身份证明或徽章，了解公会的层级结构。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-24T00:19:03.865",
+        "updatedAt": "2026-08-24T00:19:03.865"
+      },
+      {
+        "id": 3246,
+        "stageId": 1098,
+        "chapterOrder": 5,
+        "goal": "在任务公告栏前筛选委托，最终锁定‘幽影森林失踪案’的相关线索或前置任务，确立短期行动目标。",
+        "expectedProgress": "确定接下来的主线任务方向，林夜通过观察地图或任务描述获取关键情报。",
+        "targetCharacters": 3200,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-24T00:19:03.865",
+        "updatedAt": "2026-08-24T00:19:03.865"
+      }
+    ],
+    "createdAt": "2026-08-24T00:19:03.863",
+    "updatedAt": "2026-08-24T00:19:03.863"
+  }
+}

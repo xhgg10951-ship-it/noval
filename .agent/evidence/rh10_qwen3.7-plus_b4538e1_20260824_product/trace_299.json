@@ -1,0 +1,19 @@
+{
+  "method": "POST",
+  "path": "/api/generation-jobs/487/stop",
+  "request": null,
+  "status": 200,
+  "durationSeconds": 0.032,
+  "response": {
+    "id": 487,
+    "stageId": 1100,
+    "mode": "STEP",
+    "currentPlanIndex": 3,
+    "total": 9,
+    "status": "STOPPED",
+    "phase": "CHECKPOINT",
+    "lastError": null,
+    "createdAt": "2026-08-24T00:23:51",
+    "updatedAt": "2026-08-24T00:27:03"
+  }
+}

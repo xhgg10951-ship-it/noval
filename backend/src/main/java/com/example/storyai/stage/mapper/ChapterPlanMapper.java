@@ -26,7 +26,12 @@ public interface ChapterPlanMapper {
 
     int updateEditable(@Param("id") Long id,
                        @Param("goal") String goal,
-                       @Param("targetCharacters") Integer targetCharacters);
+                       @Param("expectedProgress") String expectedProgress,
+                       @Param("targetCharacters") Integer targetCharacters,
+                       @Param("mustAdvance") String mustAdvance,
+                       @Param("mustNotDo") String mustNotDo,
+                       @Param("storyBeats") String storyBeats,
+                       @Param("endingIntent") String endingIntent);
 
     /** TASK-134/135: mark a single plan COMPLETED once its chapter is generated. */
     int markCompleted(@Param("id") Long id);

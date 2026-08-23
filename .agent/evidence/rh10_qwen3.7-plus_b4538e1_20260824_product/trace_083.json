@@ -1,0 +1,23 @@
+{
+  "method": "PUT",
+  "path": "/api/stages/plans/3245",
+  "request": {
+    "goal": "接取调查幽影森林失踪案的初步委托，核对三名失踪者最后活动的时间与地点。",
+    "targetCharacters": 3000
+  },
+  "status": 200,
+  "durationSeconds": 0.016,
+  "response": {
+    "id": 3245,
+    "stageId": 1098,
+    "chapterOrder": 4,
+    "goal": "接取调查幽影森林失踪案的初步委托，核对三名失踪者最后活动的时间与地点。",
+    "expectedProgress": "林夜拿到某种形式的身份证明或徽章，了解公会的层级结构。",
+    "targetCharacters": 3000,
+    "planVersion": 1,
+    "active": true,
+    "status": "ACTIVE",
+    "createdAt": "2026-08-24T00:19:03.865",
+    "updatedAt": "2026-08-24T00:19:03.886"
+  }
+}

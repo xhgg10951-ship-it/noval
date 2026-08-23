@@ -99,7 +99,9 @@ public class StageController {
     public ChapterPlanResponse updatePlanGoal(@PathVariable Long planId,
                                               @Valid @RequestBody UpdatePlanGoalRequest request) {
         return new ChapterPlanResponse(planningService.updatePlanGoal(
-                planId, request.getGoal(), request.getTargetCharacters()));
+                planId, request.getGoal(), request.getTargetCharacters(),
+                request.getExpectedProgress(), request.getMustAdvance(),
+                request.getMustNotDo(), request.getStoryBeats(), request.getEndingIntent()));
     }
 
     // ---- mapping helper ----

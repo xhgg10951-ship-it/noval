@@ -1,0 +1,23 @@
+{
+  "method": "PUT",
+  "path": "/api/stages/plans/3242",
+  "request": {
+    "goal": "林夜初到异界，在城门附近遇见艾琳；两人建立初步信任。",
+    "targetCharacters": 3000
+  },
+  "status": 200,
+  "durationSeconds": 0.015,
+  "response": {
+    "id": 3242,
+    "stageId": 1097,
+    "chapterOrder": 1,
+    "goal": "林夜初到异界，在城门附近遇见艾琳；两人建立初步信任。",
+    "expectedProgress": "林夜从现代都市瞬间转移至异界荒野/城镇边缘，经历短暂的生理不适与认知冲击。在遭遇低级魔物或当地流氓骚扰时，因语言不通和力量薄弱陷入绝境。艾琳登场，以干练的战斗技巧迅速解决危机，但并未深究林夜来历，仅将其视为需要帮助的可怜人。",
+    "targetCharacters": 3000,
+    "planVersion": 1,
+    "active": true,
+    "status": "ACTIVE",
+    "createdAt": "2026-08-24T00:16:04.958",
+    "updatedAt": "2026-08-24T00:16:04.973"
+  }
+}

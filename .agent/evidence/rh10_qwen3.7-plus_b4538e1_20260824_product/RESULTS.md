@@ -1,0 +1,21 @@
+# RH-10 qwen3.7-plus Product-wired Results
+
+Run ID: `rh10_qwen3.7-plus_b4538e1_20260824_product`
+
+Product/prompt commit: `b4538e1`
+
+Provider: `qwen3.7-plus`, `mock_llm=false`
+
+Execution boundary: public Spring Boot API → Java workflow/context assembly → Python AI service → MySQL persistence.
+
+| Acceptance | Result | Metrics |
+|---|---|---|
+| AC-101 | PASS | `{"restartHits":[],"logicalOrders":[3,4,5],"plannerText":"林夜通过观察艾琳的晨间准备，初步了解冒险者的装备与日常，并随其前往灰石城街道，建立对城市环境的初步认知。 林夜离开住所，进入灰石城公共区域，观察到货币交易或基础社会规则。\n进入冒险者公会，林夜在艾琳的帮助下完成注册手续，正式获得临时冒险者身份（或附属身份），并接触公会内的氛围。 林夜拿到某种形式的身份证明或徽章，了解公会的层级结构。\n在任务公告栏前筛选委托，最终锁定‘幽影森林失踪案’的相关线索或前置任务，确立短期行动目标。 确定接下来的主线任务方向，林夜通过观察地图或任务描述获取关键情报。"}` |
+| AC-103 | PASS | `{"targetCharacters":3000,"actualCharacters":[3398,3040,2808,3201,3392],"inBand":[true,true,true,true,true],"passRate":"5/5","duplicateLongSentences":[]}` |
+| AC-104 | FAIL | `{"chapterId":1502,"registrationHits":[],"identityViolations":[]}` |
+| AC-105 | FAIL | `{"breadCandidates":[{"id":990,"storyId":1637,"sourceChapterId":1501,"type":"TRANSIENT_DETAIL","subject":"艾琳","field":"consumed_item","value":"黑面包","suggestedAction":"IGNORE","evidence":"艾琳坐在他对面，手里拿着一块黑面包，慢慢地咀嚼着。","importance":1,"scope":"CHAPTER","processingStatus":"IGNORED","applied":false,"createdAt":"2026-08-24T00:18:11"},{"id":1001,"storyId":1637,"sourceChapterId":1501,"type":"TRANSIENT_DETAIL","subject":"林夜","field":"consumed_item","value":"普通面包（仅用于填饱肚子）","suggestedAction":"IGNORE","evidence":"早餐时，林夜吃掉一块普通面包，只是填饱肚子，随后不再关注它。","importance":1,"scope":"CHAPTER","processingStatus":"IGNORED","applied":false,"createdAt":"2026-08-24T00:18:39"}],"exactClassificationCount":2,"laterBreadMentions":[4,0,0]}` |
+| AC-106 | PASS | `{"replanLogicalOrders":[4,5,6],"repeatedOpeningHits":[],"finalChapterNumbers":[1,2,3,4,5,6],"firstThreeUnchanged":true,"duplicateTitles":[],"stoppedJobStatus":"STOPPED","finalJobStatus":"COMPLETED","replanSemanticText":"在下一个预测的时间节点前锁定潜在受害者，并建立防御性监视网络。 林夜利用现代统计学思维缩小排查范围，艾琳提供武力与情报支持，两人成功定位第五名潜在受害者，但发现对方已处于极度危险中。\n目睹‘抹除’过程的发生，获取关于凶手手段的动态线索，并尝试营救但失败。 林夜和艾琳亲眼见证第五名受害者被‘带走’的过程，发现凶手并非隐形，而是利用了视觉盲区或认知干扰。营救行动因未知力量受阻，仅救回部分遗物。\n分析新获得的金属齿轮，引出‘地下黑市’或‘禁忌工坊’的线索，为下一阶段调查做铺垫。 林夜通过齿轮的工艺特征，推断出这并非普通工匠所能制造，指向城镇中某个被官方禁止的地下技术圈子。艾琳对此表示担忧，但同意带林夜去接触线人。"}` |
+| AC-109 | PASS | `{"chapterId":1504,"missingFacts":{"characters":[],"location":[],"items":[],"case":[],"ending":[]},"mechanicalStartsBefore":6,"mechanicalStartsAfter":3,"sourceType":"AI_POLISH","memoryExtractionStatus":"COMPLETED"}` |
+| AC-114 | PASS | `{"targetChapterCount":600,"currentChapter":5,"arc":"1-60 生存融入","logicalOrders":[6,7,8,9,10],"endgameHits":[],"localProgressHits":["森林","失踪","生存"],"plannerText":"采购物资与建立初步信任，展示林夜的观察力与伪装技巧 完成进入幽影森林前的物资准备，林夜通过细节观察获得艾琳的轻微改观，但维持哑巴人设\n午夜旧钟楼会面，获取关键线索，营造悬疑氛围 见证人出现并提供关于失踪者的异常信息，暗示案件背后有非自然力量\n进入幽影森林边缘，适应野外环境，展示团队磨合 林夜在野外生存中发挥作用，同时继续隐藏实力，确立'累赘但有点用'的定位\n深入北侧溪流，发现失踪者营地遗迹，线索升级 找到采药人遗留的物品，发现非人类活动的痕迹，危机感加剧\n小规模遭遇战，林夜首次间接参与战斗，验证成长 通过战术配合击败敌人，林夜利用环境优势助攻，获得艾琳的认可"}` |
+
+Final: **FAILED**

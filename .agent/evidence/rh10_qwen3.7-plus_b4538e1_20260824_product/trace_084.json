@@ -1,0 +1,23 @@
+{
+  "method": "PUT",
+  "path": "/api/stages/plans/3246",
+  "request": {
+    "goal": "与艾琳准备调查药剂和绳索，确认南城门出城路线，并决定次日清晨出发。",
+    "targetCharacters": 3000
+  },
+  "status": 200,
+  "durationSeconds": 0.031,
+  "response": {
+    "id": 3246,
+    "stageId": 1098,
+    "chapterOrder": 5,
+    "goal": "与艾琳准备调查药剂和绳索，确认南城门出城路线，并决定次日清晨出发。",
+    "expectedProgress": "确定接下来的主线任务方向，林夜通过观察地图或任务描述获取关键情报。",
+    "targetCharacters": 3000,
+    "planVersion": 1,
+    "active": true,
+    "status": "ACTIVE",
+    "createdAt": "2026-08-24T00:19:03.865",
+    "updatedAt": "2026-08-24T00:19:03.915"
+  }
+}

@@ -9,6 +9,10 @@ export interface ChapterPlanResponse {
   goal: string
   expectedProgress: string | null
   targetCharacters: number | null
+  mustAdvance: string | null
+  mustNotDo: string | null
+  storyBeats: string | null
+  endingIntent: string | null
   planVersion: number
   active: boolean
   status: string // ACTIVE / COMPLETED / SUPERSEDED (v0.1.1 Phase 4)
@@ -92,9 +96,12 @@ export async function updatePlanGoal(
   planId: number,
   goal: string,
   targetCharacters?: number,
+  spec?: Pick<ChapterPlanResponse,
+    'expectedProgress' | 'mustAdvance' | 'mustNotDo' | 'storyBeats' | 'endingIntent'>,
 ): Promise<ChapterPlanResponse> {
   const body: Record<string, unknown> = { goal }
   if (targetCharacters != null) body.targetCharacters = targetCharacters
+  if (spec) Object.assign(body, spec)
   const { data } = await api.put<ChapterPlanResponse>(`/stages/plans/${planId}`, body)
   return data
 }
