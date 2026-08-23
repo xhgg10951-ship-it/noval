@@ -66,7 +66,7 @@
          exactly which live-memory slots this chapter created. -->
     <select id="findAppliedCandidatesBySource" resultMap="CandidateResult">
         SELECT id, story_id, source_chapter_id, type, subject, field,
-               suggested_action, evidence, processing_status, applied,
+               value, suggested_action, evidence, processing_status, applied,
                importance, scope, created_at, updated_at
         FROM memory_candidate
         WHERE source_chapter_id = #{chapterId} AND processing_status = 'APPLIED'
@@ -81,18 +81,25 @@
         <result column="subject" property="subject"/>
         <result column="field" property="field"/>
         <result column="value" property="value"/>
+        <result column="source_candidate_id" property="sourceCandidateId"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
     </resultMap>
 
     <insert id="upsertCurrentState" parameterType="com.example.storyai.memory.model.CurrentState">
-        INSERT INTO current_state (story_id, category, subject, field, value)
-        VALUES (#{storyId}, #{category}, #{subject}, #{field}, #{value})
-        ON DUPLICATE KEY UPDATE value = VALUES(value), updated_at = CURRENT_TIMESTAMP
+        INSERT INTO current_state
+            (story_id, category, subject, field, value, source_candidate_id)
+        VALUES
+            (#{storyId}, #{category}, #{subject}, #{field}, #{value}, #{sourceCandidateId})
+        ON DUPLICATE KEY UPDATE
+            value = VALUES(value),
+            source_candidate_id = VALUES(source_candidate_id),
+            updated_at = CURRENT_TIMESTAMP
     </insert>
 
     <select id="findCurrentState" resultMap="CurrentStateResult">
-        SELECT id, story_id, category, subject, field, value, created_at, updated_at
+        SELECT id, story_id, category, subject, field, value, source_candidate_id,
+               created_at, updated_at
         FROM current_state
         WHERE story_id = #{storyId}
         ORDER BY category, subject, field
@@ -107,6 +114,16 @@
           AND field = #{field}
     </delete>
 
+    <!-- RH-02: revision invalidation is provenance-guarded. -->
+    <delete id="deleteCurrentStateSlotIfSource">
+        DELETE FROM current_state
+        WHERE story_id = #{storyId}
+          AND category = #{category}
+          AND subject = #{subject}
+          AND field = #{field}
+          AND source_candidate_id = #{sourceCandidateId}
+    </delete>
+
     <!-- ============ relationship_state (upsert by pair) ============ -->
     <resultMap id="RelationshipResult" type="com.example.storyai.memory.model.RelationshipState">
         <id column="id" property="id"/>
@@ -114,18 +131,25 @@
         <result column="subject_a" property="subjectA"/>
         <result column="subject_b" property="subjectB"/>
         <result column="description" property="description"/>
+        <result column="source_candidate_id" property="sourceCandidateId"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
     </resultMap>
 
     <insert id="upsertRelationship" parameterType="com.example.storyai.memory.model.RelationshipState">
-        INSERT INTO relationship_state (story_id, subject_a, subject_b, description)
-        VALUES (#{storyId}, #{subjectA}, #{subjectB}, #{description})
-        ON DUPLICATE KEY UPDATE description = VALUES(description), updated_at = CURRENT_TIMESTAMP
+        INSERT INTO relationship_state
+            (story_id, subject_a, subject_b, description, source_candidate_id)
+        VALUES
+            (#{storyId}, #{subjectA}, #{subjectB}, #{description}, #{sourceCandidateId})
+        ON DUPLICATE KEY UPDATE
+            description = VALUES(description),
+            source_candidate_id = VALUES(source_candidate_id),
+            updated_at = CURRENT_TIMESTAMP
     </insert>
 
     <select id="findRelationships" resultMap="RelationshipResult">
-        SELECT id, story_id, subject_a, subject_b, description, created_at, updated_at
+        SELECT id, story_id, subject_a, subject_b, description, source_candidate_id,
+               created_at, updated_at
         FROM relationship_state
         WHERE story_id = #{storyId}
         ORDER BY subject_a, subject_b
@@ -137,6 +161,15 @@
         WHERE story_id = #{storyId}
           AND subject_a = #{subjectA}
           AND subject_b = #{subjectB}
+    </delete>
+
+    <!-- RH-02: revision invalidation is provenance-guarded. -->
+    <delete id="deleteRelationshipSlotIfSource">
+        DELETE FROM relationship_state
+        WHERE story_id = #{storyId}
+          AND subject_a = #{subjectA}
+          AND subject_b = #{subjectB}
+          AND source_candidate_id = #{sourceCandidateId}
     </delete>
 
     <!-- ============ story_memory ============ -->

@@ -58,10 +58,31 @@ public class MemoryService {
         return memoryMapper.deleteCurrentStateSlot(storyId, category, subject, field);
     }
 
+    /** RH-02: revision invalidation cannot delete a slot written by a newer candidate. */
+    @Transactional
+    public int deleteCurrentStateSlotIfSource(Long storyId,
+                                              String category,
+                                              String subject,
+                                              String field,
+                                              Long sourceCandidateId) {
+        return memoryMapper.deleteCurrentStateSlotIfSource(
+                storyId, category, subject, field, sourceCandidateId);
+    }
+
     /** TASK-148: removes one exact relationship slot. */
     @Transactional
     public int deleteRelationshipSlot(Long storyId, String subjectA, String subjectB) {
         return memoryMapper.deleteRelationshipSlot(storyId, subjectA, subjectB);
+    }
+
+    /** RH-02: revision invalidation cannot delete a relationship written later. */
+    @Transactional
+    public int deleteRelationshipSlotIfSource(Long storyId,
+                                              String subjectA,
+                                              String subjectB,
+                                              Long sourceCandidateId) {
+        return memoryMapper.deleteRelationshipSlotIfSource(
+                storyId, subjectA, subjectB, sourceCandidateId);
     }
 
     public MemoryCandidate getCandidate(Long id) {

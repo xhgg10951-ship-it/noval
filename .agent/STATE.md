@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`RELEASE HARDENING — RH-01 COMPLETE`
+`RELEASE HARDENING — RH-02 COMPLETE`
 
 Current Task:
 
-`RH-02 — Memory Provenance (NEXT)`
+`RH-03 — Replan Logical Order (NEXT)`
 
 Task Status:
 
@@ -48,6 +48,14 @@ Task Evidence:
   `ChapterRevisionIntegrationTest` 8/8; Python tests 8/8.
 - AC-H01 Real-LLM Semantic Verification: NOT_REQUIRED (consistency/plumbing;
   final AI semantics are re-run together at RH-10 with qwen3.7-plus).
+- RH-02 DONE (2026-08-23) — V15 adds candidate provenance to current and
+  relationship live state; every upsert replaces provenance, and revision
+  invalidation now uses the Apply path's normalized slot plus source ownership.
+- AC-H02 Engineering Verification: PASSED — both regression cases failed before
+  the fix, then `MemoryProvenanceIntegrationTest` passed 2/2; related Memory and
+  Revision integration tests passed 16/16.
+- AC-H02 Real-LLM Semantic Verification: NOT_REQUIRED (deterministic persistence
+  and invalidation behavior).
 - Historical TASK-101~179 remain implementation history only and do not override
   the Release Hardening gate.
 
@@ -910,14 +918,14 @@ repository is currently:
 
 Release verdict:
 
-`NOT ACCEPTED — RH-02 through RH-10 remain; RH-11 is gated`
+`NOT ACCEPTED — RH-03 through RH-10 remain; RH-11 is gated`
 
 Hardening progress:
 
 ```text
 RH-01 DONE — AC-H01 PASSED (engineering)
-RH-02 NEXT
-RH-03 TODO
+RH-02 DONE — AC-H02 PASSED (engineering)
+RH-03 NEXT
 RH-04 TODO
 RH-05 TODO
 RH-06 TODO
@@ -925,7 +933,7 @@ RH-07 TODO
 RH-08 TODO
 RH-09 TODO
 RH-10 TODO — final qwen3.7-plus semantic suite
-RH-11 BLOCKED BY RH-02~RH-10
+RH-11 BLOCKED BY RH-03~RH-10
 ```
 
 RH-01 verification details:
@@ -940,6 +948,24 @@ Engineering Verification:
 PASSED
 - ChapterRevisionIntegrationTest: 8/8
 - ai-service pytest: 8/8
+
+Real-LLM Semantic Verification:
+NOT_REQUIRED
+```
+
+RH-02 verification details:
+
+```text
+Regression before fix:
+MemoryProvenanceIntegrationTest — 2 failures
+- normalized item:铁剑 remained after revising its source chapter
+- revising Chapter 1 deleted Chapter 2's newer location/relationship values
+
+Engineering Verification:
+PASSED
+- MemoryProvenanceIntegrationTest: 2/2
+- Related Memory + Revision integration tests: 16/16
+- V15 additive migration applied to the existing local schema without data loss
 
 Real-LLM Semantic Verification:
 NOT_REQUIRED

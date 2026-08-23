@@ -110,6 +110,7 @@ public class CandidateProcessingService {
         s.setSubject(c.getSubject());
         s.setField(effectiveField);
         s.setValue(c.getValue());
+        s.setSourceCandidateId(c.getId());
         memoryService.upsertCurrentState(s);
         log.info("Applied CURRENT_STATE candidate {} -> {}:{}", c.getId(), effectiveField, c.getValue());
     }
@@ -148,6 +149,7 @@ public class CandidateProcessingService {
             r.setSubjectB("(story)");
         }
         r.setDescription(c.getValue());
+        r.setSourceCandidateId(c.getId());
         memoryService.upsertRelationship(r);
         log.info("Applied RELATIONSHIP candidate {} -> {} / {}", c.getId(), r.getSubjectA(), r.getSubjectB());
     }
@@ -221,12 +223,10 @@ public class CandidateProcessingService {
 
     /**
      * TASK-148 — invalidates the live-memory slots this chapter's APPLIED
-     * candidates created. The candidate rows are the only per-chapter provenance
-     * for current_state / relationship_state (those tables carry no source
-     * column), so each applied candidate is reverse-mapped back to its exact
-     * slot using the SAME field->category mapping the apply path used, and that
-     * slot is deleted. STORY_MEMORY rows are source-tracked and are deleted by
-     * {@code deleteStoryMemoriesBySource} at the call site.
+     * candidates created. Each candidate is reverse-mapped with the same slot
+     * normalization used by Apply, but deletion succeeds only while that
+     * candidate is still recorded as the live slot's source. A newer chapter's
+     * upsert therefore cannot be erased by revising an older chapter.
      *
      * @return number of live slots removed
      */
@@ -238,15 +238,21 @@ public class CandidateProcessingService {
             if ("CURRENT_STATE".equals(c.getType())) {
                 String field = c.getField();
                 if (field != null && !field.isBlank()) {
-                    removed += memoryService.deleteCurrentStateSlot(
-                            c.getStoryId(), categoryFor(field), c.getSubject(), field);
+                    String effectiveField = normalizeInventoryField(field, c.getValue());
+                    removed += memoryService.deleteCurrentStateSlotIfSource(
+                            c.getStoryId(),
+                            categoryFor(field),
+                            c.getSubject(),
+                            effectiveField,
+                            c.getId());
                 }
             } else if ("RELATIONSHIP".equals(c.getType())) {
                 String subj = c.getSubject() == null ? "" : c.getSubject();
                 int arrow = subj.indexOf("->");
                 String a = arrow > 0 ? subj.substring(0, arrow).trim() : subj.trim();
                 String b = arrow > 0 ? subj.substring(arrow + 2).trim() : "(story)";
-                removed += memoryService.deleteRelationshipSlot(c.getStoryId(), a, b);
+                removed += memoryService.deleteRelationshipSlotIfSource(
+                        c.getStoryId(), a, b, c.getId());
             }
             // audit trail: never re-apply an invalidated candidate
             memoryService.updateCandidateStatus(c.getId(), "SUPERSEDED", false);

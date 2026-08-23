@@ -41,6 +41,13 @@ public interface MemoryMapper {
                                @Param("subject") String subject,
                                @Param("field") String field);
 
+    /** RH-02: removes a slot only when the invalidated candidate still owns it. */
+    int deleteCurrentStateSlotIfSource(@Param("storyId") Long storyId,
+                                       @Param("category") String category,
+                                       @Param("subject") String subject,
+                                       @Param("field") String field,
+                                       @Param("sourceCandidateId") Long sourceCandidateId);
+
     // ---- relationship_state ----
     void upsertRelationship(RelationshipState r);
 
@@ -50,6 +57,12 @@ public interface MemoryMapper {
     int deleteRelationshipSlot(@Param("storyId") Long storyId,
                                @Param("subjectA") String subjectA,
                                @Param("subjectB") String subjectB);
+
+    /** RH-02: removes a relationship only when the invalidated candidate owns it. */
+    int deleteRelationshipSlotIfSource(@Param("storyId") Long storyId,
+                                       @Param("subjectA") String subjectA,
+                                       @Param("subjectB") String subjectB,
+                                       @Param("sourceCandidateId") Long sourceCandidateId);
 
     // ---- story_memory ----
     int insertStoryMemory(StoryMemory m);

@@ -15,6 +15,7 @@ public class RelationshipState {
     private String subjectA;
     private String subjectB;
     private String description;
+    private Long sourceCandidateId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -32,6 +33,11 @@ public class RelationshipState {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
+    public Long getSourceCandidateId() { return sourceCandidateId; }
+    public void setSourceCandidateId(Long sourceCandidateId) {
+        this.sourceCandidateId = sourceCandidateId;
+    }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

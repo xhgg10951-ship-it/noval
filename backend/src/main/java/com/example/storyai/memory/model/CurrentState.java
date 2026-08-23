@@ -17,6 +17,7 @@ public class CurrentState {
     private String subject;
     private String field;     // the specific slot name (e.g. 'location', 'weapon')
     private String value;
+    private Long sourceCandidateId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -37,6 +38,11 @@ public class CurrentState {
 
     public String getValue() { return value; }
     public void setValue(String value) { this.value = value; }
+
+    public Long getSourceCandidateId() { return sourceCandidateId; }
+    public void setSourceCandidateId(Long sourceCandidateId) {
+        this.sourceCandidateId = sourceCandidateId;
+    }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

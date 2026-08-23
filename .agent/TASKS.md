@@ -3292,15 +3292,15 @@ Current Version:
 
 Frozen Requirement:
 
-`V0.1.1_IMPROVEMENT_PLAN.md`
+`V0.1.1_RELEASE_HARDENING.md`
 
 Current Phase:
 
-`Release Hardening — RH-01 COMPLETE`
+`Release Hardening — RH-02 COMPLETE`
 
 Current Task:
 
-`RH-02 — Memory Provenance (NEXT)`
+`RH-03 — Replan Logical Order (NEXT)`
 
 Task Status:
 
@@ -3308,7 +3308,7 @@ Task Status:
 
 Next Safe Action:
 
-> 从 RH-02 开始检查真实 Memory provenance / inventory invalidation 代码，先补 regression test。
+> 从 RH-03 开始检查真实 Replan Remaining logical chapter order，先补 regression test。
 
 ---
 
@@ -3400,11 +3400,40 @@ Real-LLM Semantic Verification: `NOT_REQUIRED`
 
 ## RH-02 — Memory Provenance
 
-Status: `TODO`
+Status: `DONE`
 
 Scope: HB-002 / AC-H02
 
 Dependencies: RH-01
+
+Implementation:
+
+- Added additive V15 `source_candidate_id` columns, indexes and foreign keys to
+  `current_state` and `relationship_state`; legacy rows are conservatively
+  backfilled only where a complete live value and normalized slot match.
+- Current-state and relationship upserts now replace both the live value and its
+  owning candidate id.
+- Revision invalidation uses the same inventory normalization as Apply and
+  deletes a slot only if its current `source_candidate_id` still equals the
+  invalidated candidate.
+- Fixed the applied-candidate reverse lookup to include `value`, which is needed
+  to reconstruct normalized inventory fields such as `item:铁剑`.
+
+Regression Evidence:
+
+- Before fix: AC-H02-A left `item:铁剑` after editing away the acquisition.
+- Before fix: AC-H02-B deleted Chapter 2's `location=公会` and newer relationship
+  when Chapter 1 was revised.
+- After fix: the source-owned inventory slot is removed, while newer current
+  state and relationship values remain intact.
+
+Engineering Verification: `PASSED`
+
+- Backend `MemoryProvenanceIntegrationTest`: 2/2 PASSED
+- Related `MemoryProvenanceIntegrationTest`, `MemoryV2IntegrationTest`,
+  `MemoryIntegrationTest`, `ChapterRevisionIntegrationTest`: 16/16 PASSED
+
+Real-LLM Semantic Verification: `NOT_REQUIRED`
 
 ## RH-03 — Replan Logical Order
 
