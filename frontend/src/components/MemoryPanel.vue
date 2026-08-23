@@ -94,6 +94,13 @@ onMounted(refresh)
         <li v-for="m in view.storyMemories" :key="m.id">
           <span class="mem-list__type">{{ m.type }}</span>
           <span>{{ m.description }}</span>
+          <div class="mem-list__meta">
+            <span>重要度 {{ m.importance }}</span>
+            <span>范围 {{ m.scope }}</span>
+            <span>{{ m.active ? '启用' : '停用' }}</span>
+            <span>来源章节 {{ m.sourceChapterId == null ? '未记录' : `#${m.sourceChapterId}` }}</span>
+          </div>
+          <p v-if="m.evidence" class="cand-item__evidence">依据：{{ m.evidence }}</p>
         </li>
       </ul>
       <p v-else class="memory-empty">暂无记录</p>

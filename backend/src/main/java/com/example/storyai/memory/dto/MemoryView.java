@@ -71,6 +71,9 @@ public class MemoryView {
         public String type;
         public String subject;
         public String description;
+        public int importance;
+        public String scope;
+        public boolean active;
         public Long sourceChapterId;
         public String evidence;
     }

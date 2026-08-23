@@ -37,6 +37,9 @@ export interface StoryMemory {
   type: string
   subject: string | null
   description: string
+  importance: number
+  scope: 'CHAPTER' | 'STAGE' | 'ARC' | 'STORY'
+  active: boolean
   sourceChapterId: number | null
   evidence: string | null
 }

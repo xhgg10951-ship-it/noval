@@ -56,7 +56,9 @@ public class MemoryController {
         view.setStoryMemories(memoryService.getStoryMemories(storyId).stream().map(m -> {
             MemoryView.StoryMemoryDto d = new MemoryView.StoryMemoryDto();
             d.id = m.getId(); d.type = m.getType(); d.subject = m.getSubject();
-            d.description = m.getDescription(); d.sourceChapterId = m.getSourceChapterId();
+            d.description = m.getDescription(); d.importance = m.getImportance();
+            d.scope = m.getScope(); d.active = m.isActive();
+            d.sourceChapterId = m.getSourceChapterId();
             d.evidence = m.getEvidence();
             return d;
         }).collect(Collectors.toList()));

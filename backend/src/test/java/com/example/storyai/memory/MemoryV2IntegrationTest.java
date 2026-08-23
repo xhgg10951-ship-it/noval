@@ -1,7 +1,10 @@
 package com.example.storyai.memory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
 
@@ -99,6 +102,60 @@ class MemoryV2IntegrationTest {
         // no STORY_MEMORY row was created for the unknown type
         assertThat(memoryService.findActiveByTypeSubject(storyId, "MYSTICAL_VIBES", "林夜"))
                 .isEmpty();
+    }
+
+    // ---- RH-07 / HH-008 / AC-H09: manual Apply uses the same type guard ----
+
+    @Test
+    void manualApplyRejectsUnknownTypeWithoutPersistingStoryMemory() throws Exception {
+        long storyId = createStory();
+        MemoryCandidate unknown = candidate(storyId, "MYSTICAL_VIBES", "林夜", null,
+                "身上有神秘气息", "REVIEW");
+        unknown.setImportance(4);
+        unknown.setScope("STORY");
+        unknown.setProcessingStatus("PENDING");
+        unknown.setApplied(false);
+        memoryService.saveCandidate(unknown);
+
+        mockMvc.perform(post("/api/memory/candidates/{id}/apply", unknown.getId()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("BAD_REQUEST"));
+
+        assertThat(memoryService.getCandidate(unknown.getId()).getProcessingStatus())
+                .isEqualTo("PENDING");
+        assertThat(memoryService.findActiveByTypeSubject(
+                storyId, "MYSTICAL_VIBES", "林夜")).isEmpty();
+    }
+
+    // ---- RH-07 / HH-007: MemoryView exposes all Memory v2 review metadata ----
+
+    @Test
+    void memoryViewExposesImportanceScopeActiveSourceAndEvidence() throws Exception {
+        long storyId = createStory();
+        StoryMemory sourced = new StoryMemory();
+        sourced.setStoryId(storyId);
+        sourced.setType("PLOT_THREAD");
+        sourced.setSubject("失踪信使");
+        sourced.setDescription("信使留下了半封信");
+        sourced.setSourceChapterId(null);
+        sourced.setEvidence("第十二章末尾提及半封信");
+        sourced.setImportance(5);
+        sourced.setScope("ARC");
+        sourced.setActive(false);
+        memoryService.saveStoryMemory(sourced);
+
+        mockMvc.perform(get("/api/stories/{id}/memory", storyId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.storyMemories[?(@.type=='PLOT_THREAD')].importance")
+                        .value(org.hamcrest.Matchers.contains(5)))
+                .andExpect(jsonPath("$.storyMemories[?(@.type=='PLOT_THREAD')].scope")
+                        .value(org.hamcrest.Matchers.contains("ARC")))
+                .andExpect(jsonPath("$.storyMemories[?(@.type=='PLOT_THREAD')].active")
+                        .value(org.hamcrest.Matchers.contains(false)))
+                .andExpect(jsonPath("$.storyMemories[?(@.type=='PLOT_THREAD')].sourceChapterId")
+                        .value(org.hamcrest.Matchers.contains(org.hamcrest.Matchers.nullValue())))
+                .andExpect(jsonPath("$.storyMemories[?(@.type=='PLOT_THREAD')].evidence")
+                        .value(org.hamcrest.Matchers.contains("第十二章末尾提及半封信")));
     }
 
     // ---- TASK-159: importance clamped 1..5, scope normalized ----
@@ -256,9 +313,9 @@ class MemoryV2IntegrationTest {
                 .doesNotContain("玉佩", "魔力", "冒险者公会");
     }
 
-    private void saveStoryMemory(long storyId, String type, String subject,
-                                 String description, int importance, String scope,
-                                 boolean active) {
+    private StoryMemory saveStoryMemory(long storyId, String type, String subject,
+                                        String description, int importance, String scope,
+                                        boolean active) {
         StoryMemory memory = new StoryMemory();
         memory.setStoryId(storyId);
         memory.setType(type);
@@ -268,7 +325,7 @@ class MemoryV2IntegrationTest {
         memory.setImportance(importance);
         memory.setScope(scope);
         memory.setActive(active);
-        memoryService.saveStoryMemory(memory);
+        return memoryService.saveStoryMemory(memory);
     }
 
     private long countBreadInWriterRequest(long storyId) {

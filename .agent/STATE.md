@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`RELEASE HARDENING — RH-06 COMPLETE`
+`RELEASE HARDENING — RH-07 COMPLETE`
 
 Current Task:
 
-`RH-07 — Memory Review Hardening (NEXT)`
+`RH-08 — Release Hygiene (NEXT)`
 
 Task Status:
 
@@ -90,6 +90,14 @@ Task Evidence:
   key-cleared Python suite passed 14/14.
 - AC-H07/H08 Real-LLM Semantic Verification: NOT_REQUIRED here; the final
   qwen3.7-plus semantic suite remains RH-10.
+- RH-07 DONE (2026-08-23) — MemoryView and MemoryPanel expose StoryMemory type,
+  importance, scope, active state, source chapter and evidence; the unified
+  `applyCandidate()` boundary now rejects non-frozen Memory types with HTTP 400
+  and leaves the candidate PENDING without creating StoryMemory.
+- AC-H09 Engineering Verification: PASSED — both backend regressions failed
+  before the fix then MemoryV2 passed 9/9; related Memory suites passed 12/12;
+  frontend passed 6/6 and production build PASSED.
+- AC-H09 Real-LLM Semantic Verification: NOT_REQUIRED.
 - Historical TASK-101~179 remain implementation history only and do not override
   the Release Hardening gate.
 
@@ -952,7 +960,7 @@ repository is currently:
 
 Release verdict:
 
-`NOT ACCEPTED — RH-07 through RH-10 remain; RH-11 is gated`
+`NOT ACCEPTED — RH-08 through RH-10 remain; RH-11 is gated`
 
 Hardening progress:
 
@@ -963,11 +971,11 @@ RH-03 DONE — AC-H03 PASSED (engineering)
 RH-04 DONE — AC-H04/H05/H06 PASSED (engineering)
 RH-05 DONE — HH-001/HH-002/HH-003 PASSED (engineering)
 RH-06 DONE — AC-H07/H08 PASSED (engineering)
-RH-07 NEXT
-RH-08 TODO
+RH-07 DONE — AC-H09 PASSED (engineering)
+RH-08 NEXT
 RH-09 TODO
 RH-10 TODO — final qwen3.7-plus semantic suite
-RH-11 BLOCKED BY RH-07~RH-10
+RH-11 BLOCKED BY RH-08~RH-10
 ```
 
 RH-01 verification details:
@@ -1080,6 +1088,26 @@ PASSED
 
 Real-LLM Semantic Verification:
 NOT_REQUIRED (final qwen3.7-plus semantic rerun is RH-10)
+```
+
+RH-07 verification details:
+
+```text
+Regression before fix:
+- MemoryView omitted importance/scope/active and MemoryPanel rendered only type
+  plus description.
+- POST unknown MYSTICAL_VIBES Apply returned 200, marked the candidate APPLIED,
+  and inserted an invalid StoryMemory row.
+
+Engineering Verification:
+PASSED
+- MemoryV2IntegrationTest: 9/9
+- Related Memory integration suite: 12/12
+- Frontend Vitest: 6/6
+- Frontend production build: PASSED
+
+Real-LLM Semantic Verification:
+NOT_REQUIRED
 ```
 
 Core principles:

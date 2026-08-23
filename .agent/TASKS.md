@@ -3296,11 +3296,11 @@ Frozen Requirement:
 
 Current Phase:
 
-`Release Hardening — RH-06 COMPLETE`
+`Release Hardening — RH-07 COMPLETE`
 
 Current Task:
 
-`RH-07 — Memory Review Hardening (NEXT)`
+`RH-08 — Release Hygiene (NEXT)`
 
 Task Status:
 
@@ -3308,7 +3308,7 @@ Task Status:
 
 Next Safe Action:
 
-> 从 RH-07 开始检查 Memory v2 DTO/UI 可见性与统一 applyCandidate unknown-type guard，先补 regression test。
+> 从 RH-08 开始逐项核对 RUN.md、版本元数据、默认配置与仓库卫生，按 HR-001→HR-004 修复并验证。
 
 ---
 
@@ -3571,15 +3571,40 @@ Real-LLM Semantic Verification: `NOT_REQUIRED` (final qwen3.7-plus suite is RH-1
 
 ## RH-07 — Memory Review Hardening
 
-Status: `IN_PROGRESS`
+Status: `DONE`
 
 Scope: HH-007 / HH-008 / AC-H09
 
 Dependencies: RH-06
 
+Implementation:
+
+- StoryMemory DTO/TypeScript/UI now show type, importance, scope, active,
+  sourceChapterId and evidence; the UI keeps the existing simple read-only
+  review presentation.
+- `applyCandidate()` itself validates the frozen Memory type enum. Unknown types
+  return HTTP 400, remain PENDING and cannot create StoryMemory even through a
+  manual review override.
+
+Regression Evidence:
+
+- Before fix, the Memory API omitted importance/scope/active and the UI omitted
+  all v2 metadata except type.
+- Before fix, manually applying MYSTICAL_VIBES returned 200 and persisted it as
+  an active StoryMemory.
+
+Engineering Verification: `PASSED`
+
+- Backend `MemoryV2IntegrationTest`: 9/9
+- Related Memory integration suite: 12/12
+- Frontend Vitest: 6/6
+- Frontend production build: PASSED
+
+Real-LLM Semantic Verification: `NOT_REQUIRED`
+
 ## RH-08 — Release Hygiene
 
-Status: `TODO`
+Status: `IN_PROGRESS`
 
 Scope: HR-001 / HR-002 / HR-003 / HR-004
 
