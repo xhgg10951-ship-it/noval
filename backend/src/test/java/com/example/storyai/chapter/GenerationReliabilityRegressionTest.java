@@ -18,7 +18,9 @@ import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.assertj.core.api.SoftAssertions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -26,6 +28,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.example.storyai.ai.AiServiceClient;
 import com.example.storyai.ai.dto.ExtractMemoryRequest;
@@ -33,6 +37,7 @@ import com.example.storyai.ai.dto.GenerateChapterRequest;
 import com.example.storyai.ai.dto.GenerateChapterResponse;
 import com.example.storyai.ai.dto.PlanStageRequest;
 import com.example.storyai.ai.dto.PlanStageResponse;
+import com.example.storyai.chapter.service.GenerationOrchestrationService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -74,6 +79,12 @@ class GenerationReliabilityRegressionTest {
 
     @MockitoBean
     private AiServiceClient aiServiceClient;
+
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    @Autowired
+    private GenerationOrchestrationService orchestrationService;
 
     private final List<Long> createdStoryIds = new ArrayList<>();
 
@@ -391,5 +402,58 @@ class GenerationReliabilityRegressionTest {
         // same chapter rows, nothing regenerated
         assertThat(after.stream().map(c -> c[0]).sorted().toList())
                 .containsExactlyElementsOf(before.stream().map(c -> c[0]).sorted().toList());
+    }
+
+    // ---- RH-06 / HH-005 / AC-H08: one active job per Stage ----
+
+    @Test
+    void startRejectsPendingRunningAndPausedJobsForSameStage() throws Exception {
+        SoftAssertions softly = new SoftAssertions();
+        for (String existingStatus : List.of("PENDING", "RUNNING", "PAUSED")) {
+            Long storyId = createStory();
+            long stageId = createActiveStage(storyId, 1);
+            jdbcTemplate.update("""
+                    INSERT INTO generation_job
+                        (stage_id, mode, current_plan_index, total, status, phase,
+                         pause_requested, stop_requested)
+                    VALUES (?, 'CONTINUOUS', 0, 1, ?, 'PLANNING', 0, 0)
+                    """, stageId, existingStatus);
+
+            MvcResult duplicate = mockMvc.perform(post("/api/stages/{id}/generate", stageId)
+                            .param("mode", "CONTINUOUS"))
+                    .andReturn();
+            int actualStatus = duplicate.getResponse().getStatus();
+            if (actualStatus == 200) {
+                long wronglyCreatedJob = objectMapper.readTree(
+                        duplicate.getResponse().getContentAsString()).get("id").asLong();
+                awaitTerminal(wronglyCreatedJob);
+            }
+
+            softly.assertThat(actualStatus)
+                    .as("duplicate start while existing job is %s", existingStatus)
+                    .isEqualTo(409);
+            Integer count = jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM generation_job WHERE stage_id = ?",
+                    Integer.class, stageId);
+            softly.assertThat(count)
+                    .as("job row count while existing job is %s", existingStatus)
+                    .isEqualTo(1);
+        }
+        softly.assertAll();
+    }
+
+    // ---- RH-06 / HH-006: bounded executor is owned by Spring ----
+
+    @Test
+    void generationUsesSpringManagedBoundedExecutor() {
+        ThreadPoolTaskExecutor executor = applicationContext.getBean(
+                "generationTaskExecutor", ThreadPoolTaskExecutor.class);
+
+        assertThat(executor.getCorePoolSize()).isEqualTo(2);
+        assertThat(executor.getMaxPoolSize()).isEqualTo(4);
+        assertThat(executor.getThreadPoolExecutor().getQueue().remainingCapacity())
+                .isBetween(1, 1000);
+        assertThat(ReflectionTestUtils.getField(orchestrationService, "executor"))
+                .isSameAs(executor);
     }
 }

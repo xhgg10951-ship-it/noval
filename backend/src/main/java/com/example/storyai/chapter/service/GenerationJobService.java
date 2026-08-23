@@ -40,6 +40,10 @@ public class GenerationJobService {
         return jobMapper.findLatestByStage(stageId);
     }
 
+    public GenerationJob findActiveByStage(Long stageId) {
+        return jobMapper.findActiveByStage(stageId);
+    }
+
     @Transactional
     public GenerationJob update(GenerationJob job) {
         jobMapper.update(job);

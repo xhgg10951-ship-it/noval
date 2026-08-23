@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`RELEASE HARDENING — RH-05 COMPLETE`
+`RELEASE HARDENING — RH-06 COMPLETE`
 
 Current Task:
 
-`RH-06 — Length + Job Safety (NEXT)`
+`RH-07 — Memory Review Hardening (NEXT)`
 
 Task Status:
 
@@ -80,6 +80,16 @@ Task Evidence:
   planning/assistance suites passed 21/21.
 - RH-05 Real-LLM Semantic Verification: NOT_REQUIRED here (deterministic context
   selection/wiring; final semantic behavior is re-run at RH-10).
+- RH-06 DONE (2026-08-23) — Writer prompt and expand guard now share the frozen
+  target-specific 75%/125% length bounds; Start rejects an existing PENDING,
+  RUNNING or PAUSED job for the same Stage; generation uses a Spring-managed
+  core=2/max=4/queue=100 executor.
+- AC-H07/H08 Engineering Verification: PASSED — dynamic targets 1500/3000/5000
+  passed 6/6; single-active-job and bounded-executor regressions passed in the
+  7/7 reliability suite; related generation/replan tests passed 17/17 and the
+  key-cleared Python suite passed 14/14.
+- AC-H07/H08 Real-LLM Semantic Verification: NOT_REQUIRED here; the final
+  qwen3.7-plus semantic suite remains RH-10.
 - Historical TASK-101~179 remain implementation history only and do not override
   the Release Hardening gate.
 
@@ -942,7 +952,7 @@ repository is currently:
 
 Release verdict:
 
-`NOT ACCEPTED — RH-06 through RH-10 remain; RH-11 is gated`
+`NOT ACCEPTED — RH-07 through RH-10 remain; RH-11 is gated`
 
 Hardening progress:
 
@@ -952,12 +962,12 @@ RH-02 DONE — AC-H02 PASSED (engineering)
 RH-03 DONE — AC-H03 PASSED (engineering)
 RH-04 DONE — AC-H04/H05/H06 PASSED (engineering)
 RH-05 DONE — HH-001/HH-002/HH-003 PASSED (engineering)
-RH-06 NEXT
-RH-07 TODO
+RH-06 DONE — AC-H07/H08 PASSED (engineering)
+RH-07 NEXT
 RH-08 TODO
 RH-09 TODO
 RH-10 TODO — final qwen3.7-plus semantic suite
-RH-11 BLOCKED BY RH-06~RH-10
+RH-11 BLOCKED BY RH-07~RH-10
 ```
 
 RH-01 verification details:
@@ -1046,6 +1056,27 @@ PASSED
 - Focused ChapterGenerationIntegrationTest + MemoryV2IntegrationTest: 12/12
 - Expanded assistance/chapter/memory/planner suite: 21/21
 - Writer hard cap remains 20; Planner cap is 30
+
+Real-LLM Semantic Verification:
+NOT_REQUIRED (final qwen3.7-plus semantic rerun is RH-10)
+```
+
+RH-06 verification details:
+
+```text
+Regression before fix:
+- target 1500 expanded despite already exceeding its 1125 floor
+- target 5000 did not expand a 3000-character draft below its 3750 floor
+- target 1500 prompt advertised the stale 1500 floor
+- duplicate Start created a second job for PENDING/RUNNING/PAUSED (six failures)
+- generationTaskExecutor Spring bean did not exist
+
+Engineering Verification:
+PASSED
+- Dynamic length regression: 6/6
+- GenerationReliabilityRegressionTest: 7/7
+- Related generation + replan integration suite: 17/17
+- Python Mock suite with API keys cleared in the test process: 14/14
 
 Real-LLM Semantic Verification:
 NOT_REQUIRED (final qwen3.7-plus semantic rerun is RH-10)

@@ -16,6 +16,7 @@ from app.schemas.models import (
     SuggestDirectionsRequest,
     SummarizeChapterRequest,
 )
+from app.services.length_policy import length_bounds
 
 import logging
 
@@ -361,8 +362,7 @@ def _fmt_writer_spec(req: GenerateChapterRequest) -> str:
     """
     lines = ["本章执行规格（ChapterSpec）："]
     if req.targetCharacters is not None:
-        lo = max(1500, int(req.targetCharacters * 0.75))
-        hi = int(req.targetCharacters * 1.25)
+        lo, hi = length_bounds(req.targetCharacters)
         lines.append(
             f"- 目标字数：必须达到约 {req.targetCharacters} 字（硬性要求，可接受范围 "
             f"{lo}–{hi} 字）。严禁明显偏短：若正文不足 {lo} 字，视为未完成本章，必须补充 "

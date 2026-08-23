@@ -3296,11 +3296,11 @@ Frozen Requirement:
 
 Current Phase:
 
-`Release Hardening — RH-05 COMPLETE`
+`Release Hardening — RH-06 COMPLETE`
 
 Current Task:
 
-`RH-06 — Length + Job Safety (NEXT)`
+`RH-07 — Memory Review Hardening (NEXT)`
 
 Task Status:
 
@@ -3308,7 +3308,7 @@ Task Status:
 
 Next Safe Action:
 
-> 从 RH-06 开始检查 dynamic length floor、单 Stage active job guard 与 executor ownership，先补 regression test。
+> 从 RH-07 开始检查 Memory v2 DTO/UI 可见性与统一 applyCandidate unknown-type guard，先补 regression test。
 
 ---
 
@@ -3536,15 +3536,42 @@ Real-LLM Semantic Verification: `NOT_REQUIRED` (final qwen3.7-plus suite is RH-1
 
 ## RH-06 — Length + Job Safety
 
-Status: `IN_PROGRESS`
+Status: `DONE`
 
 Scope: HH-004 / HH-005 / HH-006 / AC-H07 / AC-H08
 
 Dependencies: RH-05
 
+Implementation:
+
+- Added one shared Python length policy:
+  `floor=max(300, round(target*0.75))`, `ceiling=round(target*1.25)`; Writer
+  prompt and bounded expand guard now use the same values.
+- Start checks PENDING/RUNNING/PAUSED jobs inside a synchronized single-JVM
+  check+insert boundary and returns the existing lifecycle conflict as HTTP 409.
+- Replaced `Executors.newCachedThreadPool()` with a Spring-managed
+  `ThreadPoolTaskExecutor` (core 2, max 4, bounded queue 100); rejected dispatch
+  marks the persisted job FAILED instead of leaving it PENDING.
+
+Regression Evidence:
+
+- Before fix, target 1500 over-expanded a 1200-character draft, target 5000
+  accepted a 3000-character draft, and the 1500 prompt advertised the wrong floor.
+- Before fix, each PENDING/RUNNING/PAUSED scenario returned 200 and created a
+  second job row; the managed executor bean was absent.
+
+Engineering Verification: `PASSED`
+
+- Python dynamic length tests: 6/6
+- Backend `GenerationReliabilityRegressionTest`: 7/7
+- Related generation/replan integration suite: 17/17
+- Python Mock suite (API keys cleared in the test subprocess): 14/14
+
+Real-LLM Semantic Verification: `NOT_REQUIRED` (final qwen3.7-plus suite is RH-10)
+
 ## RH-07 — Memory Review Hardening
 
-Status: `TODO`
+Status: `IN_PROGRESS`
 
 Scope: HH-007 / HH-008 / AC-H09
 

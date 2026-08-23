@@ -13,11 +13,9 @@ from __future__ import annotations
 from app.llm.provider import get_provider, parse_json_response
 from app.prompts.builders import build_generate_prompt, log_request_shape
 from app.schemas.models import GenerateChapterRequest, GenerateChapterResponse
+from app.services.length_policy import length_bounds
 from app.services.mock_builders import mock_generate
 
-# Below this many characters we treat the draft as under-target and trigger
-# expand passes. 2250 is the AC-103 lower band; we guard at the same floor.
-_LENGTH_FLOOR = 2250
 _MAX_EXPAND_PASSES = 3
 
 
@@ -68,8 +66,11 @@ def generate_chapter(req: GenerateChapterRequest) -> GenerateChapterResponse:
     resp = parse_json_response(GenerateChapterResponse, raw)
 
     target = req.targetCharacters
-    # TASK-121: bounded expand-and-reconcile when the draft is under target.
-    if target and _count_chars(resp.content) < _LENGTH_FLOOR:
+    # RH-06 / HH-004: every ChapterSpec target gets its own 75% floor. A fixed
+    # 2250 threshold over-expanded short targets and accepted long targets too
+    # early. The prompt uses the same shared floor/ceiling policy.
+    floor = length_bounds(target)[0] if target else None
+    if target and floor is not None and _count_chars(resp.content) < floor:
         for _ in range(_MAX_EXPAND_PASSES):
             exp_raw = provider.complete(
                 _expand_user(resp.title, resp.content, target, resp.summary),
@@ -81,6 +82,6 @@ def generate_chapter(req: GenerateChapterRequest) -> GenerateChapterResponse:
                 break  # keep the original draft if the expand pass is unparseable
             if _count_chars(expanded.content) > _count_chars(resp.content):
                 resp = expanded
-            if _count_chars(resp.content) >= _LENGTH_FLOOR:
+            if _count_chars(resp.content) >= floor:
                 break
     return resp

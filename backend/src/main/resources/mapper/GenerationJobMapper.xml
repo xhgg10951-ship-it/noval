@@ -44,6 +44,16 @@
         LIMIT 1
     </select>
 
+    <select id="findActiveByStage" resultMap="GenerationJobResult">
+        SELECT id, stage_id, mode, current_plan_index, total, status, phase,
+               last_error, pause_requested, stop_requested, created_at, updated_at
+        FROM generation_job
+        WHERE stage_id = #{stageId}
+          AND status IN ('PENDING', 'RUNNING', 'PAUSED')
+        ORDER BY id DESC
+        LIMIT 1
+    </select>
+
     <!-- TASK-132 fix: the old full-row UPDATE let a stale in-memory copy clobber
          concurrently written control signals (pause/stop were silently erased by
          the per-chapter progress write). Writes are now narrow and disjoint:

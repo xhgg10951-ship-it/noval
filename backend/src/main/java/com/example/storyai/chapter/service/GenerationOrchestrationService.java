@@ -1,10 +1,9 @@
 package com.example.storyai.chapter.service;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.example.storyai.chapter.model.GenerationJob;
@@ -50,27 +49,38 @@ public class GenerationOrchestrationService {
     private final GenerationJobMapper jobMapper;
     private final NextSafeActionResolver safeActionResolver;
     private final ChapterMapper chapterMapper;
-    // TASK-127: application-managed background executor. Continuous generation no
-    // longer blocks the HTTP request — POST /generate returns the Job immediately
-    // and the chapters run on this pool. No MQ / Redis / new microservice.
-    private final ExecutorService executor = Executors.newCachedThreadPool();
+    // RH-06 / HH-006: bounded and lifecycle-managed by Spring. Continuous
+    // generation remains in-process; no MQ / Redis / new microservice.
+    private final TaskExecutor executor;
 
     public GenerationOrchestrationService(ChapterGenerationService generationService,
                                           StageService stageService,
                                           GenerationJobService jobService,
                                           GenerationJobMapper jobMapper,
                                           NextSafeActionResolver safeActionResolver,
-                                          ChapterMapper chapterMapper) {
+                                          ChapterMapper chapterMapper,
+                                          @Qualifier("generationTaskExecutor")
+                                          TaskExecutor executor) {
         this.generationService = generationService;
         this.stageService = stageService;
         this.jobService = jobService;
         this.jobMapper = jobMapper;
         this.safeActionResolver = safeActionResolver;
         this.chapterMapper = chapterMapper;
+        this.executor = executor;
     }
 
     /** Starts a generation job for a stage in the given mode (STEP or CONTINUOUS). */
-    public GenerationJob startJob(Long stageId, GenerationJob.Mode mode) {
+    public synchronized GenerationJob startJob(Long stageId, GenerationJob.Mode mode) {
+        // RH-06 / HH-005: serialize the single-JVM check+insert boundary so two
+        // simultaneous HTTP starts cannot both observe an empty slot. PAUSED is
+        // active by product definition; callers must continue/stop that job.
+        GenerationJob active = jobService.findActiveByStage(stageId);
+        if (active != null) {
+            throw new IllegalStateException(String.format(
+                    "阶段 %d 已有活动生成任务 %d（%s），请继续、暂停或停止该任务",
+                    stageId, active.getId(), active.getStatus()));
+        }
         // TASK-137: total counts only the ACTIVE REMAINING queue — superseded and
         // completed plan rows are history and must not inflate the progress bar.
         int total = stageService.getActiveRemainingPlans(stageId).size();
@@ -125,18 +135,24 @@ public class GenerationOrchestrationService {
     private void submitRun(Long jobId) {
         GenerationJob.Mode mode = GenerationJob.Mode.valueOf(jobService.get(jobId).getMode());
         Long stageId = jobService.get(jobId).getStageId();
-        executor.submit(() -> {
-            try {
-                markRunning(jobId);
-                if (mode == GenerationJob.Mode.CONTINUOUS) {
-                    runContinuous(jobId, stageId);
-                } else {
-                    runStep(jobId, stageId);
+        try {
+            executor.execute(() -> {
+                try {
+                    markRunning(jobId);
+                    if (mode == GenerationJob.Mode.CONTINUOUS) {
+                        runContinuous(jobId, stageId);
+                    } else {
+                        runStep(jobId, stageId);
+                    }
+                } catch (RuntimeException ex) {
+                    fail(jobId, ex);
                 }
-            } catch (RuntimeException ex) {
-                fail(jobId, ex);
-            }
-        });
+            });
+        } catch (RuntimeException ex) {
+            // A saturated bounded pool must not strand a permanently PENDING row.
+            fail(jobId, ex);
+            throw ex;
+        }
     }
 
     /** TASK-129 — author requests PAUSE; loop stops at the next checkpoint. */

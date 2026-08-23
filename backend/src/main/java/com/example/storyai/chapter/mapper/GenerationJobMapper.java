@@ -15,6 +15,9 @@ public interface GenerationJobMapper {
 
     GenerationJob findLatestByStage(@Param("stageId") Long stageId);
 
+    /** RH-06: PENDING/RUNNING/PAUSED all reserve the Stage generation slot. */
+    GenerationJob findActiveByStage(@Param("stageId") Long stageId);
+
     /** Legacy full-row update (kept for compatibility; orchestration no longer uses it). */
     int update(GenerationJob job);
 
