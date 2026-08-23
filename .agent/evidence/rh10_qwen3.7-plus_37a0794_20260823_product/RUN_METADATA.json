@@ -1,0 +1,9 @@
+{
+  "runId": "rh10_qwen3.7-plus_37a0794_20260823_product",
+  "model": "qwen3.7-plus",
+  "mockLlm": false,
+  "productWired": true,
+  "productCommit": "37a0794",
+  "storyIds": [1629],
+  "status": "INVALID_ACCEPTANCE_FIXTURE_ABORTED"
+}

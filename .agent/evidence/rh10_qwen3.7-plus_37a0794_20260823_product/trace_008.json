@@ -1,0 +1,46 @@
+{
+  "method": "POST",
+  "path": "/api/stages/1090/confirm",
+  "request": null,
+  "status": 200,
+  "durationSeconds": 0.032,
+  "response": {
+    "id": 1090,
+    "storyId": 1629,
+    "direction": "用两章写完林夜初到异界、认识艾琳并在她住处安顿过夜。",
+    "status": "ACTIVE",
+    "suggestedChapterCount": 2,
+    "targetChapterCount": 2,
+    "targetCharacters": 3000,
+    "plans": [
+      {
+        "id": 3217,
+        "stageId": 1090,
+        "chapterOrder": 1,
+        "goal": "林夜初到异界，在城门附近遇见艾琳；两人建立初步信任。",
+        "expectedProgress": "林夜从现代穿越至异界荒野/森林边缘，经历短暂的恐慌与生理不适。在遭遇低阶魔物或恶劣环境威胁时，被路过的冒险者艾琳所救。林夜意识到语言不通或文化差异，开始本能地隐藏自己‘异界来客’的身份，伪装成失忆或受惊的本地流民。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:59:32.871",
+        "updatedAt": "2026-08-23T23:59:32.896"
+      },
+      {
+        "id": 3218,
+        "stageId": 1090,
+        "chapterOrder": 2,
+        "goal": "艾琳把林夜带回住处安顿；本章结束时已经过夜，二人已认识且林夜已有住所。",
+        "expectedProgress": "两人抵达艾琳的住所（简陋但温馨的小屋或旅馆房间）。林夜在处理伤口或休息时，小心翼翼地从艾琳口中套取基础世界观信息（货币、势力、常识），同时极力避免说出任何现代词汇。艾琳对林夜的‘失忆’或‘古怪’表现出怀疑但暂不深究，提供食物和过夜许可。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-23T23:59:32.871",
+        "updatedAt": "2026-08-23T23:59:32.927"
+      }
+    ],
+    "createdAt": "2026-08-23T23:59:32.869",
+    "updatedAt": "2026-08-23T23:59:32.958"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "method": "POST",
+  "path": "/api/chapters/1497/polish",
+  "request": {
+    "userInstruction": "降低机械重复，保持全部事实、位置、物品和结尾意图，不新增事件。"
+  },
+  "status": 200,
+  "durationSeconds": 17.188,
+  "response": {
+    "id": 1497,
+    "storyId": 1629,
+    "stageId": 1091,
+    "planId": 3221,
+    "chapterNumber": 5,
+    "title": "第五章：锈刃与黑液",
+    "content": "林夜和艾琳在冒险者公会完成了失踪案线索的汇报，仍站在公会大厅中。他手中紧握着铁剑与调查委托书，脑海中再次确认：失踪者最后出现在幽影森林。耳边传来艾琳的提醒，让他午夜去旧钟楼见见证人。林夜回应道：“我们午夜去旧钟楼。”\n\n夜幕再次降临，但这次不再是安眠之夜。林夜检查着简陋的装备，望着森林方向，心中默念：‘明天，要么猎杀，要么被猎杀。’",
+    "summary": "林夜与艾琳在冒险者公会汇报完失踪案线索后，约定午夜前往旧钟楼见见证人。夜幕降临，林夜检查装备并望向幽影森林，做好了即将面临生死猎杀的准备。",
+    "generationStatus": "GENERATED",
+    "currentRevisionId": 1309,
+    "currentRevisionVersion": 3,
+    "sourceType": "AI_POLISH",
+    "status": "DRAFT",
+    "memoryExtractionStatus": "COMPLETED",
+    "targetCharacters": 3000,
+    "actualCharacterCount": 167,
+    "createdAt": "2026-08-24T00:05:00",
+    "updatedAt": "2026-08-24T00:05:56"
+  }
+}

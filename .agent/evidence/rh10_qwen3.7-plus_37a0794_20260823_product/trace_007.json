@@ -1,0 +1,23 @@
+{
+  "method": "PUT",
+  "path": "/api/stages/plans/3218",
+  "request": {
+    "goal": "艾琳把林夜带回住处安顿；本章结束时已经过夜，二人已认识且林夜已有住所。",
+    "targetCharacters": 3000
+  },
+  "status": 200,
+  "durationSeconds": 0.031,
+  "response": {
+    "id": 3218,
+    "stageId": 1090,
+    "chapterOrder": 2,
+    "goal": "艾琳把林夜带回住处安顿；本章结束时已经过夜，二人已认识且林夜已有住所。",
+    "expectedProgress": "两人抵达艾琳的住所（简陋但温馨的小屋或旅馆房间）。林夜在处理伤口或休息时，小心翼翼地从艾琳口中套取基础世界观信息（货币、势力、常识），同时极力避免说出任何现代词汇。艾琳对林夜的‘失忆’或‘古怪’表现出怀疑但暂不深究，提供食物和过夜许可。",
+    "targetCharacters": 3000,
+    "planVersion": 1,
+    "active": true,
+    "status": "ACTIVE",
+    "createdAt": "2026-08-23T23:59:32.871",
+    "updatedAt": "2026-08-23T23:59:32.927"
+  }
+}

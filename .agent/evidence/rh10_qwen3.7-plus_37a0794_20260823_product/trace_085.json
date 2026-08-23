@@ -1,0 +1,23 @@
+{
+  "method": "PUT",
+  "path": "/api/stages/plans/3221",
+  "request": {
+    "goal": "与艾琳准备调查物资并确认出城路线，只推进近期调查；不得围绕早餐或面包展开。",
+    "targetCharacters": 3000
+  },
+  "status": 200,
+  "durationSeconds": 0.031,
+  "response": {
+    "id": 3221,
+    "stageId": 1091,
+    "chapterOrder": 5,
+    "goal": "与艾琳准备调查物资并确认出城路线，只推进近期调查；不得围绕早餐或面包展开。",
+    "expectedProgress": "完成装备补给，从老冒险者口中套取关于幽影森林的零星情报，林夜调整心态，准备迎接第一次实战考验。",
+    "targetCharacters": 3000,
+    "planVersion": 1,
+    "active": true,
+    "status": "ACTIVE",
+    "createdAt": "2026-08-24T00:02:34.822",
+    "updatedAt": "2026-08-24T00:02:34.919"
+  }
+}

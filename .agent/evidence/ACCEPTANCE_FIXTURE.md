@@ -57,7 +57,9 @@ provider directly.
 - Before the second Stage, Manual Edit adds one incidental ordinary-bread
   sentence. The product's automatic re-extraction must classify it as
   `TRANSIENT_DETAIL / 1 / CHAPTER / IGNORE`; none of the next three chapters
-  may mention bread for AC-105.
+  may mention bread for AC-105. All three follow-up ChapterSpecs are unrelated
+  and must themselves contain neither the bread term nor a negative reminder
+  about it.
 - AC-109 polishes a fixed deliberately mechanical chapter through the public
   revision API. Every named character, location, item, case clue and ending
   intent must remain, while repeated sentence starts decrease.

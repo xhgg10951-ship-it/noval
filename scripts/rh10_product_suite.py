@@ -23,6 +23,15 @@ from typing import Any
 TERMINAL_JOBS = {"PAUSED", "STOPPED", "FAILED", "COMPLETED"}
 FINAL_JOBS = {"STOPPED", "FAILED", "COMPLETED"}
 
+# AC-105 requires three unrelated ChapterSpecs. Keep the low-value term out of
+# every goal: naming a forbidden detail in a high-priority ChapterSpec would be
+# an artificial narrative anchor and would not exercise the frozen acceptance.
+AC105_UNRELATED_GOALS = [
+    "完成冒险者公会登记并取得资格；林夜必须隐藏穿越者身份，不得向任何人暴露。",
+    "接取调查幽影森林失踪案的初步委托，核对三名失踪者最后活动的时间与地点。",
+    "与艾琳准备调查药剂和绳索，确认南城门出城路线，并决定次日清晨出发。",
+]
+
 
 class ProductSuite:
     def __init__(self, base_url: str, evidence_dir: Path, run_id: str,
@@ -247,11 +256,7 @@ class ProductSuite:
             plannerText=plan_text,
         )
 
-        self.update_goals(stage2, [
-            "完成冒险者公会登记并取得资格；林夜必须隐藏穿越者身份，不得向任何人暴露。",
-            "接取调查幽影森林失踪案的初步委托，核对失踪者记录；不得围绕早餐或面包展开。",
-            "与艾琳准备调查物资并确认出城路线，只推进近期调查；不得围绕早餐或面包展开。",
-        ], 3000)
+        self.update_goals(stage2, AC105_UNRELATED_GOALS, 3000)
         self.api("POST", f"/api/stages/{stage2['id']}/confirm")
         self.finish_step_job(stage2["id"], 3)
         later_three = sorted(

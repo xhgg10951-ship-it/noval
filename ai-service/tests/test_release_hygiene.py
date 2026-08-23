@@ -1,4 +1,5 @@
 from pathlib import Path
+import runpy
 
 
 REPO = Path(__file__).resolve().parents[2]
@@ -31,3 +32,11 @@ def test_runbook_and_ci_apply_every_current_migration():
     assert "seq 1 16" in runbook
     assert "Apply migrations V1 through V16" in workflow
     assert "seq 1 16" in workflow
+
+
+def test_rh10_low_value_followups_are_truly_unrelated_specs():
+    suite = runpy.run_path(str(REPO / "scripts/rh10_product_suite.py"))
+    goals = suite["AC105_UNRELATED_GOALS"]
+
+    assert len(goals) == 3
+    assert all("面包" not in goal and "早餐" not in goal for goal in goals)

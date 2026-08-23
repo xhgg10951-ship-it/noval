@@ -1,0 +1,59 @@
+{
+  "method": "POST",
+  "path": "/api/stages/1091/confirm",
+  "request": null,
+  "status": 200,
+  "durationSeconds": 0.0,
+  "response": {
+    "id": 1091,
+    "storyId": 1629,
+    "direction": "第二天前往冒险者公会入会并接取委托：调查幽影森林失踪案。",
+    "status": "ACTIVE",
+    "suggestedChapterCount": 3,
+    "targetChapterCount": 3,
+    "targetCharacters": 3000,
+    "plans": [
+      {
+        "id": 3219,
+        "stageId": 1091,
+        "chapterOrder": 3,
+        "goal": "完成冒险者公会登记并取得资格；林夜必须隐藏穿越者身份，不得向任何人暴露。",
+        "expectedProgress": "林夜抵达公会，观察到冒险者的生态，感受到自身‘黑户’身份的尴尬与危机，确立入会的紧迫性。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-24T00:02:34.822",
+        "updatedAt": "2026-08-24T00:02:34.857"
+      },
+      {
+        "id": 3220,
+        "stageId": 1091,
+        "chapterOrder": 4,
+        "goal": "接取调查幽影森林失踪案的初步委托，核对失踪者记录；不得围绕早餐或面包展开。",
+        "expectedProgress": "林夜成功登记为最低阶冒险者（如F级或见习），并与艾琳组队接下调查任务，建立初步的利益捆绑关系。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-24T00:02:34.822",
+        "updatedAt": "2026-08-24T00:02:34.888"
+      },
+      {
+        "id": 3221,
+        "stageId": 1091,
+        "chapterOrder": 5,
+        "goal": "与艾琳准备调查物资并确认出城路线，只推进近期调查；不得围绕早餐或面包展开。",
+        "expectedProgress": "完成装备补给，从老冒险者口中套取关于幽影森林的零星情报，林夜调整心态，准备迎接第一次实战考验。",
+        "targetCharacters": 3000,
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-24T00:02:34.822",
+        "updatedAt": "2026-08-24T00:02:34.919"
+      }
+    ],
+    "createdAt": "2026-08-24T00:02:34.82",
+    "updatedAt": "2026-08-24T00:02:34.929"
+  }
+}
