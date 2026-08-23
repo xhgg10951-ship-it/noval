@@ -3,7 +3,13 @@ import api from '@/api'
 // ---- Types matching the Spring Boot GenerationJob DTO (M5 / TASK-036..041) ----
 
 export type GenerationMode = 'STEP' | 'CONTINUOUS'
-export type GenerationStatus = 'PENDING' | 'RUNNING' | 'PAUSED' | 'COMPLETED' | 'FAILED'
+export type GenerationStatus =
+  | 'PENDING'
+  | 'RUNNING'
+  | 'PAUSED'
+  | 'COMPLETED'
+  | 'FAILED'
+  | 'STOPPED'
 export type GenerationPhase = 'PLANNING' | 'WRITING' | 'MEMORY' | 'CHECKPOINT' | null
 
 export interface GenerationJobResponse {
@@ -40,6 +46,16 @@ export async function continueGeneration(jobId: number): Promise<GenerationJobRe
 
 export async function retryGeneration(jobId: number): Promise<GenerationJobResponse> {
   const { data } = await api.post<GenerationJobResponse>(`/generation-jobs/${jobId}/retry`)
+  return data
+}
+
+export async function pauseGeneration(jobId: number): Promise<GenerationJobResponse> {
+  const { data } = await api.post<GenerationJobResponse>(`/generation-jobs/${jobId}/pause`)
+  return data
+}
+
+export async function stopGeneration(jobId: number): Promise<GenerationJobResponse> {
+  const { data } = await api.post<GenerationJobResponse>(`/generation-jobs/${jobId}/stop`)
   return data
 }
 

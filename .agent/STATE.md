@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`RELEASE HARDENING — RH-03 COMPLETE`
+`RELEASE HARDENING — RH-04 COMPLETE`
 
 Current Task:
 
-`RH-04 — Generation UI Completion (NEXT)`
+`RH-05 — Context Hardening (NEXT)`
 
 Task Status:
 
@@ -64,6 +64,12 @@ Task Evidence:
   generated chapter numbers 4/5/6, and Writer chapterOrder 4/5/6 after it.
 - AC-H03 Real-LLM Semantic Verification: NOT_REQUIRED here; final AC-106 semantic
   behavior is re-run with qwen3.7-plus at RH-10.
+- RH-04 DONE (2026-08-23) — GenerationPanel polls PENDING/RUNNING jobs every
+  1500ms, stops at every terminal state, clears timers across Stage changes and
+  unmount, and exposes Pause/Stop with a safe-checkpoint wait state.
+- AC-H04/H05/H06 Engineering Verification: PASSED — frontend Vitest 5/5,
+  production build PASSED, backend Pause/Stop checkpoint regressions 2/2.
+- AC-H04/H05/H06 Real-LLM Semantic Verification: NOT_REQUIRED.
 - Historical TASK-101~179 remain implementation history only and do not override
   the Release Hardening gate.
 
@@ -926,7 +932,7 @@ repository is currently:
 
 Release verdict:
 
-`NOT ACCEPTED — RH-04 through RH-10 remain; RH-11 is gated`
+`NOT ACCEPTED — RH-05 through RH-10 remain; RH-11 is gated`
 
 Hardening progress:
 
@@ -934,14 +940,14 @@ Hardening progress:
 RH-01 DONE — AC-H01 PASSED (engineering)
 RH-02 DONE — AC-H02 PASSED (engineering)
 RH-03 DONE — AC-H03 PASSED (engineering)
-RH-04 NEXT
-RH-05 TODO
+RH-04 DONE — AC-H04/H05/H06 PASSED (engineering)
+RH-05 NEXT
 RH-06 TODO
 RH-07 TODO
 RH-08 TODO
 RH-09 TODO
 RH-10 TODO — final qwen3.7-plus semantic suite
-RH-11 BLOCKED BY RH-04~RH-10
+RH-11 BLOCKED BY RH-05~RH-10
 ```
 
 RH-01 verification details:
@@ -994,6 +1000,25 @@ PASSED
 
 Real-LLM Semantic Verification:
 NOT_REQUIRED (AC-106 final semantic rerun is RH-10)
+```
+
+RH-04 verification details:
+
+```text
+Regression before fix:
+Frontend RH-04 suite — 4 failures / 5 tests
+- no PENDING/RUNNING polling (progress remained 0/3)
+- no pauseGeneration / stopGeneration API functions
+- no Pause / Stop buttons
+
+Engineering Verification:
+PASSED
+- Frontend Vitest: 5/5
+- Frontend production build: PASSED
+- Backend Pause/Stop checkpoint regressions: 2/2
+
+Real-LLM Semantic Verification:
+NOT_REQUIRED
 ```
 
 Core principles:

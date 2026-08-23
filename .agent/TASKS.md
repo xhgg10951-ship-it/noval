@@ -3296,11 +3296,11 @@ Frozen Requirement:
 
 Current Phase:
 
-`Release Hardening — RH-03 COMPLETE`
+`Release Hardening — RH-04 COMPLETE`
 
 Current Task:
 
-`RH-04 — Generation UI Completion (NEXT)`
+`RH-05 — Context Hardening (NEXT)`
 
 Task Status:
 
@@ -3308,7 +3308,7 @@ Task Status:
 
 Next Safe Action:
 
-> 从 RH-04 开始检查 GenerationPanel polling / pause / stop 的真实前端实现，先补 regression test。
+> 从 RH-05 开始检查 Writer/Planner memory selection 与 Continuation Anchor 的真实 context wiring，先补 regression test。
 
 ---
 
@@ -3466,11 +3466,37 @@ Real-LLM Semantic Verification: `NOT_REQUIRED` (AC-106 runs again at RH-10)
 
 ## RH-04 — Generation UI Completion
 
-Status: `TODO`
+Status: `DONE`
 
 Scope: HB-004 / HB-005 / AC-H04 / AC-H05 / AC-H06
 
 Dependencies: RH-03
+
+Implementation:
+
+- Added a 1500ms `GET /generation-jobs/{id}` polling loop for PENDING/RUNNING;
+  PAUSED/COMPLETED/FAILED/STOPPED terminate polling.
+- Stage switches and component unmount invalidate pending requests and clear the
+  timer so an old job cannot overwrite the new Stage view.
+- Added `pauseGeneration` / `stopGeneration`, STOPPED typing/labeling, RUNNING
+  Pause/Stop controls, and the pause safe-checkpoint wait message.
+- Added minimal Vitest + Vue Test Utils + jsdom coverage for the component and
+  generation control endpoints.
+
+Regression Evidence:
+
+- Before fix: progress stayed 0/3 after 1500ms; Pause/Stop API functions and UI
+  buttons were absent (4 failures / 5 tests).
+- After fix: polling renders 0/3→1/3→2/3→3/3 COMPLETED and makes no terminal
+  polls; Stage change/unmount cleanup, Pause wait state, and STOPPED all pass.
+
+Engineering Verification: `PASSED`
+
+- Frontend `npm test`: 5/5 PASSED
+- Frontend `npm run build`: PASSED
+- Backend Pause/Stop `GenerationReliabilityRegressionTest`: 2/2 PASSED
+
+Real-LLM Semantic Verification: `NOT_REQUIRED`
 
 ## RH-05 — Context Hardening
 
