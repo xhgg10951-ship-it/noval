@@ -3732,7 +3732,21 @@ Engineering Verification: `PASSED`
 Real-LLM Semantic Verification: `NOT_REQUIRED` (deterministic workflow; final
 product-wired qwen3.7-plus gate remains RH-10)
 
-Next active task: `RH-02 — Memory Provenance Revalidation`
+## RH-02 Revalidation — Memory Provenance
+
+Status: `REVALIDATED`
+
+- Inspected the Apply/invalidation normalization path and the
+  `source_candidate_id` ownership guard for current state and relationships.
+- Existing AC-H02 regressions cover both frozen HB-002 cases; no duplicate
+  regression or source change was required.
+- Backend: `MemoryProvenanceIntegrationTest` 2/2 PASSED against MySQL.
+
+Engineering Verification: `PASSED`
+
+Real-LLM Semantic Verification: `NOT_REQUIRED` (deterministic persistence)
+
+Next active task: `RH-03 — Replan Logical Order Contract Repair`
 
 
 

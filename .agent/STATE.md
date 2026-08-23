@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`RELEASE HARDENING REOPENED — RH-01 REVALIDATED`
+`RELEASE HARDENING REOPENED — RH-02 REVALIDATED`
 
 Current Task:
 
-`RH-02 — Memory Provenance Revalidation`
+`RH-03 — Replan Logical Order Contract Repair`
 
 Task Status:
 
@@ -51,6 +51,11 @@ Task Evidence:
   Python `tests/test_mock.py` passed 8/8. No source fix was required; the
   existing regression covers Manual Edit, Regenerate, Polish, active Memory,
   and subsequent Writer recent context.
+- RH-02 REVALIDATED (2026-08-23) — inspected normalized inventory Apply and
+  invalidation plus source-owned current/relationship slots. The existing
+  `MemoryProvenanceIntegrationTest` passed 2/2 against MySQL: deleting the
+  sword event removed `item:铁剑`, while revising Chapter 1 left Chapter 2's
+  newer location and relationship untouched. No source fix was required.
 
 - RH-01 DONE (2026-08-23) — regression first reproduced stale summary after
   Manual Edit; fixed Manual Edit summary refresh + automatic re-extract,
