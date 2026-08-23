@@ -17,6 +17,7 @@ from app.schemas.models import (
     ChapterPlanItem,
     StateItem,
     StoryQueryResponse,
+    SummarizeChapterResponse,
     SuggestDirectionsResponse,
 )
 
@@ -63,6 +64,14 @@ def mock_generate(req) -> GenerateChapterResponse:
         f"（本章为 Mock Provider 生成的占位正文，用于在无 LLM_API_KEY 时验证端到端链路。）"
     )
     return GenerateChapterResponse(title=title, content=content, summary=summary)
+
+
+def mock_summarize(req) -> SummarizeChapterResponse:
+    """Deterministic, grounded summary for offline plumbing tests."""
+    text = re.sub(r"\s+", " ", req.content or "").strip()
+    if len(text) > 240:
+        text = text[:240].rstrip() + "…"
+    return SummarizeChapterResponse(summary=text or "本章正文为空。")
 
 
 def mock_extract(req) -> ExtractMemoryResponse:

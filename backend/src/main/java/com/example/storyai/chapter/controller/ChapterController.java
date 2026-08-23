@@ -80,9 +80,9 @@ public class ChapterController {
     @PutMapping("/api/chapters/{chapterId}/content")
     public ChapterResponse editContent(@PathVariable Long chapterId,
                                        @Valid @RequestBody EditChapterContentRequest request) {
-        revisionService.createRevision(chapterId, request.getContent(),
-                ChapterRevision.SOURCE_MANUAL_EDIT);
-        return withRevisionVersion(new ChapterResponse(chapterService.getChapter(chapterId)));
+        return withRevisionVersion(
+                new ChapterResponse(
+                        generationService.editChapterContent(chapterId, request.getContent())));
     }
 
     /** TASK-146 — author accepts the current revision: DRAFT → APPROVED. */

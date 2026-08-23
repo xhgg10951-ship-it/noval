@@ -1,10 +1,10 @@
-"""FastAPI router exposing the six AI capabilities."""
+"""FastAPI router exposing the AI capabilities."""
 from __future__ import annotations
 
 from fastapi import APIRouter
 
 from app.llm.provider import get_provider, parse_json_response
-from app.prompts.builders import build_polish_prompt, build_suggest_prompt
+from app.prompts.builders import build_polish_prompt, build_suggest_prompt, build_summary_prompt
 from app.schemas.models import (
     ExtractMemoryRequest,
     ExtractMemoryResponse,
@@ -18,9 +18,11 @@ from app.schemas.models import (
     StoryQueryResponse,
     SuggestDirectionsRequest,
     SuggestDirectionsResponse,
+    SummarizeChapterRequest,
+    SummarizeChapterResponse,
 )
 from app.services import memory_extractor, planner, story_query as story_query_service, writer
-from app.services.mock_builders import mock_suggest
+from app.services.mock_builders import mock_suggest, mock_summarize
 
 router = APIRouter()
 
@@ -50,6 +52,17 @@ def polish_chapter(req: PolishChapterRequest) -> PolishChapterResponse:
     raw = provider.complete(user, system=system)
     polished = parse_json_response(PolishChapterResponse, raw)
     return polished
+
+
+@router.post("/summarize-chapter", response_model=SummarizeChapterResponse)
+def summarize_chapter(req: SummarizeChapterRequest) -> SummarizeChapterResponse:
+    """RH-01: rebuild summary exclusively from the current chapter body."""
+    provider = get_provider()
+    if provider.is_mock:
+        return mock_summarize(req)
+    system, user = build_summary_prompt(req)
+    raw = provider.complete(user, system=system)
+    return parse_json_response(SummarizeChapterResponse, raw)
 
 
 @router.post("/extract-memory", response_model=ExtractMemoryResponse)

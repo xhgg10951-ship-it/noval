@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import com.example.storyai.ai.AiServiceClient;
 import com.example.storyai.ai.dto.GenerateChapterRequest;
 import com.example.storyai.ai.dto.GenerateChapterResponse;
+import com.example.storyai.ai.dto.SummarizeChapterRequest;
+import com.example.storyai.ai.dto.SummarizeChapterResponse;
 import com.example.storyai.chapter.model.Chapter;
 import com.example.storyai.common.exception.AiServiceException;
 import com.example.storyai.common.exception.NoPendingChapterException;
@@ -74,6 +76,40 @@ public class ChapterGenerationService {
         this.extractionService = extractionService;
         this.processingService = processingService;
         this.memoryMapper = memoryMapper;
+    }
+
+    /**
+     * RH-01 — Manual Edit consistency workflow.
+     *
+     * <pre>
+     * current author content
+     * -> refresh summary from that content only
+     * -> persist revision + current read model
+     * -> memory STALE
+     * -> invalidate and re-extract
+     * </pre>
+     *
+     * <p>The AI calls remain outside the revision transaction. If extraction
+     * fails, the already-saved author revision is retained with FAILED memory
+     * status and the existing recovery path can retry it.</p>
+     */
+    public Chapter editChapterContent(Long chapterId, String content) {
+        Chapter current = chapterService.getChapter(chapterId);
+        String summary = refreshSummary(content);
+
+        revisionService.createRevision(
+                chapterId,
+                content,
+                current.getTitle(),
+                summary,
+                com.example.storyai.chapter.model.ChapterRevision.SOURCE_MANUAL_EDIT);
+
+        reExtractChapter(chapterId);
+
+        Chapter refreshed = chapterService.getChapter(chapterId);
+        refreshed.setActualCharacterCount(
+                com.example.storyai.common.util.TextLengthUtil.countCharacters(content));
+        return chapterService.saveChapter(refreshed);
     }
 
     /** Generates the next pending chapter for a stage (AT-C01). */
@@ -204,7 +240,11 @@ public class ChapterGenerationService {
         validate(ai);
 
         // NEW immutable revision; createRevision flips memory to STALE for us.
-        revisionService.createRevision(chapterId, ai.content(),
+        revisionService.createRevision(
+                chapterId,
+                ai.content(),
+                ai.title(),
+                ai.summary(),
                 com.example.storyai.chapter.model.ChapterRevision.SOURCE_AI_REWRITE);
 
         // TASK-148 loop closes here: invalidate derived memories + re-extract.
@@ -264,8 +304,16 @@ public class ChapterGenerationService {
             throw new com.example.storyai.common.exception.AiServiceException("AI 润色服务返回空内容");
         }
 
+        // Polish preserves the current title but its summary must describe the
+        // polished body, never the obsolete pre-polish revision.
+        String refreshedSummary = refreshSummary(polished);
+
         // NEW immutable AI_POLISH revision; createRevision marks memory STALE.
-        revisionService.createRevision(chapterId, polished,
+        revisionService.createRevision(
+                chapterId,
+                polished,
+                chapter.getTitle(),
+                refreshedSummary,
                 com.example.storyai.chapter.model.ChapterRevision.SOURCE_AI_POLISH);
 
         // TASK-148 loop: invalidate derived memories + re-extract from the polished text.
@@ -375,5 +423,15 @@ public class ChapterGenerationService {
 
     private boolean isBlank(String s) {
         return s == null || s.isBlank();
+    }
+
+    /** Refreshes a concise, current-body-only summary for Manual Edit / Polish. */
+    private String refreshSummary(String content) {
+        SummarizeChapterResponse ai = aiServiceClient.summarizeChapter(
+                new SummarizeChapterRequest(content));
+        if (ai == null || isBlank(ai.summary())) {
+            throw new AiServiceException("AI 摘要服务返回空摘要");
+        }
+        return ai.summary().trim();
     }
 }

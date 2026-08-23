@@ -2,6 +2,8 @@ package com.example.storyai.chapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -14,6 +16,7 @@ import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -58,7 +61,7 @@ class ChapterRevisionIntegrationTest {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private com.example.storyai.chapter.service.ChapterGenerationService generationService;
+    private com.example.storyai.context.StoryContextReader contextReader;
 
     @MockitoBean
     private AiServiceClient aiServiceClient;
@@ -90,15 +93,34 @@ class ChapterRevisionIntegrationTest {
         return id;
     }
 
-    private long createActiveStageWithOneChapter(Long storyId) throws Exception {
+    private record GeneratedFixture(long stageId, long chapterId) {
+    }
+
+    private GeneratedFixture createActiveStageWithPlans(Long storyId, int planCount) throws Exception {
+        return createActiveStageWithPlans(
+                storyId,
+                planCount,
+                new GenerateChapterResponse("第一章", "AI 生成的原稿内容。", "原稿摘要。"));
+    }
+
+    private GeneratedFixture createActiveStageWithPlans(Long storyId,
+                                                        int planCount,
+                                                        GenerateChapterResponse firstChapter)
+            throws Exception {
         when(aiServiceClient.planStage(any(PlanStageRequest.class)))
-                .thenReturn(new PlanStageResponse(1, IntStream.rangeClosed(1, 1)
+                .thenReturn(new PlanStageResponse(planCount, IntStream.rangeClosed(1, planCount)
                         .mapToObj(i -> new PlanStageResponse.ChapterPlanItem(
                                 i, "目标" + i, "推进", null, null, null, null, null))
                         .toList()));
         when(aiServiceClient.generateChapter(any(GenerateChapterRequest.class)))
-                .thenAnswer(inv -> new GenerateChapterResponse(
-                        "第一章", "AI 生成的原稿内容。", "原稿摘要。"));
+                .thenReturn(firstChapter);
+        when(aiServiceClient.summarizeChapter(any()))
+                .thenAnswer(inv -> {
+                    var req = inv.getArgument(0,
+                            com.example.storyai.ai.dto.SummarizeChapterRequest.class);
+                    return new com.example.storyai.ai.dto.SummarizeChapterResponse(
+                            req.content());
+                });
         when(aiServiceClient.extractMemory(any())).thenReturn(
                 new com.example.storyai.ai.dto.ExtractMemoryResponse(List.of()));
 
@@ -114,8 +136,13 @@ class ChapterRevisionIntegrationTest {
         MvcResult generated = mockMvc.perform(post("/api/stages/{id}/chapters", stageId))
                 .andExpect(status().isOk())
                 .andReturn();
-        return objectMapper.readTree(generated.getResponse().getContentAsString())
+        long chapterId = objectMapper.readTree(generated.getResponse().getContentAsString())
                 .get("id").asLong();
+        return new GeneratedFixture(stageId, chapterId);
+    }
+
+    private long createActiveStageWithOneChapter(Long storyId) throws Exception {
+        return createActiveStageWithPlans(storyId, 1).chapterId();
     }
 
     private JsonNode getChapter(long chapterId) throws Exception {
@@ -177,6 +204,82 @@ class ChapterRevisionIntegrationTest {
         assertThat(revisions.get(1).get("content").asText()).contains("AI 生成的原稿");
     }
 
+    // ---- RH-01 / AC-H01: the current read model must follow a manual revision ----
+
+    @Test
+    void manualEditRefreshesSummaryMemoryAndRecentWriterContext() throws Exception {
+        Long storyId = createStory();
+        GeneratedFixture fixture = createActiveStageWithPlans(
+                storyId,
+                2,
+                new GenerateChapterResponse(
+                        "铁剑入手", "主角在仓库中获得铁剑。", "主角获得铁剑。"));
+        long chapterId = fixture.chapterId();
+
+        // Reproduce the release blocker: the old body, summary and active memory
+        // all say that the protagonist obtained an iron sword.
+        jdbcTemplate.update("""
+                INSERT INTO story_memory
+                    (story_id, type, subject, description, source_chapter_id,
+                     evidence, importance, scope, active)
+                VALUES (?, 'PLOT_FACT', '铁剑', '主角获得铁剑', ?,
+                        '主角在仓库中获得铁剑。', 5, 'STORY', 1)
+                """, storyId, chapterId);
+        clearInvocations(aiServiceClient);
+
+        String editedBody = "主角检查空荡荡的仓库后，空手离开。";
+        MvcResult edited = mockMvc.perform(put("/api/chapters/{id}/content", chapterId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                java.util.Map.of("content", editedBody))))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode current = objectMapper.readTree(
+                edited.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8));
+        assertThat(current.get("content").asText()).isEqualTo(editedBody);
+        assertThat(current.get("summary").asText()).isNotBlank();
+        assertThat(current.get("summary").asText()).contains("空手离开");
+        assertThat(current.get("summary").asText()).doesNotContain("铁剑");
+        assertThat(current.get("memoryExtractionStatus").asText()).isEqualTo("COMPLETED");
+
+        Integer activeOldMemory = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*) FROM story_memory
+                WHERE source_chapter_id = ? AND active = 1
+                """, Integer.class, chapterId);
+        assertThat(activeOldMemory).isZero();
+
+        ArgumentCaptor<com.example.storyai.ai.dto.ExtractMemoryRequest> extraction =
+                ArgumentCaptor.forClass(com.example.storyai.ai.dto.ExtractMemoryRequest.class);
+        verify(aiServiceClient).extractMemory(extraction.capture());
+        assertThat(extraction.getValue().chapterContent()).isEqualTo(editedBody);
+        assertThat(extraction.getValue().chapterSummary()).contains("空手离开");
+        assertThat(extraction.getValue().chapterSummary()).doesNotContain("铁剑");
+
+        // ChapterGenerationService passes this value straight into the next
+        // GenerateChapterRequest.recentContext; the deleted fact must be gone.
+        String recentContext = contextReader.getRecentContextWithEnding(storyId, 3, 800);
+        assertThat(recentContext).contains("空手离开");
+        assertThat(recentContext).doesNotContain("铁剑");
+
+        // Prove the actual next Writer request receives the refreshed context,
+        // not merely that the context reader can compute it.
+        clearInvocations(aiServiceClient);
+        when(aiServiceClient.generateChapter(any(GenerateChapterRequest.class)))
+                .thenReturn(new GenerateChapterResponse(
+                        "第二章", "主角继续前行。", "主角继续前行。"));
+        mockMvc.perform(post("/api/stages/{id}/chapters", fixture.stageId()))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<GenerateChapterRequest> nextWriter =
+                ArgumentCaptor.forClass(GenerateChapterRequest.class);
+        verify(aiServiceClient).generateChapter(nextWriter.capture());
+        assertThat(nextWriter.getValue().recentContext()).contains("空手离开");
+        assertThat(nextWriter.getValue().recentContext()).doesNotContain("铁剑");
+        assertThat(nextWriter.getValue().storyMemories())
+                .allSatisfy(memory -> assertThat(memory.description()).doesNotContain("铁剑"));
+    }
+
     // ---- TASK-146 (+TASK-142 interplay): approve, then edit re-opens DRAFT ----
 
     @Test
@@ -223,6 +326,7 @@ class ChapterRevisionIntegrationTest {
         when(aiServiceClient.polishChapter(any(com.example.storyai.ai.dto.PolishChapterRequest.class)))
                 .thenReturn(new com.example.storyai.ai.dto.PolishChapterResponse(
                         "润色后的事实保持版本。"));
+        clearInvocations(aiServiceClient);
 
         mockMvc.perform(post("/api/chapters/{id}/polish", chapterId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -232,7 +336,15 @@ class ChapterRevisionIntegrationTest {
                 .andExpect(jsonPath("$.currentRevisionVersion").value(2))
                 .andExpect(jsonPath("$.sourceType").value("AI_POLISH"))
                 .andExpect(jsonPath("$.content").value("润色后的事实保持版本。"))
+                .andExpect(jsonPath("$.title").value(before.get("title").asText()))
+                .andExpect(jsonPath("$.summary").value("润色后的事实保持版本。"))
                 .andExpect(jsonPath("$.memoryExtractionStatus").value("COMPLETED"));
+
+        ArgumentCaptor<com.example.storyai.ai.dto.ExtractMemoryRequest> polishExtraction =
+                ArgumentCaptor.forClass(com.example.storyai.ai.dto.ExtractMemoryRequest.class);
+        verify(aiServiceClient).extractMemory(polishExtraction.capture());
+        assertThat(polishExtraction.getValue().chapterSummary())
+                .isEqualTo("润色后的事实保持版本。");
 
         // history: v1 AI_GENERATED preserved, v2 AI_POLISH current
         String revBody = mockMvc.perform(get("/api/chapters/{id}/revisions", chapterId))
@@ -254,7 +366,8 @@ class ChapterRevisionIntegrationTest {
 
         when(aiServiceClient.generateChapter(any(GenerateChapterRequest.class)))
                 .thenAnswer(inv -> new GenerateChapterResponse(
-                        "第一章", "重写后的全新正文。", "重写摘要。"));
+                        "重写后的标题", "重写后的全新正文。", "重写摘要。"));
+        clearInvocations(aiServiceClient);
 
         mockMvc.perform(post("/api/chapters/{id}/regenerate", chapterId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -264,9 +377,16 @@ class ChapterRevisionIntegrationTest {
                 .andExpect(jsonPath("$.chapterNumber").value(before.get("chapterNumber").asInt()))
                 .andExpect(jsonPath("$.currentRevisionVersion").value(2))
                 .andExpect(jsonPath("$.sourceType").value("AI_REWRITE"))
+                .andExpect(jsonPath("$.title").value("重写后的标题"))
                 .andExpect(jsonPath("$.content").value("重写后的全新正文。"))
+                .andExpect(jsonPath("$.summary").value("重写摘要。"))
                 // TASK-148 loop closed inside regenerate: memory re-extracted to COMPLETED
                 .andExpect(jsonPath("$.memoryExtractionStatus").value("COMPLETED"));
+
+        ArgumentCaptor<com.example.storyai.ai.dto.ExtractMemoryRequest> rewriteExtraction =
+                ArgumentCaptor.forClass(com.example.storyai.ai.dto.ExtractMemoryRequest.class);
+        verify(aiServiceClient).extractMemory(rewriteExtraction.capture());
+        assertThat(rewriteExtraction.getValue().chapterSummary()).isEqualTo("重写摘要。");
 
         // history intact: v1 (AI_GENERATED) still readable, v2 (AI_REWRITE) current
         String revBody = mockMvc.perform(get("/api/chapters/{id}/revisions", chapterId))
@@ -291,22 +411,13 @@ class ChapterRevisionIntegrationTest {
                 VALUES (?, 'EVENT', '旧事实', '旧正文派生的事实', ?, 'evidence')
                 """, createdStoryIds.get(0), chapterId);
 
-        // manual edit -> the exposed prose changed -> extraction must become STALE
+        // RH-01: the public Manual Edit workflow must close STALE -> re-extract
+        // before returning, rather than requiring a hidden service call.
         mockMvc.perform(put("/api/chapters/{id}/content", chapterId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"content\":\"作者修改后的正文，事实已变化。\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.memoryExtractionStatus").value("STALE"));
-
-        Integer before = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM story_memory WHERE source_chapter_id = ?",
-                Integer.class, chapterId);
-        assertThat(before).isEqualTo(1);
-
-        // TASK-148: re-extraction invalidates derived memories, then restores COMPLETED
-        when(aiServiceClient.extractMemory(any())).thenReturn(
-                new com.example.storyai.ai.dto.ExtractMemoryResponse(List.of()));
-        generationService.reExtractChapter(chapterId);
+                .andExpect(jsonPath("$.memoryExtractionStatus").value("COMPLETED"));
 
         Integer remaining = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM story_memory WHERE source_chapter_id = ?",

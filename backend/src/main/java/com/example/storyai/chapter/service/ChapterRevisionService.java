@@ -60,6 +60,22 @@ public class ChapterRevisionService {
     @Transactional
     public ChapterRevision createRevision(Long chapterId, String content, String sourceType) {
         Chapter chapter = chapterService.getChapter(chapterId);
+        return createRevision(chapterId, content, chapter.getTitle(), chapter.getSummary(), sourceType);
+    }
+
+    /**
+     * RH-01 — creates a revision and atomically synchronizes the Chapter current
+     * read model. Revision history remains content-only per the frozen domain
+     * model; title and summary describe the currently exposed revision and live
+     * on {@code chapter}.
+     */
+    @Transactional
+    public ChapterRevision createRevision(Long chapterId,
+                                          String content,
+                                          String title,
+                                          String summary,
+                                          String sourceType) {
+        Chapter chapter = chapterService.getChapter(chapterId);
         Integer maxVersion = revisionMapper.findMaxVersion(chapterId);
 
         ChapterRevision revision = new ChapterRevision();
@@ -71,6 +87,8 @@ public class ChapterRevisionService {
 
         // Keep the denormalized read model in sync; a new write re-opens DRAFT.
         chapter.setContent(content);
+        chapter.setTitle(title);
+        chapter.setSummary(summary);
         chapter.setCurrentRevisionId(revision.getId());
         chapter.setStatus("DRAFT");
         if (!ChapterRevision.SOURCE_AI_GENERATED.equals(sourceType)) {

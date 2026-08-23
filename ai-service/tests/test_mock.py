@@ -69,6 +69,18 @@ def test_generate_chapter():
     assert data["title"] and data["content"] and data["summary"]
 
 
+def test_summarize_chapter_uses_current_body():
+    r = client.post(
+        "/ai/summarize-chapter",
+        json={"content": "主角检查空仓库后，空手离开。"},
+    )
+    assert r.status_code == 200
+    summary = r.json()["summary"]
+    assert summary
+    assert "空手离开" in summary
+    assert "铁剑" not in summary
+
+
 def test_extract_memory():
     r = client.post(
         "/ai/extract-memory",

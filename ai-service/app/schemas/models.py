@@ -145,6 +145,17 @@ class PolishChapterResponse(BaseModel):
 
 
 # --------------------------------------------------------------------------
+# Summarize Chapter (RH-01 / HB-001)
+# --------------------------------------------------------------------------
+class SummarizeChapterRequest(BaseModel):
+    content: str
+
+
+class SummarizeChapterResponse(BaseModel):
+    summary: str
+
+
+# --------------------------------------------------------------------------
 # Extract Memory
 # --------------------------------------------------------------------------
 class ExtractMemoryRequest(BaseModel):

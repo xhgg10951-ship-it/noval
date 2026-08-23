@@ -14,6 +14,7 @@ from app.schemas.models import (
     PlanStageRequest,
     StoryQueryRequest,
     SuggestDirectionsRequest,
+    SummarizeChapterRequest,
 )
 
 import logging
@@ -226,6 +227,26 @@ GENERATE_OUTPUT_HINT = '{"title": str, "content": str, "summary": str}'
 
 # ---- v0.1.1 Phase 8 (TASK-167/168): polish prompt with fact preservation ----
 POLISH_OUTPUT_HINT = '{"polishedContent": str}'
+
+
+# ---- RH-01 / HB-001: current-body-only summary refresh ----
+SUMMARY_OUTPUT_HINT = '{"summary": str}'
+
+
+def build_summary_prompt(req: SummarizeChapterRequest) -> Tuple[str, str]:
+    """Summarize only the supplied current body; never reuse stale context."""
+    system = (
+        "你是一名小说章节摘要 AI。只根据本次提供的【当前正文】生成简洁摘要，"
+        "不得沿用旧摘要，不得补充正文中没有的事实。摘要应优先记录：本章已经完成的"
+        "事件、人物或物品状态变化、尚未完成的动作，以及结尾所在位置或悬念。"
+        "普通装饰细节不要强化为主线。必须只返回严格 JSON，格式为：\n"
+        + SUMMARY_OUTPUT_HINT
+    )
+    user = f"""当前正文（唯一事实来源）：
+{req.content}
+
+请生成 1–3 句摘要，只输出 JSON。"""
+    return system, user
 
 
 def build_polish_prompt(req) -> Tuple[str, str]:

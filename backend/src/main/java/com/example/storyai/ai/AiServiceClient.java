@@ -20,6 +20,8 @@ import com.example.storyai.ai.dto.SuggestDirectionsRequest;
 import com.example.storyai.ai.dto.SuggestDirectionsResponse;
 import com.example.storyai.ai.dto.StoryQueryRequest;
 import com.example.storyai.ai.dto.StoryQueryResponse;
+import com.example.storyai.ai.dto.SummarizeChapterRequest;
+import com.example.storyai.ai.dto.SummarizeChapterResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -126,6 +128,17 @@ public class AiServiceClient {
                 .body(json)
                 .retrieve()
                 .body(PolishChapterResponse.class);
+    }
+
+    /** RH-01: refresh the denormalized chapter summary from the current body. */
+    public SummarizeChapterResponse summarizeChapter(SummarizeChapterRequest request) {
+        String json = serialize("summarize-chapter", request);
+        return restClient.post()
+                .uri("/ai/summarize-chapter")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(json)
+                .retrieve()
+                .body(SummarizeChapterResponse.class);
     }
 
     /** Calls {@code POST /ai/suggest-directions} — planner-suggested next directions (M6 / TASK-042, AT-K01..K03). */

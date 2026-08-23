@@ -4,7 +4,7 @@
 >
 > Status: **ACTIVE IMPLEMENTATION PLAN**
 >
-> Source of scope truth: `V0.1.1_IMPROVEMENT_PLAN.md` (`Status: FROZEN`)
+> Source of scope truth: `V0.1.1_RELEASE_HARDENING.md` (highest current product requirement), then `V0.1.1_IMPROVEMENT_PLAN.md`
 >
 > This file replaces the v0.1 implementation task tree for active development.
 
@@ -34,6 +34,8 @@
 ```text
 AGENTS.md
 ↓
+V0.1.1_RELEASE_HARDENING.md
+↓
 V0.1.1_IMPROVEMENT_PLAN.md
 ↓
 .agent/STATE.md
@@ -43,7 +45,12 @@ V0.1.1_IMPROVEMENT_PLAN.md
 Repository Reality
 ```
 
-如果 `.agent/TASKS.md` 与冻结的 `V0.1.1_IMPROVEMENT_PLAN.md` 冲突：
+如果 `.agent/TASKS.md` 与冻结的 `V0.1.1_RELEASE_HARDENING.md` 冲突：
+
+> 以 Release Hardening 为准。
+
+如果 Release Hardening 未规定、且 `.agent/TASKS.md` 与冻结的
+`V0.1.1_IMPROVEMENT_PLAN.md` 冲突：
 
 > 以冻结 Improvement Plan 为准。
 
@@ -3289,11 +3296,11 @@ Frozen Requirement:
 
 Current Phase:
 
-`Phase 0 — Correct Evidence Base`
+`Release Hardening — RH-01 COMPLETE`
 
 Current Task:
 
-`TASK-101 — Snapshot v0.1 Regression Evidence`
+`RH-02 — Memory Provenance (NEXT)`
 
 Task Status:
 
@@ -3301,7 +3308,7 @@ Task Status:
 
 Next Safe Action:
 
-> 检查 Git 当前状态，保存 v0.1 真实 regression evidence；不要立刻开始重构 Planner / Writer。
+> 从 RH-02 开始检查真实 Memory provenance / inventory invalidation 代码，先补 regression test。
 
 ---
 
@@ -3348,6 +3355,127 @@ TASK-172 ~ TASK-179
 > **Prove wiring with tests. Prove AI behavior with a real model.**
 
 > **Never let TASKS.md become evidence by itself. Repository behavior is the evidence.**
+
+---
+
+# 18. v0.1.1 Release Hardening (Current Task Tree)
+
+This task tree is governed by `V0.1.1_RELEASE_HARDENING.md` and supersedes the
+old TASK-179 release verdict. Required order is strict.
+
+## RH-01 — Revision Consistency
+
+Status: `DONE`
+
+Scope:
+
+- HB-001
+- AC-H01
+
+Implementation:
+
+- Added a current-body-only structured summary refresh contract.
+- Manual Edit now refreshes/persists summary, creates the revision, marks memory
+  STALE internally, then automatically invalidates and re-extracts before the
+  successful API response.
+- Regenerate synchronizes Writer `title/content/summary` into the Chapter current
+  read model before re-extraction.
+- Polish explicitly preserves title and refreshes summary from polished content
+  before re-extraction.
+
+Regression Evidence:
+
+- Before fix: `ChapterRevisionIntegrationTest` failed because a deleted
+  iron-sword fact remained in `chapter.summary`.
+- AC-H01 asserts current content/summary, active chapter-derived StoryMemory,
+  ExtractMemoryRequest summary, and the next actual Writer recentContext no
+  longer carry the deleted fact.
+
+Engineering Verification: `PASSED`
+
+- Backend `ChapterRevisionIntegrationTest`: 8/8 PASSED
+- Python `pytest tests`: 8/8 PASSED
+
+Real-LLM Semantic Verification: `NOT_REQUIRED`
+
+## RH-02 — Memory Provenance
+
+Status: `TODO`
+
+Scope: HB-002 / AC-H02
+
+Dependencies: RH-01
+
+## RH-03 — Replan Logical Order
+
+Status: `TODO`
+
+Scope: HB-003 / AC-H03
+
+Dependencies: RH-02
+
+## RH-04 — Generation UI Completion
+
+Status: `TODO`
+
+Scope: HB-004 / HB-005 / AC-H04 / AC-H05 / AC-H06
+
+Dependencies: RH-03
+
+## RH-05 — Context Hardening
+
+Status: `TODO`
+
+Scope: HH-001 / HH-002 / HH-003
+
+Dependencies: RH-04
+
+## RH-06 — Length + Job Safety
+
+Status: `TODO`
+
+Scope: HH-004 / HH-005 / HH-006 / AC-H07 / AC-H08
+
+Dependencies: RH-05
+
+## RH-07 — Memory Review Hardening
+
+Status: `TODO`
+
+Scope: HH-007 / HH-008 / AC-H09
+
+Dependencies: RH-06
+
+## RH-08 — Release Hygiene
+
+Status: `TODO`
+
+Scope: HR-001 / HR-002 / HR-003 / HR-004
+
+Dependencies: RH-07
+
+## RH-09 — Full Engineering Verification
+
+Status: `TODO`
+
+Dependencies: RH-08
+
+## RH-10 — Final qwen3.7-plus Semantic Suite
+
+Status: `TODO`
+
+Dependencies: RH-09
+
+## RH-11 — Freeze v0.1.1 Release
+
+Status: `TODO`
+
+Dependencies: RH-01 through RH-10 all PASSED
+
+Release rule:
+
+> v0.1.1 remains NOT ACCEPTED until RH-10 passes on qwen3.7-plus. Only then may
+> RH-11 merge `v0.1.1-dev` to `main` and create tag `v0.1.1`.
 
 
 

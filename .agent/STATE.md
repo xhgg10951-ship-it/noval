@@ -4,9 +4,9 @@
 >
 > Active Version: **v0.1.1**
 >
-> State Type: **INITIAL IMPLEMENTATION STATE**
+> State Type: **RELEASE HARDENING STATE**
 >
-> Updated: **2026-08-22**
+> Updated: **2026-08-23**
 
 # 1. Current Project State
 
@@ -20,7 +20,7 @@ Requirement Status:
 
 Frozen Requirement Document:
 
-`V0.1.1_IMPROVEMENT_PLAN.md`
+`V0.1.1_RELEASE_HARDENING.md` (highest current product requirement)
 
 Current Implementation Plan:
 
@@ -28,35 +28,28 @@ Current Implementation Plan:
 
 Current Phase:
 
-`v0.1.1 ACCEPTED — Phase 9 COMPLETE (BLOCKER-1 resolved via model upgrade qwen3.7-plus)`
+`RELEASE HARDENING — RH-01 COMPLETE`
 
 Current Task:
 
-`NONE — v0.1.1 frozen as ACCEPTED`
+`RH-02 — Memory Provenance (NEXT)`
 
 Task Status:
 
-`ACCEPTED (all 79 tasks terminal; DoD fully green)`
+`Feature Complete, Release Hardening Required — v0.1.1 is NOT ACCEPTED until RH-01~RH-10 and the final qwen3.7-plus suite pass`
 
 Task Evidence:
 
-TASK-101~104 DONE — Phase 0 evidence base (Gate PASSED).
-TASK-105~112 DONE — Phase 1 wiring + continuation (AC-101 real-LLM PASS).
-TASK-113~122 DONE — Phase 2 ChapterSpec chain (AC-104 PASS; AC-103 honest model-limit FAIL).
-TASK-123~131 DONE — Phase 3 reliability engineering (V9/V10).
-TASK-132 DONE — Phase 3 regression suite; **full `mvn test` 34/34 PASSED (2026-08-22)**.
-  Fixed en route: V6..V11 migrations were MariaDB-only syntax and had NEVER been
-  applied anywhere (local DB was still at V5; corrected + applied additively,
-  legacy data intact); GenerationJob null control signals 500; pause/stop
-  silently clobbered by stale-copy full-row UPDATE in the worker (rewritten to
-  narrow disjoint updates: progress / control-signals / terminal); complete()
-  ordering now flips Stage before Job reads COMPLETED; TextLengthUtil blank=0.
-Phase 4 partial:
-- TASK-133 DONE — V11 plan_version/active/status additive migration.
-- TASK-134 DONE — markCompleted on generation; supersedeRemaining keeps history.
-- TASK-135 DONE — findActiveRemaining queue wired into ChapterGenerationService.
-- TASK-136 IN_PROGRESS — replanRemaining @Transactional service DONE;
-  pending: HTTP entry, planner remaining call, old full-replan guard.
+- RH-01 DONE (2026-08-23) — regression first reproduced stale summary after
+  Manual Edit; fixed Manual Edit summary refresh + automatic re-extract,
+  Regenerate title/content/summary synchronization, and Polish summary refresh
+  with title preservation.
+- AC-H01 Engineering Verification: PASSED —
+  `ChapterRevisionIntegrationTest` 8/8; Python tests 8/8.
+- AC-H01 Real-LLM Semantic Verification: NOT_REQUIRED (consistency/plumbing;
+  final AI semantics are re-run together at RH-10 with qwen3.7-plus).
+- Historical TASK-101~179 remain implementation history only and do not override
+  the Release Hardening gate.
 
 ---
 
@@ -906,6 +899,50 @@ qwen3-8b FAIL records retained as capability-difference evidence.
 Next Safe Action:
 None required for v0.1.1 — it is ACCEPTED. Future work belongs to a new
 frozen version (candidates already recorded in the Deferred Backlog).
+```
+
+# 21. Release Hardening Authority (Current)
+
+`V0.1.1_RELEASE_HARDENING.md` supersedes the earlier release verdict. The
+repository is currently:
+
+> **Feature Complete, Release Hardening Required**
+
+Release verdict:
+
+`NOT ACCEPTED — RH-02 through RH-10 remain; RH-11 is gated`
+
+Hardening progress:
+
+```text
+RH-01 DONE — AC-H01 PASSED (engineering)
+RH-02 NEXT
+RH-03 TODO
+RH-04 TODO
+RH-05 TODO
+RH-06 TODO
+RH-07 TODO
+RH-08 TODO
+RH-09 TODO
+RH-10 TODO — final qwen3.7-plus semantic suite
+RH-11 BLOCKED BY RH-02~RH-10
+```
+
+RH-01 verification details:
+
+```text
+Regression before fix:
+ChapterRevisionIntegrationTest — 1 failure
+manualEditRefreshesSummaryMemoryAndRecentWriterContext
+(old chapter.summary still contained the deleted iron-sword fact)
+
+Engineering Verification:
+PASSED
+- ChapterRevisionIntegrationTest: 8/8
+- ai-service pytest: 8/8
+
+Real-LLM Semantic Verification:
+NOT_REQUIRED
 ```
 
 Core principles:
