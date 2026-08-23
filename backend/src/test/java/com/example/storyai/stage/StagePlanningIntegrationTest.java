@@ -7,10 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpServerErrorException;
 
 import com.example.storyai.ai.AiServiceClient;
 import com.example.storyai.ai.dto.PlanStageRequest;
@@ -175,6 +177,19 @@ class StagePlanningIntegrationTest {
         Long storyId = createStory();
         when(aiServiceClient.planStage(any(PlanStageRequest.class)))
                 .thenReturn(new PlanStageResponse(3, List.of())); // count != plans
+
+        mockMvc.perform(post("/api/stories/{id}/stages", storyId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"direction\":\"方向\"}"))
+                .andExpect(status().isBadGateway())
+                .andExpect(jsonPath("$.code").value("AI_SERVICE_ERROR"));
+    }
+
+    @Test
+    void plannerUpstream500Yields502AiServiceErrorInsteadOfInternalError() throws Exception {
+        Long storyId = createStory();
+        when(aiServiceClient.planStage(any(PlanStageRequest.class)))
+                .thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
         mockMvc.perform(post("/api/stories/{id}/stages", storyId)
                         .contentType(MediaType.APPLICATION_JSON)

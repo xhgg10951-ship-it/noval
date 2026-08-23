@@ -1,0 +1,23 @@
+{
+  "method": "PUT",
+  "path": "/api/stages/plans/3228",
+  "request": {
+    "goal": "艾琳把林夜带回住处安顿；本章结束时已经过夜，二人已认识且林夜已有住所。",
+    "targetCharacters": 3000
+  },
+  "status": 200,
+  "durationSeconds": 0.031,
+  "response": {
+    "id": 3228,
+    "stageId": 1093,
+    "chapterOrder": 2,
+    "goal": "艾琳把林夜带回住处安顿；本章结束时已经过夜，二人已认识且林夜已有住所。",
+    "expectedProgress": "到达艾琳的住所（可能是简陋的公寓或旅馆房间）。艾琳提供食物和衣物，林夜通过观察学习异界基本礼仪。夜间林夜反思现状，检查自身是否有变化（如无系统提示、身体状态等），并规划下一步如何在城镇立足。",
+    "targetCharacters": 3000,
+    "planVersion": 1,
+    "active": true,
+    "status": "ACTIVE",
+    "createdAt": "2026-08-24T00:07:48.073",
+    "updatedAt": "2026-08-24T00:07:48.137"
+  }
+}

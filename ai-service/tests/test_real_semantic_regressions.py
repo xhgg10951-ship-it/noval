@@ -3,7 +3,40 @@ from __future__ import annotations
 
 from app.api import router
 from app.prompts.builders import build_extract_prompt
-from app.schemas.models import ExtractMemoryRequest, PolishChapterRequest
+from app.schemas.models import ExtractMemoryRequest, PlanStageRequest, PolishChapterRequest
+from app.services import planner
+
+
+def test_planner_retries_once_when_real_llm_returns_malformed_json(monkeypatch):
+    class FlakyProvider:
+        is_mock = False
+
+        def __init__(self):
+            self.calls = 0
+
+        def complete(self, prompt: str, *, system: str | None = None) -> str:
+            self.calls += 1
+            if self.calls == 1:
+                return '{"suggestedChapterCount":3,"chapterPlans":['
+            return (
+                '{"suggestedChapterCount":1,"chapterPlans":['
+                '{"order":1,"goal":"加入公会","expectedProgress":"完成登记",'
+                '"targetCharacters":3000,"mustAdvance":[],"mustNotDo":[],'
+                '"storyBeats":[],"endingIntent":"领取委托"}]}'
+            )
+
+    provider = FlakyProvider()
+    monkeypatch.setattr(planner, "get_provider", lambda: provider)
+
+    response = planner.plan_stage(PlanStageRequest(
+        coreIdea="异世界求生",
+        stageDirection="加入公会",
+        targetChapterCount=1,
+    ))
+
+    assert provider.calls == 2
+    assert response.suggestedChapterCount == 1
+    assert response.chapterPlans[0].goal == "加入公会"
 
 
 def test_extract_prompt_requires_low_value_food_to_be_classified_not_omitted():

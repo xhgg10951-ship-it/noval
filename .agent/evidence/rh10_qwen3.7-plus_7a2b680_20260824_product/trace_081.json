@@ -1,0 +1,16 @@
+{
+  "method": "POST",
+  "path": "/api/stories/1630/stages",
+  "request": {
+    "direction": "第二天前往冒险者公会入会并接取委托：调查幽影森林失踪案。",
+    "targetChapterCount": 3,
+    "targetCharacters": 3000
+  },
+  "status": 500,
+  "durationSeconds": 21.047,
+  "response": {
+    "code": "INTERNAL_ERROR",
+    "message": "服务内部错误",
+    "fieldErrors": null
+  }
+}

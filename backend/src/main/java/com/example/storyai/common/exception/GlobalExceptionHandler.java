@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientResponseException;
 
 import com.example.storyai.common.exception.NoPendingChapterException;
 
@@ -47,6 +48,13 @@ public class GlobalExceptionHandler {
         log.warn("AI service unreachable: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
                 .body(new ErrorResponse("AI_SERVICE_ERROR", "AI 服务不可用，请确认 Python AI Service 已启动"));
+    }
+
+    @ExceptionHandler(RestClientResponseException.class)
+    public ResponseEntity<ErrorResponse> handleAiUpstreamError(RestClientResponseException ex) {
+        log.warn("AI service returned HTTP {}", ex.getStatusCode());
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                .body(new ErrorResponse("AI_SERVICE_ERROR", "AI 服务返回无效响应，请重试"));
     }
 
     @ExceptionHandler(NoPendingChapterException.class)
