@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useStoryStore } from '@/stores/story'
 import StagePlanning from '@/components/StagePlanning.vue'
@@ -12,6 +12,7 @@ const router = useRouter()
 const storyStore = useStoryStore()
 
 const storyId = computed(() => storyStore.currentStory?.id ?? null)
+const memoryRefreshToken = ref(0)
 
 async function loadStory(id: number): Promise<void> {
   await storyStore.fetchStory(id)
@@ -32,6 +33,10 @@ watch(
 
 function goBack(): void {
   router.push('/stories')
+}
+
+function handleContentChanged(): void {
+  memoryRefreshToken.value += 1
 }
 </script>
 
@@ -84,10 +89,20 @@ function goBack(): void {
       <ArcPanel v-if="storyId" :story-id="storyId" class="story-detail__section" />
 
       <!-- Stage planning vertical slice (M2) -->
-      <StagePlanning v-if="storyId" :story-id="storyId" class="story-detail__section" />
+      <StagePlanning
+        v-if="storyId"
+        :story-id="storyId"
+        class="story-detail__section"
+        @content-changed="handleContentChanged"
+      />
 
       <!-- Memory vertical slice (M4) -->
-      <MemoryPanel v-if="storyId" :story-id="storyId" class="story-detail__section" />
+      <MemoryPanel
+        v-if="storyId"
+        :story-id="storyId"
+        :refresh-token="memoryRefreshToken"
+        class="story-detail__section"
+      />
 
       <!-- Author assistance: planner suggestions + story query (M6) -->
       <AssistancePanel v-if="storyId" :story-id="storyId" class="story-detail__section" />

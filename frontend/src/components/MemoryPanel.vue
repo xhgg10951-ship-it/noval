@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import {
   getMemoryView,
   applyCandidate,
@@ -8,7 +8,7 @@ import {
   type MemoryCandidate,
 } from '@/api/memory'
 
-const props = defineProps<{ storyId: number }>()
+const props = defineProps<{ storyId: number; refreshToken?: number }>()
 
 const view = ref<MemoryView | null>(null)
 const errorMsg = ref('')
@@ -56,6 +56,7 @@ function statusLabel(s: string): string {
 }
 
 onMounted(refresh)
+watch(() => props.refreshToken, refresh)
 </script>
 
 <template>

@@ -13,7 +13,7 @@ import {
   type ChapterRevisionResponse,
 } from '@/api/chapters'
 
-const props = defineProps<{ stageId: number; planCount?: number }>()
+const props = defineProps<{ stageId: number; planCount?: number; refreshToken?: number }>()
 
 const chapters = ref<ChapterResponse[]>([])
 const generating = ref(false)
@@ -182,6 +182,7 @@ function revisionSourceLabel(sourceType: string): string {
 
 onMounted(refresh)
 watch(() => props.stageId, refresh)
+watch(() => props.refreshToken, refresh)
 </script>
 
 <template>

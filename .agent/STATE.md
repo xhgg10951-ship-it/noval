@@ -28,11 +28,11 @@ Current Implementation Plan:
 
 Current Phase:
 
-`RELEASE HARDENING REOPENED — RH-03 COMPLETE`
+`RELEASE HARDENING REOPENED — RH-04 COMPLETE`
 
 Current Task:
 
-`RH-04 — Generation UI Completion Revalidation`
+`RH-05 — Context Hardening Contract Repair`
 
 Task Status:
 
@@ -65,6 +65,14 @@ Task Evidence:
 - RH-03 Engineering Verification: PASSED — new regressions 2/2;
   `ReplanRemainingIntegrationTest` 9/9; `StagePlanningIntegrationTest` 5/5;
   Python 14/14.
+- RH-04 COMPLETE (2026-08-23, reopened gate) — two frontend regressions failed
+  before the fix: terminal completion emitted no refresh signal and STOPPED hid
+  the Start control. GenerationPanel now emits terminal checkpoints, refreshes
+  Stage/Chapter/Memory through the existing component hierarchy, and permits a
+  new Job for remaining plans after STOPPED. Polling still stops at every frozen
+  terminal state and cleans timers on Stage change/unmount.
+- RH-04 Engineering Verification: PASSED — new regressions 2/2; frontend 7/7;
+  production build PASSED.
 
 - RH-01 DONE (2026-08-23) — regression first reproduced stale summary after
   Manual Edit; fixed Manual Edit summary refresh + automatic re-extract,

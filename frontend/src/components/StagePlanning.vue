@@ -17,6 +17,9 @@ import ChapterPanel from '@/components/ChapterPanel.vue'
 import GenerationPanel from '@/components/GenerationPanel.vue'
 
 const props = defineProps<{ storyId: number }>()
+const emit = defineEmits<{
+  contentChanged: []
+}>()
 
 // ---- stage list ----
 const stages = ref<StageSummary[]>([])
@@ -34,6 +37,7 @@ const confirming = ref(false)
 const editingPlanId = ref<number | null>(null)
 const editingGoal = ref('')
 const savingGoal = ref(false)
+const chapterRefreshToken = ref(0)
 
 onMounted(async () => {
   await refreshStages()
@@ -74,6 +78,15 @@ async function loadStage(id: number): Promise<void> {
   } catch (err) {
     errorMsg.value = extractStageError(err)
   }
+}
+
+async function handleGenerationTerminal(): Promise<void> {
+  if (!stage.value) return
+  const stageId = stage.value.id
+  await loadStage(stageId)
+  await refreshStages()
+  chapterRefreshToken.value += 1
+  emit('contentChanged')
 }
 
 async function handleReplan(): Promise<void> {
@@ -294,10 +307,16 @@ function statusLabel(status: string): string {
         :stage-id="stage.id"
         :plan-count="stage.plans?.length"
         :stage-status="stage.status"
+        @terminal="handleGenerationTerminal"
       />
 
       <!-- single chapter generation + reading (M3, TASK-024) -->
-      <ChapterPanel v-if="stage" :stage-id="stage.id" :plan-count="stage.plans?.length" />
+      <ChapterPanel
+        v-if="stage"
+        :stage-id="stage.id"
+        :plan-count="stage.plans?.length"
+        :refresh-token="chapterRefreshToken"
+      />
     </article>
   </section>
 </template>

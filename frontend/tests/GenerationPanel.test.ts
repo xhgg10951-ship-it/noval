@@ -70,6 +70,10 @@ describe('GenerationPanel release hardening', () => {
     await vi.advanceTimersByTimeAsync(1500)
     expect(wrapper.text()).toContain('3 / 3')
     expect(wrapper.text()).toContain('已完成')
+    expect(wrapper.emitted('terminal')?.at(-1)?.[0]).toMatchObject({
+      status: 'COMPLETED',
+      currentPlanIndex: 3,
+    })
 
     const terminalCallCount = apiMocks.getGenerationJob.mock.calls.length
     await vi.advanceTimersByTimeAsync(4500)
@@ -133,6 +137,24 @@ describe('GenerationPanel release hardening', () => {
     await flushPromises()
     expect(apiMocks.stopGeneration).toHaveBeenCalledWith(41)
     expect(wrapper.text()).toContain('已停止')
+    wrapper.unmount()
+  })
+
+  it('allows a new job for remaining plans after a STOPPED job', async () => {
+    apiMocks.listStageGenerationJobs.mockResolvedValue([job('STOPPED', 2)])
+    apiMocks.startGeneration.mockResolvedValue(job('RUNNING', 2))
+
+    const wrapper = mount(GenerationPanel, {
+      props: { stageId: 11, planCount: 3, stageStatus: 'ACTIVE' },
+    })
+    await flushPromises()
+
+    const startButton = buttonByText(wrapper, '开始生成')
+    expect(startButton.attributes('disabled')).toBeUndefined()
+    await startButton.trigger('click')
+    await flushPromises()
+
+    expect(apiMocks.startGeneration).toHaveBeenCalledWith(11, 'CONTINUOUS')
     wrapper.unmount()
   })
 })

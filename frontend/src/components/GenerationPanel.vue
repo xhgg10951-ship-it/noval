@@ -14,6 +14,9 @@ import {
 } from '@/api/generation'
 
 const props = defineProps<{ stageId: number; planCount?: number; stageStatus?: string }>()
+const emit = defineEmits<{
+  terminal: [job: GenerationJobResponse]
+}>()
 
 const job = ref<GenerationJobResponse | null>(null)
 const mode = ref<GenerationMode>('CONTINUOUS')
@@ -27,7 +30,8 @@ let pollToken = 0
 let refreshToken = 0
 
 const canStart = computed(
-  () => !busy.value && props.stageStatus === 'ACTIVE' && (job.value == null || job.value.status === 'COMPLETED'),
+  () => !busy.value && props.stageStatus === 'ACTIVE'
+    && (job.value == null || job.value.status === 'COMPLETED' || job.value.status === 'STOPPED'),
 )
 
 const progressPct = computed(() => {
@@ -72,6 +76,11 @@ function isPolling(status: GenerationJobResponse['status'] | undefined): boolean
   return status === 'PENDING' || status === 'RUNNING'
 }
 
+function isTerminal(status: GenerationJobResponse['status'] | undefined): boolean {
+  return status === 'PAUSED' || status === 'COMPLETED'
+    || status === 'FAILED' || status === 'STOPPED'
+}
+
 function cancelPolling(): void {
   if (pollTimer != null) {
     clearTimeout(pollTimer)
@@ -108,8 +117,12 @@ function restartPolling(): void {
 }
 
 function acceptJob(next: GenerationJobResponse | null): void {
+  const previousStatus = job.value?.status
   job.value = next
   if (!next || !isPolling(next.status)) controlPending.value = null
+  if (next && isTerminal(next.status) && previousStatus !== next.status) {
+    emit('terminal', next)
+  }
   restartPolling()
 }
 
@@ -218,7 +231,7 @@ onBeforeUnmount(() => {
 
     <div v-if="errorMsg" class="alert alert--error">{{ errorMsg }}</div>
 
-    <div v-if="!job || job.status === 'COMPLETED'" class="gen-panel__start">
+    <div v-if="!job || job.status === 'COMPLETED' || job.status === 'STOPPED'" class="gen-panel__start">
       <p class="gen-panel__hint">
         选择生成模式：<strong>连续</strong>自动完成全部章节；<strong>逐步</strong>每章后暂停，需手动继续。
       </p>

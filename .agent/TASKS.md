@@ -3781,6 +3781,36 @@ remains RH-10.
 
 Next active task: `RH-04 — Generation UI Completion Revalidation`
 
+## RH-04 Reopened — Generation UI Completion
+
+Status: `DONE`
+
+Observed regressions before fix:
+
+- A polled COMPLETED job updated only GenerationPanel; Stage, Chapter list and
+  Memory view remained stale until a page reload or Stage switch.
+- STOPPED is terminal on the backend and releases the Stage job slot, but the UI
+  hid the Start control, permanently blocking remaining plans.
+
+Fix:
+
+- GenerationPanel emits terminal checkpoint events for
+  PAUSED/COMPLETED/FAILED/STOPPED.
+- The existing component hierarchy reloads Stage summaries, the current Stage,
+  Chapter rows and Memory view without reloading the page.
+- STOPPED is a valid state from which the author can start a fresh Job for the
+  still-active remaining plan queue.
+
+Engineering Verification: `PASSED`
+
+- New terminal-refresh/STOPPED regressions: 2/2 PASSED after failing before fix.
+- Frontend: 7/7 PASSED.
+- Production build: PASSED (`vue-tsc --noEmit && vite build`).
+
+Real-LLM Semantic Verification: `NOT_REQUIRED`
+
+Next active task: `RH-05 — Context Hardening Contract Repair`
+
 
 
 
