@@ -6,13 +6,17 @@
 Required final model: qwen3.7-plus
 Engineering suite:    PASSED — backend 86/86, Python 23/23, frontend 8/8 + build
 Current RH-10 status: PASSED — 7/7
-Hosted CI:            PENDING final evidence/docs commit
-Current release verdict:  NOT ACCEPTED
+Hosted CI:            PASSED — run 32676289823 at 3aafee0
+Current release verdict:  ACCEPTED
 ```
 
 Current run ID: `rh10_qwen3.7-plus_4696b4f_focus_20260824_product`
 
 Product/prompt commit: `4696b4f`
+
+RH-10 evidence commit: `3aafee0`
+
+Hosted CI: [run 32676289823](https://github.com/xhgg10951-ship-it/noval/actions/runs/32676289823)
 
 Raw evidence: `.agent/evidence/rh10_qwen3.7-plus_4696b4f_focus_20260824_product/`
 

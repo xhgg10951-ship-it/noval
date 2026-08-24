@@ -28,7 +28,7 @@ Current Implementation Plan:
 
 Current Phase:
 
-`RELEASE HARDENING REOPENED — RH-10 COMPLETE`
+`RELEASE HARDENING COMPLETE — RH-11 COMPLETE`
 
 Current Task:
 
@@ -36,7 +36,7 @@ Current Task:
 
 Task Status:
 
-`NOT ACCEPTED — RH-01 through RH-10 passed; RH-11 final evidence, push, and current hosted CI remain pending`
+`ACCEPTED — RH-01 through RH-11 passed on the repaired v0.1.1 candidate`
 
 Task Evidence:
 
@@ -137,9 +137,11 @@ Task Evidence:
   `SUPERSEDED`, Replan preserved Chapters 1–3 and completed logical orders
   4–6, Polish retained all frozen facts, and the 600-chapter pace guard planned
   only logical orders 6–10 with local progress and no endgame pattern.
-- RH-11 is PENDING. The final evidence/document changes are not yet committed
-  or pushed and hosted CI has not run against the final repaired candidate.
-  The release verdict therefore remains NOT ACCEPTED.
+- RH-11 COMPLETE (2026-08-24) — RH-10 evidence was committed as `3aafee0` and
+  pushed to `origin/v0.1.1-dev`. GitHub Actions run `32676289823` executed that
+  exact SHA; backend, frontend and Python jobs all completed successfully.
+  RH-01 through RH-10, the required qwen3.7-plus 7/7 gate, evidence freeze and
+  current hosted CI are all complete. Release verdict: ACCEPTED.
 
 - RH-01 DONE (2026-08-23) — regression first reproduced stale summary after
   Manual Edit; fixed Manual Edit summary refresh + automatic re-extract,
@@ -1091,11 +1093,11 @@ Superseded by Section 21 and RH-09.
 `V0.1.1_RELEASE_HARDENING.md` supersedes the earlier release verdict. The
 repository is currently:
 
-> **Feature Complete, Release Hardening Required**
+> **Feature Complete, Release Hardening Complete**
 
 Release verdict:
 
-`NOT ACCEPTED — RH-01 through RH-10 passed; RH-11 pending`
+`ACCEPTED — RH-01 through RH-11 passed`
 
 Hardening progress:
 
@@ -1110,7 +1112,7 @@ RH-07 REOPENED/DONE — Memory review/invalidation guard repaired
 RH-08 DONE — release documents and CI candidate reconciled
 RH-09 DONE — full engineering, clean migration, and hosted CI gate passed
 RH-10 DONE — fresh qwen3.7-plus product-wired suite passed 7/7
-RH-11 PENDING — final evidence commit/push and current hosted CI are not complete
+RH-11 DONE — evidence commit 3aafee0 pushed; CI run 32676289823 passed
 ```
 
 RH-01 verification details:

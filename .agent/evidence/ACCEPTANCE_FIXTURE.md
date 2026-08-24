@@ -7,13 +7,14 @@
 ```text
 Required model:     qwen3.7-plus (mock_llm=false)
 Prompt/code commit: 4696b4f
+RH-10 evidence:     3aafee0
 Branch:             v0.1.1-dev
 Database:           MySQL story_ai
 Migrations:         V1..V16
 Engineering suite:  PASSED — backend 86/86, Python 23/23, frontend 8/8 + build
 Run ID:             rh10_qwen3.7-plus_4696b4f_focus_20260824_product
-Hosted CI:          PENDING final evidence/docs commit
-Release verdict:    NOT ACCEPTED
+Hosted CI:          PASSED — run 32676289823 at 3aafee0
+Release verdict:    ACCEPTED
 ```
 
 ## Fixed Story Settings

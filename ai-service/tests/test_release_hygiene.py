@@ -9,17 +9,19 @@ def read(relative: str) -> str:
     return (REPO / relative).read_text(encoding="utf-8")
 
 
-def test_current_release_documents_do_not_reuse_withdrawn_acceptance():
+def test_current_release_documents_record_verified_acceptance():
     readme = read("README.md")
     metrics = read(".agent/evidence/ACCEPTANCE_METRICS.md")
     fixture = read(".agent/evidence/ACCEPTANCE_FIXTURE.md")
 
-    assert "Current Release Verdict:  NOT ACCEPTED" in readme
+    assert "Current Release Verdict:  ACCEPTED" in readme
     assert "Current Real-LLM Gate:    PASSED" in readme
-    assert "Current release verdict:  NOT ACCEPTED" in metrics
+    assert "Hosted CI:                PASSED — run 32676289823" in readme
+    assert "Current release verdict:  ACCEPTED" in metrics
     assert "Current RH-10 status: PASSED" in metrics
+    assert "RH-10 evidence commit: `3aafee0`" in metrics
     assert "Migrations:         V1..V16" in fixture
-    assert "Release verdict:    NOT ACCEPTED" in fixture
+    assert "Release verdict:    ACCEPTED" in fixture
     assert (
         "Run ID:             "
         "rh10_qwen3.7-plus_4696b4f_focus_20260824_product"

@@ -4038,6 +4038,26 @@ Release verdict remains `NOT ACCEPTED`.
 
 Next active task: `RH-11 — Freeze v0.1.1 Release`
 
+## RH-11 — Freeze v0.1.1 Release
+
+Status: `DONE`
+
+Release checks:
+
+- RH-01 through RH-10: PASSED in required order.
+- Engineering Verification: PASSED — backend 86/86, Python 23/23, frontend
+  8/8 and production build.
+- Real-LLM Semantic Verification: PASSED — qwen3.7-plus, mock_llm=false,
+  product-wired AC-101/103/104/105/106/109/114: 7/7.
+- RH-10 evidence commit: `3aafee0`, pushed to `origin/v0.1.1-dev`.
+- Hosted CI: GitHub Actions run `32676289823` on exact SHA `3aafee0`; backend,
+  frontend and Python jobs all PASSED.
+- README, STATE, TASKS, fixture, metrics and raw evidence are consistent.
+
+Final verdict: `v0.1.1 ACCEPTED`
+
+Release operations: merge `v0.1.1-dev` into `main`, then tag `v0.1.1`.
+
 
 
 
