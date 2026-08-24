@@ -1,0 +1,71 @@
+{
+  "method": "POST",
+  "path": "/api/stages/1233/confirm",
+  "request": null,
+  "status": 200,
+  "durationSeconds": 0.031,
+  "response": {
+    "id": 1233,
+    "storyId": 1830,
+    "direction": "第二天前往冒险者公会入会并接取委托：调查幽影森林失踪案。",
+    "status": "ACTIVE",
+    "suggestedChapterCount": 3,
+    "targetChapterCount": 3,
+    "targetCharacters": 3000,
+    "plans": [
+      {
+        "id": 3629,
+        "stageId": 1233,
+        "chapterOrder": 3,
+        "goal": "完成冒险者公会登记并取得资格；林夜必须隐藏穿越者身份，不得向任何人暴露。",
+        "expectedProgress": "林夜进入公会大厅，完成登记和基础测试，取得合法身份牌。",
+        "targetCharacters": 3000,
+        "mustAdvance": "进入冒险者公会\n完成身份登记\n完成基础测试铺垫",
+        "mustNotDo": "不得暴露天帝身份\n不得暴露穿越者身份",
+        "storyBeats": "抵达接待台\n填写身份档案\n完成基础测试\n领取身份牌",
+        "endingIntent": "登记完成后前往委托板",
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-24T01:21:29.028",
+        "updatedAt": "2026-08-24T01:21:29.055"
+      },
+      {
+        "id": 3630,
+        "stageId": 1233,
+        "chapterOrder": 4,
+        "goal": "接取调查幽影森林失踪案的初步委托，核对三名失踪者最后活动的时间与地点。",
+        "expectedProgress": "领取失踪案委托并整理三名失踪者的时空线索。",
+        "targetCharacters": 3000,
+        "mustAdvance": "领取调查委托\n核对失踪时间\n核对最后活动地点",
+        "mustNotDo": "不得直接找到幕后真凶",
+        "storyBeats": "查看委托板\n与接待员核对档案\n整理调查顺序",
+        "endingIntent": "确定调查幽影森林失踪案",
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-24T01:21:29.028",
+        "updatedAt": "2026-08-24T01:21:29.087"
+      },
+      {
+        "id": 3631,
+        "stageId": 1233,
+        "chapterOrder": 5,
+        "goal": "与艾琳准备调查药剂和绳索，确认南城门出城路线，并决定次日清晨出发。",
+        "expectedProgress": "备齐调查物资并确认从南城门前往幽影森林的路线。",
+        "targetCharacters": 3000,
+        "mustAdvance": "准备药剂和绳索\n确认南城门路线\n决定次日清晨出发",
+        "mustNotDo": "不得提前进入幽影森林深处",
+        "storyBeats": "清点物资\n查看地图\n确认出发时间",
+        "endingIntent": "次日清晨从南城门出发",
+        "planVersion": 1,
+        "active": true,
+        "status": "ACTIVE",
+        "createdAt": "2026-08-24T01:21:29.028",
+        "updatedAt": "2026-08-24T01:21:29.102"
+      }
+    ],
+    "createdAt": "2026-08-24T01:21:29.027",
+    "updatedAt": "2026-08-24T01:21:29.131"
+  }
+}

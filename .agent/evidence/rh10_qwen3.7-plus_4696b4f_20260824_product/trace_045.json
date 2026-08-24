@@ -1,0 +1,19 @@
+{
+  "method": "POST",
+  "path": "/api/generation-jobs/535/continue",
+  "request": null,
+  "status": 200,
+  "durationSeconds": 0.016,
+  "response": {
+    "id": 535,
+    "stageId": 1228,
+    "mode": "STEP",
+    "currentPlanIndex": 1,
+    "total": 2,
+    "status": "RUNNING",
+    "phase": "PLANNING",
+    "lastError": null,
+    "createdAt": "2026-08-24T01:00:58",
+    "updatedAt": "2026-08-24T01:02:04"
+  }
+}

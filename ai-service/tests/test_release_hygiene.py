@@ -15,12 +15,26 @@ def test_current_release_documents_do_not_reuse_withdrawn_acceptance():
     fixture = read(".agent/evidence/ACCEPTANCE_FIXTURE.md")
 
     assert "Current Release Verdict:  NOT ACCEPTED" in readme
-    assert "Current Real-LLM Gate:    NOT RUN" in readme
+    assert "Current Real-LLM Gate:    PASSED" in readme
     assert "Current release verdict:  NOT ACCEPTED" in metrics
-    assert "Current RH-10 status:      NOT RUN" in metrics
+    assert "Current RH-10 status: PASSED" in metrics
     assert "Migrations:         V1..V16" in fixture
     assert "Release verdict:    NOT ACCEPTED" in fixture
-    assert "Run ID:             PENDING RH-10" in fixture
+    assert (
+        "Run ID:             "
+        "rh10_qwen3.7-plus_4696b4f_focus_20260824_product"
+    ) in fixture
+
+    required_metrics = [
+        "Prompt version",
+        "Story IDs",
+        "Continuation failures",
+        "Duplicate active Memory",
+        "Revision operations",
+        "Memory extraction failures",
+        "Average generation latency",
+    ]
+    assert all(metric in metrics for metric in required_metrics)
 
 
 def test_runbook_and_ci_apply_every_current_migration():
@@ -56,3 +70,21 @@ def test_rh10_fixture_removes_naturally_generated_bread_before_inserting_test_de
     assert "面包" not in clean
     assert "林夜整理行李" in clean
     assert "两人准备出门" in clean
+
+
+def test_rh10_low_value_check_allows_incidental_world_detail_but_rejects_focus():
+    suite = runpy.run_path(str(REPO / "scripts/rh10_product_suite.py"))
+    check = suite["low_value_bread_is_isolated"]
+    incidental = check([
+        {"content": "林夜穿过长街。" * 300 + "面包房传来焦香。"},
+        {"content": "林夜在公会核对失踪者档案。" * 200},
+        {"content": "林夜购买药剂和绳索。" * 200 + "他顺手补充了黑麦面包。"},
+    ])
+    focused = check([
+        {"content": "普通面包成为调查重点。" * 100},
+        {"content": "林夜检查面包线索。" * 100},
+        {"content": "艾琳继续追查面包来源。" * 100},
+    ])
+
+    assert incidental["passed"] is True
+    assert focused["passed"] is False

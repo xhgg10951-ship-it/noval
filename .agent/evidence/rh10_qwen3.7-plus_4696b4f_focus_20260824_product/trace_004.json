@@ -1,0 +1,24 @@
+{
+  "method": "POST",
+  "path": "/api/stories/1830/arcs",
+  "request": {
+    "title": "第一卷·初入异界",
+    "goal": "在城镇立足、成为正式冒险者并完成初期委托",
+    "targetStartChapter": 1,
+    "targetEndChapter": 60,
+    "status": "ACTIVE"
+  },
+  "status": 201,
+  "durationSeconds": 0.032,
+  "response": {
+    "id": 128,
+    "storyId": 1830,
+    "title": "第一卷·初入异界",
+    "goal": "在城镇立足、成为正式冒险者并完成初期委托",
+    "targetStartChapter": 1,
+    "targetEndChapter": 60,
+    "status": "ACTIVE",
+    "createdAt": "2026-08-24T01:18:21",
+    "updatedAt": "2026-08-24T01:18:21"
+  }
+}

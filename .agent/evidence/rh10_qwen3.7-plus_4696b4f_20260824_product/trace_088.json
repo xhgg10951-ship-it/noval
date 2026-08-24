@@ -1,0 +1,32 @@
+{
+  "method": "PUT",
+  "path": "/api/stages/plans/3608",
+  "request": {
+    "goal": "接取调查幽影森林失踪案的初步委托，核对三名失踪者最后活动的时间与地点。",
+    "targetCharacters": 3000,
+    "expectedProgress": "领取失踪案委托并整理三名失踪者的时空线索。",
+    "mustAdvance": "领取调查委托\n核对失踪时间\n核对最后活动地点",
+    "mustNotDo": "不得直接找到幕后真凶",
+    "storyBeats": "查看委托板\n与接待员核对档案\n整理调查顺序",
+    "endingIntent": "确定调查幽影森林失踪案"
+  },
+  "status": 200,
+  "durationSeconds": 0.031,
+  "response": {
+    "id": 3608,
+    "stageId": 1229,
+    "chapterOrder": 4,
+    "goal": "接取调查幽影森林失踪案的初步委托，核对三名失踪者最后活动的时间与地点。",
+    "expectedProgress": "领取失踪案委托并整理三名失踪者的时空线索。",
+    "targetCharacters": 3000,
+    "mustAdvance": "领取调查委托\n核对失踪时间\n核对最后活动地点",
+    "mustNotDo": "不得直接找到幕后真凶",
+    "storyBeats": "查看委托板\n与接待员核对档案\n整理调查顺序",
+    "endingIntent": "确定调查幽影森林失踪案",
+    "planVersion": 1,
+    "active": true,
+    "status": "ACTIVE",
+    "createdAt": "2026-08-24T01:04:14.761",
+    "updatedAt": "2026-08-24T01:04:14.813"
+  }
+}

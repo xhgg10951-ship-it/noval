@@ -1,0 +1,162 @@
+{
+  "passed": false,
+  "results": {
+    "AC-101": {
+      "passed": true,
+      "restartHits": [],
+      "logicalOrders": [
+        3,
+        4,
+        5
+      ],
+      "plannerText": "林夜随艾琳前往冒险者公会，应对治安官的盘问并成功注册为见习冒险者。 完成身份合法化初步步骤，确立‘失忆流浪者’人设，获得冒险者徽章。\n林夜与艾琳在公会大厅筛选委托，锁定‘幽影森林失踪案’，并遭遇竞争对手或旁观者的轻视。 确定本阶段核心任务，建立初期冲突（来自其他冒险者的压力），展示艾琳的行事风格。\n出发前的物资准备与最后的情报补充，林夜利用现代常识提供微小但关键的帮助，加深艾琳的些许认可。 完成战前准备，林夜通过非武力方式展现价值，为进入幽影森林做铺垫。"
+    },
+    "AC-103": {
+      "passed": true,
+      "targetCharacters": 3000,
+      "actualCharacters": [
+        3689,
+        2984,
+        3184,
+        3272,
+        3373
+      ],
+      "inBand": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "passRate": "5/5",
+      "duplicateLongSentences": []
+    },
+    "AC-104": {
+      "passed": true,
+      "chapterId": 1668,
+      "registrationHits": [
+        "登记",
+        "身份牌"
+      ],
+      "identityViolations": []
+    },
+    "AC-105": {
+      "passed": false,
+      "breadCandidates": [
+        {
+          "id": 1261,
+          "storyId": 1828,
+          "sourceChapterId": 1666,
+          "type": "TRANSIENT_DETAIL",
+          "subject": "林夜",
+          "field": "consumable",
+          "value": "黑面包和稀薄的肉汤",
+          "suggestedAction": "IGNORE",
+          "evidence": "从柜子里拿出一块黑面包和一碗稀薄的肉汤，放在桌上。",
+          "importance": 1,
+          "scope": "CHAPTER",
+          "processingStatus": "IGNORED",
+          "applied": false,
+          "createdAt": "2026-08-24T01:02:04"
+        },
+        {
+          "id": 1272,
+          "storyId": 1828,
+          "sourceChapterId": 1667,
+          "type": "TRANSIENT_DETAIL",
+          "subject": "林夜",
+          "field": "item:黑面包",
+          "value": "艾琳扔给林夜的硬黑面包，用于充饥",
+          "suggestedAction": "IGNORE",
+          "evidence": "从抽屉里拿出一小块用油纸包裹的黑面包，随手扔在林夜面前的地板上...他掰下一小块面包，放入口中咀嚼",
+          "importance": 1,
+          "scope": "CHAPTER",
+          "processingStatus": "SUPERSEDED",
+          "applied": false,
+          "createdAt": "2026-08-24T01:03:12"
+        },
+        {
+          "id": 1281,
+          "storyId": 1828,
+          "sourceChapterId": 1667,
+          "type": "TRANSIENT_DETAIL",
+          "subject": "林夜",
+          "field": "consumed_item",
+          "value": "普通面包，仅用于填饱肚子",
+          "suggestedAction": "IGNORE",
+          "evidence": "早餐时，林夜吃掉一块普通面包，只是填饱肚子，随后不再关注它。",
+          "importance": 1,
+          "scope": "CHAPTER",
+          "processingStatus": "IGNORED",
+          "applied": false,
+          "createdAt": "2026-08-24T01:03:32"
+        }
+      ],
+      "exactClassificationCount": 2,
+      "oldCandidateCount": 12,
+      "oldCandidatesSuperseded": true,
+      "laterBreadMentions": [
+        1,
+        0,
+        3
+      ]
+    },
+    "AC-109": {
+      "passed": true,
+      "chapterId": 1670,
+      "missingFacts": {
+        "characters": [],
+        "location": [],
+        "items": [],
+        "case": [],
+        "ending": []
+      },
+      "mechanicalStartsBefore": 6,
+      "mechanicalStartsAfter": 1,
+      "sourceType": "AI_POLISH",
+      "memoryExtractionStatus": "COMPLETED"
+    },
+    "AC-114": {
+      "passed": true,
+      "targetChapterCount": 600,
+      "currentChapter": 5,
+      "arc": "1-60 生存融入",
+      "logicalOrders": [
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "endgameHits": [],
+      "localProgressHits": [
+        "森林",
+        "失踪",
+        "调查"
+      ],
+      "plannerText": "描绘前往幽影森林边缘的旅途，展示林夜对异界环境的适应与观察，铺垫森林的诡异氛围。 两人离开黑石镇，进入幽影森林外围，林夜利用现代知识辅助行进并隐藏实力。\n调查第一名失踪者（草药采集员托姆）的最后出现地点，发现非自然痕迹。 找到托姆失踪的南岸区域，发现被刻意清理过的现场，引出‘银色影子’的线索。\n应对小型危机，展示林夜的战术思维与艾琳的战斗风格，同时强化两人的合作默契。 遭遇一群受异常气息影响的低阶魔兽（如腐化狼），林夜利用陷阱和环境取胜，避免正面硬拼。\n调查第二名失踪者（见习信使莉亚）的北岸区域，发现通信中断的真相。 抵达北岸空地，发现莉亚留下的紧急标记，推断出她曾试图警告他人但失败。\n抵达废弃哨塔，建立临时营地，并为午夜去旧钟楼见见证人的回忆/伏笔做铺垫（此处调整为在森林中等待夜间线索）。 两人在废弃哨塔休整，林夜通过观察夜空和环境变化，发现‘银色影子’的活动规律。"
+    },
+    "AC-106": {
+      "passed": true,
+      "replanLogicalOrders": [
+        4,
+        5,
+        6
+      ],
+      "repeatedOpeningHits": [],
+      "finalChapterNumbers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "firstThreeUnchanged": true,
+      "duplicateTitles": [],
+      "stoppedJobStatus": "STOPPED",
+      "finalJobStatus": "COMPLETED",
+      "replanSemanticText": "通过图书馆古籍查阅，将‘紫幽苔’与历史失踪案建立联系，并引入新的阻力角色或势力干扰。 林夜利用现代检索逻辑在杂乱的古籍中快速定位关键信息，艾琳负责应对公会或馆方的盘问。两人发现紫幽苔并非自然生长，而是某种古老仪式的残留物。\n摆脱监视并深入旧城区地下网络，发现失踪案背后的‘活体实验’或‘献祭’迹象，危机升级。 林夜与艾琳通过反侦察手段甩掉跟踪者，进入下水道更深处。发现失踪者并未死亡，而是处于某种半昏迷的被控制状态。\n激烈突围战，林夜利用化学/物理知识辅助艾琳战斗，成功逃脱但带回致命隐患或新谜题。 林夜与艾琳配合击退魔物，逃离下水道。虽然脱险，但发现紫幽苔具有传染性或精神污染性，艾琳轻微中招或携带了追踪标记。"
+    }
+  }
+}

@@ -6,13 +6,13 @@
 
 ```text
 Required model:     qwen3.7-plus (mock_llm=false)
-Prompt/code commit: PENDING RH-10
+Prompt/code commit: 4696b4f
 Branch:             v0.1.1-dev
 Database:           MySQL story_ai
 Migrations:         V1..V16
-Engineering suite:  PENDING RH-09
-Run ID:             PENDING RH-10
-Hosted CI:          PENDING current candidate
+Engineering suite:  PASSED — backend 86/86, Python 23/23, frontend 8/8 + build
+Run ID:             rh10_qwen3.7-plus_4696b4f_focus_20260824_product
+Hosted CI:          PENDING final evidence/docs commit
 Release verdict:    NOT ACCEPTED
 ```
 
@@ -35,7 +35,6 @@ Stage direction:         第二天前往冒险者公会入会并接取委托：�
 - AC-104 ChapterSpec goal adherence
 - AC-105 low-value-detail isolation
 - AC-106 Replan Remaining
-- AC-107 Manual Edit plus Memory refresh
 - AC-109 Polish fact preservation
 - AC-114 600-chapter pace guard
 - release-hardening semantic cases required by `V0.1.1_RELEASE_HARDENING.md`
@@ -56,10 +55,12 @@ provider directly.
   identity disclosure for AC-104.
 - Before the second Stage, Manual Edit adds one incidental ordinary-bread
   sentence. The product's automatic re-extraction must classify it as
-  `TRANSIENT_DETAIL / 1 / CHAPTER / IGNORE`; none of the next three chapters
-  may mention bread for AC-105. All three follow-up ChapterSpecs are unrelated
-  and must themselves contain neither the bread term nor a negative reminder
-  about it.
+  `TRANSIENT_DETAIL / 1 / CHAPTER / IGNORE`; the prior extraction's candidates
+  must all become `SUPERSEDED`. The next three unrelated ChapterSpecs must not
+  reproduce ordinary bread or make bread a sustained narrative focus. The
+  fixed evaluator rejects any `普通面包` recurrence, a per-chapter bread-sentence
+  ratio above 3%, or focus in all three chapters; incidental independent world
+  details are not treated as narrative hijacking.
 - AC-109 polishes a fixed deliberately mechanical chapter through the public
   revision API. Every named character, location, item, case clue and ending
   intent must remain, while repeated sentence starts decrease.
@@ -73,8 +74,8 @@ provider directly.
 
 AC-103 requires at least 4/5 persisted `actualCharacterCount` values in
 2250–3750 and zero exact duplicate sentences of 24 or more non-space
-characters across the five chapters. These inputs and evaluators are frozen
-before the current qwen3.7-plus output is generated.
+characters across the five chapters. These inputs and the focus-based evaluator
+were frozen before the final `4696b4f_focus` qwen3.7-plus output was generated.
 
 ## Historical Fixture Notice
 

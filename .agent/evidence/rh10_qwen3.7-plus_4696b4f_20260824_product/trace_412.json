@@ -1,0 +1,33 @@
+{
+  "method": "GET",
+  "path": "/api/stories/1829",
+  "request": null,
+  "status": 200,
+  "durationSeconds": 0.0,
+  "response": {
+    "id": 1829,
+    "name": "RH10产品链B-rh10_qwen3.7-plus_4696b4f_20260824_product",
+    "coreIdea": "现代青年林夜穿越到剑与魔法世界，结识冒险者艾琳并被她收留。",
+    "initialStageDirection": "从既定事实继续，按章推进，不复述已经完成的相遇。",
+    "defaultTargetCharacters": 800,
+    "targetChapterCount": 100,
+    "writingStyle": "冷峻克制，多用具体感官细节，少用形容词堆砌",
+    "status": "ACTIVE",
+    "constraints": [
+      {
+        "id": 1348,
+        "type": "HARD",
+        "content": "林夜必须隐藏穿越者身份",
+        "sortOrder": 1
+      },
+      {
+        "id": 1349,
+        "type": "HARD",
+        "content": "不得跳到终局或安排最终大战",
+        "sortOrder": 2
+      }
+    ],
+    "createdAt": "2026-08-24T01:08:14.954",
+    "updatedAt": "2026-08-24T01:08:14.954"
+  }
+}

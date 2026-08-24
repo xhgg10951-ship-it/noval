@@ -6,7 +6,7 @@
 >
 > State Type: **RELEASE HARDENING STATE**
 >
-> Updated: **2026-08-23**
+> Updated: **2026-08-24**
 
 # 1. Current Project State
 
@@ -28,15 +28,15 @@ Current Implementation Plan:
 
 Current Phase:
 
-`RELEASE HARDENING REOPENED — RH-09 COMPLETE`
+`RELEASE HARDENING REOPENED — RH-10 COMPLETE`
 
 Current Task:
 
-`RH-10 — qwen3.7-plus Full Real-LLM Acceptance`
+`RH-11 — Freeze v0.1.1 Release`
 
 Task Status:
 
-`NOT ACCEPTED — post-release functional audit found unresolved release blockers; strict RH-01→RH-11 revalidation is in progress`
+`NOT ACCEPTED — RH-01 through RH-10 passed; RH-11 final evidence, push, and current hosted CI remain pending`
 
 Task Evidence:
 
@@ -126,6 +126,20 @@ Task Evidence:
   passed on product commit `177c2ef` with backend/frontend/python jobs.
 - RH-09 Engineering Verification: PASSED. Release status remains NOT ACCEPTED;
   RH-10 must now pass the complete product-wired qwen3.7-plus Real-LLM suite.
+- RH-10 COMPLETE (2026-08-24, reopened gate) — the frozen product-wired suite
+  ran through the public Spring API, Java workflows/context, Python AI service
+  with `qwen3.7-plus` and `mock_llm=false`, and MySQL. Run
+  `rh10_qwen3.7-plus_4696b4f_focus_20260824_product` passed AC-101, AC-103,
+  AC-104, AC-105, AC-106, AC-109 and AC-114 (7/7) at product commit `4696b4f`.
+- RH-10 Real-LLM Semantic Verification: PASSED — chapter lengths were
+  3604/3036/3556/3040/3322 (5/5 in range), the low-value detail was classified
+  `TRANSIENT_DETAIL / 1 / CHAPTER / IGNORE`, all ten prior candidates became
+  `SUPERSEDED`, Replan preserved Chapters 1–3 and completed logical orders
+  4–6, Polish retained all frozen facts, and the 600-chapter pace guard planned
+  only logical orders 6–10 with local progress and no endgame pattern.
+- RH-11 is PENDING. The final evidence/document changes are not yet committed
+  or pushed and hosted CI has not run against the final repaired candidate.
+  The release verdict therefore remains NOT ACCEPTED.
 
 - RH-01 DONE (2026-08-23) — regression first reproduced stale summary after
   Manual Edit; fixed Manual Edit summary refresh + automatic re-extract,
@@ -1081,7 +1095,7 @@ repository is currently:
 
 Release verdict:
 
-`NOT ACCEPTED — RH-08 active; RH-09/RH-10/RH-11 pending`
+`NOT ACCEPTED — RH-01 through RH-10 passed; RH-11 pending`
 
 Hardening progress:
 
@@ -1093,10 +1107,10 @@ RH-04 REOPENED/DONE — terminal UI refresh/STOPPED restart repaired
 RH-05 REOPENED/DONE — frozen Writer context repaired
 RH-06 REOPENED/DONE — length hierarchy and Job safety repaired
 RH-07 REOPENED/DONE — Memory review/invalidation guard repaired
-RH-08 ACTIVE — release documents and CI candidate reconciliation
-RH-09 PENDING — full engineering and clean-migration gate
-RH-10 PENDING — fresh qwen3.7-plus product-wired suite
-RH-11 PENDING — release verdict; ACCEPTED is forbidden before RH-10 passes
+RH-08 DONE — release documents and CI candidate reconciled
+RH-09 DONE — full engineering, clean migration, and hosted CI gate passed
+RH-10 DONE — fresh qwen3.7-plus product-wired suite passed 7/7
+RH-11 PENDING — final evidence commit/push and current hosted CI are not complete
 ```
 
 RH-01 verification details:

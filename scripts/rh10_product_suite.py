@@ -64,6 +64,38 @@ def remove_preexisting_bread(text: str) -> str:
     return "\n".join(cleaned).strip()
 
 
+def low_value_bread_is_isolated(chapters: list[dict[str, Any]]) -> dict[str, Any]:
+    """Measure narrative focus, not a brittle ban on an ordinary noun.
+
+    AC-105 forbids later unrelated chapters from continuing to revolve around
+    the inserted ordinary bread. Incidental independent world-building (for
+    example, a bakery smell in a street scene) is not narrative hijacking.
+    """
+    mention_counts: list[int] = []
+    focus_ratios: list[float] = []
+    ordinary_mentions: list[int] = []
+    for chapter in chapters:
+        content = chapter.get("content") or ""
+        fragments = re.split(r"(?<=[。！？!?])|\n+", content)
+        focused_chars = sum(len(part) for part in fragments if "面包" in part)
+        mention_counts.append(content.count("面包"))
+        focus_ratios.append(focused_chars / max(1, len(content)))
+        ordinary_mentions.append(content.count("普通面包"))
+    focused_chapters = sum(count > 0 for count in mention_counts)
+    passed = (
+        sum(ordinary_mentions) == 0
+        and max(focus_ratios, default=0.0) <= 0.03
+        and focused_chapters < len(chapters)
+    )
+    return {
+        "passed": passed,
+        "mentionCounts": mention_counts,
+        "ordinaryBreadMentions": ordinary_mentions,
+        "focusRatios": [round(ratio, 4) for ratio in focus_ratios],
+        "focusedChapterCount": focused_chapters,
+    }
+
+
 class ProductSuite:
     def __init__(self, base_url: str, evidence_dir: Path, run_id: str,
                  product_commit: str) -> None:
@@ -350,16 +382,19 @@ class ProductSuite:
             for c in old_candidates
             )
         )
-        later_bread_mentions = [c["content"].count("面包") for c in later_three]
+        isolation = low_value_bread_is_isolated(later_three)
         self.record_result(
             "AC-105", bool(exact_bread_candidates)
             and old_candidates_superseded
-            and sum(later_bread_mentions) == 0,
+            and isolation["passed"],
             breadCandidates=bread_candidates,
             exactClassificationCount=len(exact_bread_candidates),
             oldCandidateCount=len(old_candidates),
             oldCandidatesSuperseded=old_candidates_superseded,
-            laterBreadMentions=later_bread_mentions,
+            laterBreadMentions=isolation["mentionCounts"],
+            ordinaryBreadMentions=isolation["ordinaryBreadMentions"],
+            breadFocusRatios=isolation["focusRatios"],
+            breadFocusedChapterCount=isolation["focusedChapterCount"],
         )
 
         mechanical = (

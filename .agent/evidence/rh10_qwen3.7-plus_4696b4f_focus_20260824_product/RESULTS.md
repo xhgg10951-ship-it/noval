@@ -1,0 +1,21 @@
+# RH-10 qwen3.7-plus Product-wired Results
+
+Run ID: `rh10_qwen3.7-plus_4696b4f_focus_20260824_product`
+
+Product/prompt commit: `4696b4f`
+
+Provider: `qwen3.7-plus`, `mock_llm=false`
+
+Execution boundary: public Spring Boot API → Java workflow/context assembly → Python AI service → MySQL persistence.
+
+| Acceptance | Result | Metrics |
+|---|---|---|
+| AC-101 | PASS | `{"restartHits":[],"logicalOrders":[3,4,5],"plannerText":"林夜前往冒险者公会，在充满敌意与审视的环境中完成注册流程，并面临基础考核的第一关：力量测试。 展示公会的社会生态，确立林夜作为‘失忆者’的弱势但谨慎的形象，通过非魔法手段勉强通过力量测试，埋下魔力测试的伏笔。\n林夜在魔力感应测试中遭遇危机，利用穿越带来的灵魂特质或意外巧合蒙混过关，随后在实战模拟中展现机智而非武力。 解决‘无魔世界人如何检测魔力’的核心矛盾，确立林夜‘魔力微弱但控制诡异’或‘资质平平’的官方评价，降低他人警惕。\n林夜在公会公告栏筛选任务，锁定‘幽影森林失踪案’的低风险调查部分，并与艾琳汇合或独自决定接下委托，开启新地图铺垫。 引入主线委托‘幽影森林失踪案’，展示林夜的信息分析能力，确立初期小队合作模式或独行侠的过渡状态。"}` |
+| AC-103 | PASS | `{"targetCharacters":3000,"actualCharacters":[3604,3036,3556,3040,3322],"inBand":[true,true,true,true,true],"passRate":"5/5","duplicateLongSentences":[]}` |
+| AC-104 | PASS | `{"chapterId":1679,"registrationHits":["注册"],"identityViolations":[]}` |
+| AC-105 | PASS | `{"breadCandidates":[{"id":1400,"storyId":1830,"sourceChapterId":1678,"type":"TRANSIENT_DETAIL","subject":"林夜","field":"consumed_food","value":"一块普通面包，仅用于填饱肚子","suggestedAction":"IGNORE","evidence":"早餐时，林夜吃掉一块普通面包，只是填饱肚子，随后不再关注它。","importance":1,"scope":"CHAPTER","processingStatus":"IGNORED","applied":false,"createdAt":"2026-08-24T01:21:05"}],"exactClassificationCount":1,"oldCandidateCount":10,"oldCandidatesSuperseded":true,"laterBreadMentions":[2,0,0],"ordinaryBreadMentions":[0,0,0],"breadFocusRatios":[0.0194,0.0,0.0],"breadFocusedChapterCount":1}` |
+| AC-106 | PASS | `{"replanLogicalOrders":[4,5,6],"repeatedOpeningHits":[],"finalChapterNumbers":[1,2,3,4,5,6],"firstThreeUnchanged":true,"duplicateTitles":[],"stoppedJobStatus":"STOPPED","finalJobStatus":"COMPLETED","replanSemanticText":"潜入西区废弃矿坑入口，利用现代化学/物理常识规避初步陷阱，发现非自然痕迹。 两人成功进入矿坑外围区域，确认失踪者并非被绑架而是主动或被诱导进入，并遭遇第一次超自然威胁（非战斗或轻微冲突）。\n探索矿坑前厅，解读‘黑色石头’的历史线索，遭遇人为阻碍或更复杂的魔法陷阱。 揭示矿坑曾被非法开采禁物的历史，林夜通过逻辑推理破解一个简易魔法机关或谜题，获得关键情报碎片。\n短暂接触矿坑中层边缘，确认人为阴谋的存在，被迫撤退并带着关键证据返回。 确认失踪案背后有贵族或公会内部人员操纵，获取实物证据（如黑石样本或信物），安全撤离并为下一阶段注册正式冒险者做铺垫。"}` |
+| AC-109 | PASS | `{"chapterId":1681,"missingFacts":{"characters":[],"location":[],"items":[],"case":[],"ending":[]},"mechanicalStartsBefore":6,"mechanicalStartsAfter":1,"sourceType":"AI_POLISH","memoryExtractionStatus":"COMPLETED"}` |
+| AC-114 | PASS | `{"targetChapterCount":600,"currentChapter":5,"arc":"1-60 生存融入","logicalOrders":[6,7,8,9,10],"endgameHits":[],"localProgressHits":["森林","失踪","生存"],"plannerText":"描写午夜旧钟楼会面，获取关键线索并强化林夜与艾琳的信任纽带 2800-3200字\n清晨从南城门出发，途中通过对话补充世界观并展示林夜的生存策略 2500-3000字\n进入幽影森林外围，执行‘黑石溪流采集任务’作为掩护，同时搜寻失踪者痕迹 3000-3500字\n夜间营地遭遇小型魔兽骚扰，林夜在战斗中刻意隐藏实力并保护艾琳 3000-3500字\n深入森林核心区边缘，发现银翼小队失联前的最后营地，揭开部分谜团 3200-3600字"}` |
+
+Final: **7/7 PASSED**

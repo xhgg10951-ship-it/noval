@@ -1,0 +1,19 @@
+{
+  "method": "POST",
+  "path": "/api/generation-jobs/541/stop",
+  "request": null,
+  "status": 200,
+  "durationSeconds": 0.031,
+  "response": {
+    "id": 541,
+    "stageId": 1235,
+    "mode": "STEP",
+    "currentPlanIndex": 3,
+    "total": 9,
+    "status": "STOPPED",
+    "phase": "CHECKPOINT",
+    "lastError": null,
+    "createdAt": "2026-08-24T01:25:58",
+    "updatedAt": "2026-08-24T01:28:57"
+  }
+}

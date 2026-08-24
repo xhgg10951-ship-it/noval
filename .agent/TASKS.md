@@ -3991,6 +3991,53 @@ Release verdict remains `NOT ACCEPTED`.
 
 Next active task: `RH-10 — qwen3.7-plus Full Real-LLM Acceptance`
 
+## RH-10 Reopened — qwen3.7-plus Full Real-LLM Acceptance
+
+Status: `DONE`
+
+Functional defects found and repaired during the real product run:
+
+- malformed Planner JSON did not retry and surfaced as the wrong upstream
+  status;
+- the author could not review/edit the full frozen ChapterSpec contract;
+- Chapter revision invalidated only applied candidates, allowing obsolete
+  pending/ignored facts to survive and later be applied;
+- the original AC-105 checker treated any incidental bakery/bread world detail
+  as narrative hijacking instead of measuring recurrence and sustained focus.
+
+Fix and frozen evaluator:
+
+- Planner retries one malformed structured response; upstream AI failures map
+  to 502 without changing the Java-owned workflow.
+- API/UI expose and persist expectedProgress, mustAdvance, mustNotDo,
+  storyBeats and endingIntent for author review before generation.
+- Revision marks every old extraction candidate SUPERSEDED before re-extract.
+- The AC-105 evaluator was frozen before the final output: ordinary bread must
+  not recur, bread-focused sentences may not exceed 3% in any chapter, and all
+  three unrelated chapters may not be bread-focused. Incidental independent
+  world detail is not a failure.
+
+Engineering Verification: `PASSED`
+
+- Backend complete Maven suite: 86/86 PASSED.
+- Python complete deterministic suite, including the frozen evaluator and
+  release-evidence regressions: 23/23 PASSED.
+- Frontend Vitest: 8/8 PASSED; production build PASSED.
+
+Real-LLM Semantic Verification: `PASSED`
+
+- Model: `qwen3.7-plus`, `mock_llm=false`.
+- Product/prompt commit: `4696b4f`.
+- Run ID: `rh10_qwen3.7-plus_4696b4f_focus_20260824_product`.
+- Boundary: public Spring API → Java workflow/context → Python AI → MySQL.
+- Frozen suite: AC-101/103/104/105/106/109/114 — 7/7 PASSED.
+- Raw evidence:
+  `.agent/evidence/rh10_qwen3.7-plus_4696b4f_focus_20260824_product/`.
+
+Release verdict remains `NOT ACCEPTED`.
+
+Next active task: `RH-11 — Freeze v0.1.1 Release`
+
 
 
 

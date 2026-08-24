@@ -1,0 +1,29 @@
+{
+  "method": "POST",
+  "path": "/api/chapters/1670/polish",
+  "request": {
+    "userInstruction": "降低机械重复，保持全部事实、位置、物品和结尾意图，不新增事件。"
+  },
+  "status": 200,
+  "durationSeconds": 17.219,
+  "response": {
+    "id": 1670,
+    "storyId": 1828,
+    "stageId": 1229,
+    "planId": 3609,
+    "chapterNumber": 5,
+    "title": "第五章：阴影前的筹备",
+    "content": "林夜和艾琳在冒险者公会完成失踪案线索汇报后，仍站在公会大厅。他保留着铁剑和调查委托书，确认失踪者最后出现在幽影森林。听见艾琳提醒他午夜去旧钟楼见证人，林夜回答：“我们午夜去旧钟楼。”次日清晨从南城门出发",
+    "summary": "林夜与艾琳在冒险者公会汇报完失踪案线索后，约定午夜前往旧钟楼见证人。次日清晨，两人从南城门出发。",
+    "generationStatus": "GENERATED",
+    "currentRevisionId": 1519,
+    "currentRevisionVersion": 3,
+    "sourceType": "AI_POLISH",
+    "status": "DRAFT",
+    "memoryExtractionStatus": "COMPLETED",
+    "targetCharacters": 3000,
+    "actualCharacterCount": 101,
+    "createdAt": "2026-08-24T01:06:52",
+    "updatedAt": "2026-08-24T01:07:44"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "method": "GET",
+  "path": "/api/generation-jobs/536",
+  "request": null,
+  "status": 200,
+  "durationSeconds": 0.016,
+  "response": {
+    "id": 536,
+    "stageId": 1229,
+    "mode": "STEP",
+    "currentPlanIndex": 2,
+    "total": 3,
+    "status": "RUNNING",
+    "phase": "WRITING",
+    "lastError": null,
+    "createdAt": "2026-08-24T01:04:14",
+    "updatedAt": "2026-08-24T01:06:13"
+  }
+}

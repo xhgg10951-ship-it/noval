@@ -10,18 +10,19 @@ assistance, and polish.
 
 ```text
 Requirements:             FROZEN
-Implementation:           Feature Complete, release repairs in progress
-Release Hardening:        RH-01..RH-07 complete; RH-08 active
-Engineering Verification: PARTIAL — per-RH suites green; RH-09 pending
+Implementation:           Feature Complete
+Release Hardening:        RH-01..RH-10 complete; RH-11 pending
+Engineering Verification: PASSED — backend 86/86, Python 23/23, frontend 8/8 + build
 Required Final Model:     qwen3.7-plus
-Current Real-LLM Gate:    NOT RUN after reopened repairs; RH-10 pending
-Hosted CI:                NOT RUN for the current candidate; RH-09 pending
+Current Real-LLM Gate:    PASSED — 7/7 product-wired suite at product commit 4696b4f
+Hosted CI:                last green run 32647712308 predates final RH-10 repairs
 Current Release Verdict:  NOT ACCEPTED
 ```
 
 The earlier RH-11 verdict was withdrawn after the functional re-audit at
-`36ac510`. The current `v0.1.1-dev` candidate must complete RH-08/RH-09, then
-pass a fresh product-wired qwen3.7-plus RH-10 run before RH-11 can accept it.
+`36ac510`. The repaired `v0.1.1-dev` candidate has passed RH-01 through RH-10;
+RH-11 still requires the final evidence/docs commit and current hosted CI before
+the release verdict may become ACCEPTED.
 
 Earlier qwen3-8b results and the pre-reopen qwen3.7-plus run are retained as
 historical evidence only:

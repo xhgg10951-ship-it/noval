@@ -1,0 +1,32 @@
+{
+  "method": "PUT",
+  "path": "/api/stages/plans/3607",
+  "request": {
+    "goal": "完成冒险者公会登记并取得资格；林夜必须隐藏穿越者身份，不得向任何人暴露。",
+    "targetCharacters": 3000,
+    "expectedProgress": "林夜进入公会大厅，完成登记和基础测试，取得合法身份牌。",
+    "mustAdvance": "进入冒险者公会\n完成身份登记\n完成基础测试铺垫",
+    "mustNotDo": "不得暴露天帝身份\n不得暴露穿越者身份",
+    "storyBeats": "抵达接待台\n填写身份档案\n完成基础测试\n领取身份牌",
+    "endingIntent": "登记完成后前往委托板"
+  },
+  "status": 200,
+  "durationSeconds": 0.016,
+  "response": {
+    "id": 3607,
+    "stageId": 1229,
+    "chapterOrder": 3,
+    "goal": "完成冒险者公会登记并取得资格；林夜必须隐藏穿越者身份，不得向任何人暴露。",
+    "expectedProgress": "林夜进入公会大厅，完成登记和基础测试，取得合法身份牌。",
+    "targetCharacters": 3000,
+    "mustAdvance": "进入冒险者公会\n完成身份登记\n完成基础测试铺垫",
+    "mustNotDo": "不得暴露天帝身份\n不得暴露穿越者身份",
+    "storyBeats": "抵达接待台\n填写身份档案\n完成基础测试\n领取身份牌",
+    "endingIntent": "登记完成后前往委托板",
+    "planVersion": 1,
+    "active": true,
+    "status": "ACTIVE",
+    "createdAt": "2026-08-24T01:04:14.761",
+    "updatedAt": "2026-08-24T01:04:14.782"
+  }
+}
