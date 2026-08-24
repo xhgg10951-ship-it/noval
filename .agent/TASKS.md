@@ -4058,6 +4058,41 @@ Final verdict: `v0.1.1 ACCEPTED`
 
 Release operations: merge `v0.1.1-dev` into `main`, then tag `v0.1.1`.
 
+## Post-RH-11 Release Operations
+
+Status: `BLOCKED` (tag operation only; v0.1.1 acceptance remains PASSED)
+
+- Merge: DONE — `main` was fast-forwarded to `d9ef595` and pushed.
+- Final branch CI: PASSED — run `32676460696` on `v0.1.1-dev` and run
+  `32676632093` on `main`; backend, frontend and Python all succeeded.
+
+Observed blocker:
+
+- Local and remote annotated tag `v0.1.1` already exists and resolves to the
+  withdrawn pre-reopen commit `36ac510`, not the verified `d9ef595` release.
+
+Why frozen design fails:
+
+- The frozen operation requires creating `v0.1.1`, but Git cannot create a
+  second immutable tag with the same name. Moving the published tag requires a
+  forced ref update, which `AGENTS.md` explicitly prohibits.
+
+Smallest required change:
+
+- Human selects a new immutable tag name/version for `d9ef595`, or explicitly
+  changes the repository release/tag policy before the legacy tag is replaced.
+
+Alternatives attempted:
+
+- Verified a fast-forward main merge and completed both branch CI gates.
+- Verified the local and remote tag target without deleting or modifying it.
+- Did not invent a new version or overwrite the existing published tag.
+
+New complexity:
+
+- None in product architecture or runtime. This is release-reference hygiene
+  only.
+
 
 
 

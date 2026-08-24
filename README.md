@@ -17,6 +17,7 @@ Required Final Model:     qwen3.7-plus
 Current Real-LLM Gate:    PASSED — 7/7 product-wired suite at product commit 4696b4f
 Hosted CI:                PASSED — run 32676289823 at RH-10 evidence commit 3aafee0
 Current Release Verdict:  ACCEPTED
+Release Tag:              BLOCKED — existing v0.1.1 points to withdrawn 36ac510
 ```
 
 The earlier RH-11 verdict was withdrawn after the functional re-audit at
@@ -24,6 +25,12 @@ The earlier RH-11 verdict was withdrawn after the functional re-audit at
 RH-01 through RH-11 sequence, including the complete product-wired
 qwen3.7-plus gate and current hosted CI. This is the verified v0.1.1 release
 candidate.
+
+`main` and `v0.1.1-dev` both point to the verified `d9ef595` release commit.
+The pre-existing remote `v0.1.1` annotated tag still points to withdrawn commit
+`36ac510`. It has not been overwritten because repository rules prohibit force
+push; resolving that immutable tag-name collision requires an explicit human
+release-version decision.
 
 Earlier qwen3-8b results and the pre-reopen qwen3.7-plus run are retained as
 historical evidence only:

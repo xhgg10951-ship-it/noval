@@ -32,11 +32,11 @@ Current Phase:
 
 Current Task:
 
-`RH-11 — Freeze v0.1.1 Release`
+`Post-RH-11 Release Operation — Resolve Existing v0.1.1 Tag Collision`
 
 Task Status:
 
-`ACCEPTED — RH-01 through RH-11 passed on the repaired v0.1.1 candidate`
+`ACCEPTED — main merge complete; release tag operation BLOCKED by immutable legacy tag`
 
 Task Evidence:
 
@@ -142,6 +142,14 @@ Task Evidence:
   exact SHA; backend, frontend and Python jobs all completed successfully.
   RH-01 through RH-10, the required qwen3.7-plus 7/7 gate, evidence freeze and
   current hosted CI are all complete. Release verdict: ACCEPTED.
+- Post-RH-11 merge COMPLETE — `main`, `v0.1.1-dev`, `origin/main` and
+  `origin/v0.1.1-dev` reached `d9ef595`; GitHub Actions runs `32676460696`
+  (development branch) and `32676632093` (main) both passed backend, frontend
+  and Python jobs.
+- Release tag operation BLOCKED — the existing local and remote annotated tag
+  `v0.1.1` points to withdrawn commit `36ac510`. Repository rules prohibit
+  force push, so the tag was not deleted or moved. A human must either approve
+  a new immutable release tag name/version or change the release/tag policy.
 
 - RH-01 DONE (2026-08-23) — regression first reproduced stale summary after
   Manual Edit; fixed Manual Edit summary refresh + automatic re-extract,
